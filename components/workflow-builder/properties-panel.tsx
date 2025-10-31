@@ -113,7 +113,9 @@ export function PropertiesPanel({
 
   const handleInstructionsChange = (value: string) => {
     const agentExecutor = executor as AgentExecutor;
-    if (agentExecutor.systemPrompt !== undefined) {
+    // Check executorType instead of checking if systemPrompt property exists
+    // This handles both preset-based and newly created agent executors
+    if (executorType === "agent-executor" || executorType === "magentic-agent-executor") {
       onUpdate(selectedNode.id, {
         systemPrompt: value,
       } as Partial<BaseExecutor>);

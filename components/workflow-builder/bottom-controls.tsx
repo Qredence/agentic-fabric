@@ -31,7 +31,7 @@ export function BottomControls({
 }: BottomControlsProps) {
   return (
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-      <div className="flex items-center gap-2 rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg p-1.5">
+      <div className="flex items-center gap-2 rounded-full border bg-background/95 backdrop-blur-sm shadow-lg p-1.5">
         <Button
           variant="ghost"
           size="icon"

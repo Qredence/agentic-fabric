@@ -1,21 +1,12 @@
 "use client";
 
-import React, { memo } from "react";
-import { Handle, Position, type NodeProps as ReactFlowNodeProps } from "@xyflow/react";
-import { motion } from "motion/react";
-import {
-  Node,
-  NodeContent,
-  NodeDescription,
-  NodeFooter,
-  NodeHeader,
-  NodeTitle,
-} from "@/components/ai-elements/node";
-import { Button } from "@/components/ui/button";
-import { Workflow, Pencil, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { memo, useState } from "react";
+import { Handle, Position } from "@xyflow/react";
+import { motion, AnimatePresence } from "motion/react";
+import { Info, ChevronDown, ChevronUp, Square, ArrowRightLeft, List } from "lucide-react";
 import type { WorkflowExecutor } from "@/lib/workflow/executors";
-import { ExecutorNodeWrapper } from "@/components/ai-elements/executor-node-wrapper";
+import { getExecutorTypeLabel, getExecutorTypeDescription } from "@/lib/workflow/executors";
+import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**
  * Workflow executor node data
@@ -37,86 +28,172 @@ export interface WorkflowExecutorNodeData {
  */
 export type WorkflowExecutorNodeProps = any;
 
+const springTransition = {
+  type: "spring" as const,
+  stiffness: 300,
+  damping: 30,
+  mass: 0.8,
+};
+
 /**
  * Workflow executor node component - represents a nested workflow
  */
 export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecutorNodeProps) => {
-  const { handles, executor, label, description, status } = data;
+  const { handles, executor, label } = data;
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.workflowId || executor.id;
-  const displayDescription = description || executor.description || `Nested workflow: ${executor.workflowId}`;
+  const executorTypeLabel = getExecutorTypeLabel("workflow-executor");
+  const executorTypeDescription = getExecutorTypeDescription("workflow-executor");
+  const executorTypeName = "workflow-executor";
+  
+  // Get model from metadata or default
+  const metadata = (executor.metadata as Record<string, any> | undefined) ?? {};
+  const model = metadata.model || "GPT-5";
 
-  const executorsCount = executor.workflowDefinition?.executors.length || 0;
-  const edgesCount = executor.workflowDefinition?.edges.length || 0;
+  const hovered = internalHovered;
 
-  const statusColors = {
-    idle: "text-gray-500",
-    running: "text-blue-500",
-    completed: "text-green-500",
-    error: "text-red-500",
+  const toggleCollapse = () => {
+    setInternalCollapsed(!internalCollapsed);
   };
 
-  const statusBgColors = {
-    idle: "bg-gray-500/20",
-    running: "bg-blue-500/20",
-    completed: "bg-green-500/20",
-    error: "bg-red-500/20",
-  };
+  // Get current values for suggestions
+  const currentWorkflowId = executor.workflowId || "—";
+  const inputMappingsCount = executor.inputMapping ? Object.keys(executor.inputMapping).length : 0;
+  const currentInputMappings = inputMappingsCount > 0 ? `${inputMappingsCount} mapping(s)` : "None";
+  const outputMappingsCount = executor.outputMapping ? Object.keys(executor.outputMapping).length : 0;
+  const currentOutputMappings = outputMappingsCount > 0 ? `${outputMappingsCount} mapping(s)` : "None";
 
-  const springTransition = {
-    type: "spring" as const,
-    stiffness: 300,
-    damping: 30,
-    mass: 0.8,
-  };
+  // Suggestions for Workflow Executor - matching main parameters exactly as shown in properties panel
+  const suggestions = [
+    {
+      icon: Square,
+      label: `Workflow ID ${currentWorkflowId}`,
+    },
+    {
+      icon: ArrowRightLeft,
+      label: `Input Mappings ${currentInputMappings}`,
+    },
+    {
+      icon: List,
+      label: `Output Mappings ${currentOutputMappings}`,
+    },
+  ];
+
+  const isCollapsed = internalCollapsed;
 
   return (
-    <ExecutorNodeWrapper selected={selected} dataId={id} handles={handles}>
-      <Node handles={{ target: false, source: false }} className="h-full w-full bg-transparent border-none shadow-none rounded-2xl overflow-hidden">
-        <div className="flex flex-col h-full">
-          {/* Header Section */}
+    <motion.div
+      layout
+      transition={springTransition}
+      className="w-[352px]"
+      data-id={id}
+      onMouseEnter={() => setInternalHovered(true)}
+      onMouseLeave={() => setInternalHovered(false)}
+    >
+      {/* Collapsed State */}
+      {isCollapsed ? (
+        <motion.button
+          aria-label={`Expand ${displayLabel}`}
+          layoutId={`node-${id}`}
+          onClick={toggleCollapse}
+          initial={{
+            scale: 0.95,
+            opacity: 0,
+          }}
+          animate={{
+            scale: 1,
+            opacity: 1,
+          }}
+          exit={{
+            scale: 0.95,
+            opacity: 0,
+          }}
+          transition={springTransition}
+          className={`
+            w-full px-4 py-3 rounded-2xl
+            bg-[rgba(32,32,32,0.9)] backdrop-blur-2xl
+            border transition-all duration-200
+            ${
+              selected
+                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                : hovered
+                ? "border-white/10"
+                : "border-white/5"
+            }
+            hover:border-white/15 active:scale-98
+            flex items-center justify-between
+          `}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <motion.div
+              layoutId={`node-title-${id}`}
+              transition={springTransition}
+              className="text-base text-gray-300 truncate"
+            >
+              {displayLabel}
+            </motion.div>
+            <motion.div
+              initial={{
+                opacity: 0,
+                x: -10,
+              }}
+              animate={{
+                opacity: 1,
+                x: 0,
+              }}
+              transition={{
+                ...springTransition,
+                delay: 0.1,
+              }}
+              className="text-xs text-gray-600"
+            >
+              {model}
+            </motion.div>
+          </div>
           <motion.div
             initial={{
-              y: -10,
+              rotate: 180,
               opacity: 0,
             }}
             animate={{
-              y: 0,
+              rotate: 0,
               opacity: 1,
             }}
-            transition={{
-              ...springTransition,
-              delay: 0.1,
-            }}
-            className="px-4 pt-4 pb-3 border-b border-white/5"
+            transition={springTransition}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <motion.div
-                    layoutId={`workflow-title-${id}`}
-                    transition={springTransition}
-                    className="text-[24px] leading-[30px] truncate text-gray-300"
-                  >
-                    {displayLabel}
-                  </motion.div>
-                  {status && (
-                    <div
-                      className={cn(
-                        "w-2 h-2 rounded-full shrink-0 flex items-center justify-center",
-                        statusBgColors[status as keyof typeof statusBgColors]
-                      )}
-                      title={status}
-                    >
-                      <div
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          statusColors[status as keyof typeof statusColors]
-                        )}
-                      />
-                    </div>
-                  )}
-                </div>
+            <ChevronDown className="h-4 w-4 text-gray-500 shrink-0" />
+          </motion.div>
+        </motion.button>
+      ) : (
+        <>
+          {/* Header */}
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -10,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={springTransition}
+            className="mb-2 px-0"
+          >
+            <div className="grid grid-cols-[1fr_auto] items-center gap-3">
+              <div className="min-w-0">
+                <motion.div
+                  layoutId={`node-title-${id}`}
+                  transition={springTransition}
+                  className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
+                    hovered ? "text-gray-300" : "text-gray-400"
+                  }`}
+                >
+                  {displayLabel}
+                </motion.div>
+              </div>
+              <div className="flex items-center gap-2">
                 <motion.div
                   initial={{
                     opacity: 0,
@@ -130,139 +207,199 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
                     ...springTransition,
                     delay: 0.05,
                   }}
-                  className="text-sm text-gray-600"
+                  className="text-sm text-gray-600 truncate max-w-[120px]"
                 >
-                  Workflow
+                  {model}
                 </motion.div>
-              </div>
-              {/* Header Actions */}
-              <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-gray-300 hover:bg-white/5"
-                  title="Edit workflow executor"
+                <motion.button
+                  aria-label={`Collapse ${displayLabel}`}
+                  onClick={toggleCollapse}
+                  whileHover={{
+                    scale: 1.1,
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                  }}
+                  transition={springTransition}
+                  className="p-1 rounded hover:bg-white/5 transition-colors"
                 >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-gray-300 hover:bg-white/5"
-                  title="Open nested workflow"
-                >
-                  <Workflow className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-red-400 hover:bg-red-500/10"
-                  title="Delete workflow executor"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                  <ChevronUp className="h-4 w-4 text-gray-500" />
+                </motion.button>
               </div>
             </div>
           </motion.div>
-
-          {/* Content Section */}
-          <div className="flex-1 overflow-y-auto p-4">
+          {/* Card */}
+          <motion.div
+            layoutId={`node-${id}`}
+            className="relative"
+            initial={{
+              opacity: 0,
+              scale: 0.95,
+              y: 20,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.95,
+              y: 20,
+            }}
+            transition={{
+              ...springTransition,
+              opacity: {
+                duration: 0.2,
+              },
+            }}
+          >
             <motion.div
               initial={{
-                opacity: 0,
-                x: -20,
+                borderRadius: 16,
               }}
               animate={{
-                opacity: 1,
-                x: 0,
+                borderRadius: 16,
               }}
-              transition={{
-                ...springTransition,
-                delay: 0.15,
-              }}
-              className="space-y-4"
+              transition={springTransition}
+              className={`
+                relative h-[352px] w-[352px] rounded-2xl
+                bg-[rgba(32,32,32,0.9)] backdrop-blur-2xl
+                border transition-all duration-200
+                ${
+                  selected
+                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    : hovered
+                    ? "border-white/10"
+                    : "border-white/5"
+                }
+              `}
             >
-              {/* Primary Information Group */}
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-500 uppercase tracking-wider">
-                    Workflow ID
-                  </label>
-                  <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-300 font-mono">
-                    {executor.workflowId}
-                  </div>
+              <div className="flex flex-col h-full rounded-2xl overflow-hidden">
+                {/* Content Area */}
+                <div className="relative flex-1 flex flex-col overflow-hidden">
+                  {/* Empty State with Suggestions */}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                      }}
+                      animate={{
+                        opacity: 1,
+                      }}
+                      exit={{
+                        opacity: 0,
+                      }}
+                      transition={{
+                        duration: 0.2,
+                      }}
+                    >
+                      {/* Info Banner */}
+                      <motion.div
+                        initial={{
+                          y: -10,
+                          opacity: 0,
+                        }}
+                        animate={{
+                          y: 0,
+                          opacity: 1,
+                        }}
+                        transition={{
+                          ...springTransition,
+                          delay: 0.1,
+                        }}
+                        onClick={toggleCollapse}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors duration-200"
+                      >
+                        <button className="flex items-center gap-3 text-gray-600 hover:text-gray-400 transition-colors duration-300">
+                          <Info className="h-3.5 w-3.5" />
+                          <p className="text-xs leading-[16.5px] -tracking-[0.16px]">
+                            Learn about {executorTypeName}
+                          </p>
+                        </button>
+                      </motion.div>
+                      <hr className="border-t border-[rgb(41,47,53)]" />
+                      {/* Suggestions */}
+                      <div className="flex items-start h-[260px]">
+                        <div className="flex-1 flex flex-col gap-4 px-6 pt-4">
+                          <motion.span
+                            initial={{
+                              opacity: 0,
+                              x: -10,
+                            }}
+                            animate={{
+                              opacity: 1,
+                              x: 0,
+                            }}
+                            transition={{
+                              ...springTransition,
+                              delay: 0.15,
+                            }}
+                            className="text-gray-600 text-xs leading-[16.5px] -tracking-[0.16px]"
+                          >
+                            Try to...
+                          </motion.span>
+                          <div className="flex flex-col gap-3">
+                            {suggestions.map((suggestion, index) => {
+                              const Icon = suggestion.icon;
+                              return (
+                                <motion.button
+                                  key={index}
+                                  initial={{
+                                    opacity: 0,
+                                    x: -20,
+                                  }}
+                                  animate={{
+                                    opacity: 1,
+                                    x: 0,
+                                  }}
+                                  transition={{
+                                    ...springTransition,
+                                    delay: 0.2 + index * 0.05,
+                                  }}
+                                  whileHover={{
+                                    x: 4,
+                                    scale: 1.02,
+                                  }}
+                                  whileTap={{
+                                    scale: 0.98,
+                                  }}
+                                  className="flex items-center gap-1 p-0.5 rounded text-gray-400 hover:text-gray-300 hover:bg-white/5 transition-all duration-200"
+                                >
+                                  <Icon className="h-3 w-3" />
+                                  <span className="text-xs leading-[16.5px] -tracking-[0.16px]">
+                                    {suggestion.label}
+                                  </span>
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
-
-                {executor.workflowDefinition && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider">
-                        Executors
-                      </label>
-                      <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400">
-                        {executorsCount}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider">
-                        Edges
-                      </label>
-                      <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400">
-                        {edgesCount}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
-
-              {/* Mappings Section */}
-              {(executor.inputMapping && Object.keys(executor.inputMapping).length > 0) || 
-               (executor.outputMapping && Object.keys(executor.outputMapping).length > 0) ? (
-                <div className="pt-2 border-t border-white/5 space-y-3">
-                  <h3 className="text-xs text-gray-500 uppercase tracking-wider font-medium">
-                    Mappings
-                  </h3>
-                  {executor.inputMapping && Object.keys(executor.inputMapping).length > 0 && (
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider">
-                        Input Mappings
-                      </label>
-                      <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400">
-                        {Object.keys(executor.inputMapping).length} mapping(s)
-                      </div>
-                    </div>
-                  )}
-                  {executor.outputMapping && Object.keys(executor.outputMapping).length > 0 && (
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider">
-                        Output Mappings
-                      </label>
-                      <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400">
-                        {Object.keys(executor.outputMapping).length} mapping(s)
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-
-              {/* Description Section */}
-              {displayDescription && (
-                <div className="pt-2 border-t border-white/5 space-y-2">
-                  <label className="text-xs text-gray-500 uppercase tracking-wider">
-                    Description
-                  </label>
-                  <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400">
-                    {displayDescription}
-                  </div>
-                </div>
-              )}
             </motion.div>
-          </div>
-        </div>
-      </Node>
-    </ExecutorNodeWrapper>
+            {/* ReactFlow Handles */}
+            {handles.target && (
+              <Handle position={Position.Left} type="target" />
+            )}
+            {handles.source && (
+              <Handle position={Position.Right} type="source" />
+            )}
+            {/* Connection Handles */}
+            {handles.target && (
+              <ConnectionHandle position="left" visible={hovered} />
+            )}
+            {handles.source && (
+              <ConnectionHandle position="right" visible={hovered} />
+            )}
+          </motion.div>
+        </>
+      )}
+    </motion.div>
   );
 });
 
 WorkflowExecutorNode.displayName = "WorkflowExecutorNode";
-

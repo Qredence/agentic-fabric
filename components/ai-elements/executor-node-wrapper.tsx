@@ -69,7 +69,7 @@ export const ExecutorNodeWrapper: React.FC<ExecutorNodeWrapperProps> = ({
           }}
           transition={springTransition}
           className={`
-            relative min-h-[320px] max-h-[420px] w-[352px] rounded-2xl
+            relative h-[352px] w-[352px] rounded-2xl
             bg-[rgba(32,32,32,0.9)] backdrop-blur-2xl
             border transition-all duration-200
             ${

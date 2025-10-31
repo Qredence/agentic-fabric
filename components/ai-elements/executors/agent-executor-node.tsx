@@ -1,56 +1,12 @@
 "use client";
 
-import React, { memo } from "react";
-import { Handle, Position, type NodeProps as ReactFlowNodeProps } from "@xyflow/react";
-import { motion } from "motion/react";
-import {
-  Node,
-  NodeContent,
-  NodeDescription,
-  NodeFooter,
-  NodeHeader,
-  NodeTitle,
-} from "@/components/ai-elements/node";
-import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Settings } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { memo, useState } from "react";
+import { Handle, Position } from "@xyflow/react";
+import { motion, AnimatePresence } from "motion/react";
+import { Info, ChevronDown, ChevronUp, Settings, User, Zap, MessageSquare } from "lucide-react";
 import type { AgentExecutor, ToolReference } from "@/lib/workflow/executors";
-import { ExecutorNodeWrapper } from "@/components/ai-elements/executor-node-wrapper";
-import { Badge } from "@/components/ui/badge";
-
-const truncateText = (value: string | undefined, max = 160) => {
-  if (!value) {
-    return "";
-  }
-  return value.length > max ? `${value.slice(0, max)}…` : value;
-};
-
-const InfoRow = ({
-  label,
-  value,
-  mono = false,
-  placeholder = "—",
-}: {
-  label: string;
-  value?: string | number | null;
-  mono?: boolean;
-  placeholder?: string;
-}) => (
-  <div className="flex flex-col gap-1">
-    <span className="text-[10px] uppercase tracking-widest text-gray-500">
-      {label}
-    </span>
-    <span
-      className={cn(
-        "text-sm text-gray-100",
-        mono && "font-mono text-xs",
-        !value && "text-gray-500"
-      )}
-    >
-      {value && String(value).length > 0 ? value : placeholder}
-    </span>
-  </div>
-);
+import { getExecutorTypeLabel, getExecutorTypeDescription } from "@/lib/workflow/executors";
+import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**
  * Agent executor node data
@@ -72,11 +28,20 @@ export interface AgentExecutorNodeData {
  */
 export type AgentExecutorNodeProps = any;
 
+const springTransition = {
+  type: "spring" as const,
+  stiffness: 300,
+  damping: 30,
+  mass: 0.8,
+};
+
 /**
  * Agent executor node component
  */
 export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNodeProps) => {
-  const { handles, executor, label, description, status } = data;
+  const { handles, executor, label } = data;
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const [internalHovered, setInternalHovered] = useState(false);
 
   const typedExecutor = executor as AgentExecutor & {
     agentRole?: string;
@@ -88,129 +53,176 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   const metadata = (executor.metadata as Record<string, any> | undefined) ?? {};
   const magenticMeta = (metadata.magentic as Record<string, any> | undefined) ?? {};
   const agentRole = typedExecutor.agentRole || magenticMeta.agentRole;
-  const capabilities = typedExecutor.capabilities || magenticMeta.capabilities;
-  const toolIds = Array.isArray(typedExecutor.tools)
-    ? typedExecutor.tools.map((tool) => tool.toolId).filter(Boolean)
-    : Array.isArray(magenticMeta.toolIds)
-      ? (magenticMeta.toolIds as string[])
-      : undefined;
-  const systemPrompt = typedExecutor.systemPrompt;
-  const presetKey = (magenticMeta.presetKey as string | undefined) ?? undefined;
-
-  // Format agent type for display
-  const getAgentTypeLabel = (agentType?: string): string => {
-    if (!agentType) return "Agent";
-    
-    // Check metadata for provider information
-    const provider = metadata.provider || metadata.agentProvider;
-    
-    if (provider === "azure" || provider === "azure-ai") {
-      return "Azure AI Agent";
-    }
-    if (provider === "openai") {
-      return "OpenAI Agent";
-    }
-    
-    // Format based on agentType
-    switch (agentType.toLowerCase()) {
-      case "chat":
-        return "Chat Agent";
-      case "workflow":
-        return "Workflow Agent";
-      case "magentic":
-        return "Magentic Agent";
-      default:
-        // Capitalize first letter of each word
-        return agentType
-          .split("-")
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ") + " Agent";
-    }
-  };
-  
-  const agentTypeLabel = getAgentTypeLabel(executor.agentType);
 
   const displayLabel = label || executor.label || agentRole || executor.agentId || executor.id;
-  const rawDescription =
-    description ||
-    executor.description ||
-    (agentRole ? `Role: ${agentRole}` : executor.agentId ? `Agent: ${executor.agentId}` : "Agent");
-  const displayDescription = truncateText(rawDescription, 180);
-  const systemPromptPreview = systemPrompt ? truncateText(systemPrompt, 220) : undefined;
+  const executorTypeLabel = getExecutorTypeLabel("agent-executor");
+  const executorTypeDescription = getExecutorTypeDescription("agent-executor");
+  const executorTypeName = "agent-executor";
+  
+  // Get model from executor or default
+  const model = executor.model || metadata.model || "GPT-5";
 
-  const displayedCapabilities = Array.isArray(capabilities) ? capabilities.slice(0, 4) : [];
-  const remainingCapabilities = Array.isArray(capabilities) && capabilities.length > 4 ? capabilities.length - 4 : 0;
-  const displayedTools = Array.isArray(toolIds) ? toolIds.slice(0, 4) : [];
-  const remainingTools = Array.isArray(toolIds) && toolIds.length > 4 ? toolIds.length - 4 : 0;
+  const hovered = internalHovered;
 
-  const statusColors = {
-    idle: "text-gray-500",
-    running: "text-blue-500",
-    completed: "text-green-500",
-    error: "text-red-500",
+  const toggleCollapse = () => {
+    setInternalCollapsed(!internalCollapsed);
   };
 
-  const statusBgColors = {
-    idle: "bg-gray-500/20",
-    running: "bg-blue-500/20",
-    completed: "bg-green-500/20",
-    error: "bg-red-500/20",
-  };
+  // Get current values for suggestions
+  const currentModel = executor.model || metadata.model || "gpt-5";
+  const currentReasoningEffort = metadata.reasoningEffort || "low";
+  const toolsCount = Array.isArray(typedExecutor.tools) ? typedExecutor.tools.length : 0;
+  const currentTools = toolsCount > 0 ? `${toolsCount} tool(s)` : "No tools";
+  const currentOutputFormat = metadata.outputFormat || "text";
+  const currentVerbosity = metadata.verbosity || "medium";
+  const currentSummary = metadata.summary || "auto";
+  const currentIncludeChatHistory = metadata.includeChatHistory !== false;
 
-  const springTransition = {
-    type: "spring" as const,
-    stiffness: 300,
-    damping: 30,
-    mass: 0.8,
-  };
+  // Suggestions for Agent Executor - matching main parameters exactly as shown in properties panel
+  const suggestions = [
+    {
+      icon: Settings,
+      label: `Model ${currentModel}`,
+    },
+    {
+      icon: Zap,
+      label: `Reasoning effort ${currentReasoningEffort}`,
+    },
+    {
+      icon: MessageSquare,
+      label: `Tools ${currentTools}`,
+    },
+    {
+      icon: User,
+      label: `Output format ${currentOutputFormat}`,
+    },
+    {
+      icon: Zap,
+      label: `Verbosity ${currentVerbosity}`,
+    },
+    {
+      icon: MessageSquare,
+      label: `Summary ${currentSummary}`,
+    },
+    {
+      icon: User,
+      label: `Include chat history ${currentIncludeChatHistory ? "Yes" : "No"}`,
+    },
+  ];
+
+  const isCollapsed = internalCollapsed;
 
   return (
-    <ExecutorNodeWrapper selected={selected} dataId={id} handles={handles}>
-      <Node handles={{ target: false, source: false }} className="h-full w-full bg-transparent border-none shadow-none rounded-2xl overflow-hidden">
-        <div className="flex flex-col h-full">
-          {/* Header Section */}
+    <motion.div
+      layout
+      transition={springTransition}
+      className="w-[352px]"
+      data-id={id}
+      onMouseEnter={() => setInternalHovered(true)}
+      onMouseLeave={() => setInternalHovered(false)}
+    >
+      {/* Collapsed State */}
+      {isCollapsed ? (
+        <motion.button
+          aria-label={`Expand ${displayLabel}`}
+          layoutId={`node-${id}`}
+          onClick={toggleCollapse}
+          initial={{
+            scale: 0.95,
+            opacity: 0,
+          }}
+          animate={{
+            scale: 1,
+            opacity: 1,
+          }}
+          exit={{
+            scale: 0.95,
+            opacity: 0,
+          }}
+          transition={springTransition}
+          className={`
+            w-full px-4 py-3 rounded-2xl
+            bg-[rgba(32,32,32,0.9)] backdrop-blur-2xl
+            border transition-all duration-200
+            ${
+              selected
+                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                : hovered
+                ? "border-white/10"
+                : "border-white/5"
+            }
+            hover:border-white/15 active:scale-98
+            flex items-center justify-between
+          `}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <motion.div
+              layoutId={`node-title-${id}`}
+              transition={springTransition}
+              className="text-base text-gray-300 truncate"
+            >
+              {displayLabel}
+            </motion.div>
+            <motion.div
+              initial={{
+                opacity: 0,
+                x: -10,
+              }}
+              animate={{
+                opacity: 1,
+                x: 0,
+              }}
+              transition={{
+                ...springTransition,
+                delay: 0.1,
+              }}
+              className="text-xs text-gray-600"
+            >
+              {model}
+            </motion.div>
+          </div>
           <motion.div
             initial={{
-              y: -10,
+              rotate: 180,
               opacity: 0,
             }}
             animate={{
-              y: 0,
+              rotate: 0,
               opacity: 1,
             }}
-            transition={{
-              ...springTransition,
-              delay: 0.1,
-            }}
-            className="px-4 pt-4 pb-3 border-b border-white/5"
+            transition={springTransition}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <motion.div
-                    layoutId={`agent-title-${id}`}
-                    transition={springTransition}
-                    className="text-[24px] leading-[30px] truncate text-gray-300"
-                  >
-                    {displayLabel}
-                  </motion.div>
-                  {status && (
-                    <div
-                      className={cn(
-                        "w-2 h-2 rounded-full shrink-0 flex items-center justify-center",
-                        statusBgColors[status as keyof typeof statusBgColors]
-                      )}
-                      title={status}
-                    >
-                      <div
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          statusColors[status as keyof typeof statusColors]
-                        )}
-                      />
-                    </div>
-                  )}
-                </div>
+            <ChevronDown className="h-4 w-4 text-gray-500 shrink-0" />
+          </motion.div>
+        </motion.button>
+      ) : (
+        <>
+          {/* Header */}
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -10,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={springTransition}
+            className="mb-2 px-0"
+          >
+            <div className="grid grid-cols-[1fr_auto] items-center gap-3">
+              <div className="min-w-0">
+                <motion.div
+                  layoutId={`node-title-${id}`}
+                  transition={springTransition}
+                  className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
+                    hovered ? "text-gray-300" : "text-gray-400"
+                  }`}
+                >
+                  {displayLabel}
+                </motion.div>
+              </div>
+              <div className="flex items-center gap-2">
                 <motion.div
                   initial={{
                     opacity: 0,
@@ -224,219 +236,198 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
                     ...springTransition,
                     delay: 0.05,
                   }}
-                  className="text-sm text-gray-600"
+                  className="text-sm text-gray-600 truncate max-w-[120px]"
                 >
-                  {executor.model || agentRole || "Agent"}
+                  {model}
                 </motion.div>
-              </div>
-              {/* Header Actions */}
-              <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-gray-300 hover:bg-white/5"
-                  title="Edit agent executor"
+                <motion.button
+                  aria-label={`Collapse ${displayLabel}`}
+                  onClick={toggleCollapse}
+                  whileHover={{
+                    scale: 1.1,
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                  }}
+                  transition={springTransition}
+                  className="p-1 rounded hover:bg-white/5 transition-colors"
                 >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-gray-300 hover:bg-white/5"
-                  title="Configure agent"
-                >
-                  <Settings className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-gray-400 hover:text-red-400 hover:bg-red-500/10"
-                  title="Delete agent executor"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                  <ChevronUp className="h-4 w-4 text-gray-500" />
+                </motion.button>
               </div>
             </div>
           </motion.div>
-
-          {/* Content Section */}
-          <div className="flex-1 overflow-y-auto p-4 min-h-0">
+          {/* Card */}
+          <motion.div
+            layoutId={`node-${id}`}
+            className="relative"
+            initial={{
+              opacity: 0,
+              scale: 0.95,
+              y: 20,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.95,
+              y: 20,
+            }}
+            transition={{
+              ...springTransition,
+              opacity: {
+                duration: 0.2,
+              },
+            }}
+          >
             <motion.div
               initial={{
-                opacity: 0,
-                x: -20,
+                borderRadius: 16,
               }}
               animate={{
-                opacity: 1,
-                x: 0,
+                borderRadius: 16,
               }}
-              transition={{
-                ...springTransition,
-                delay: 0.15,
-              }}
-              className="space-y-4"
+              transition={springTransition}
+              className={`
+                relative h-[352px] w-[352px] rounded-2xl
+                bg-[rgba(32,32,32,0.9)] backdrop-blur-2xl
+                border transition-all duration-200
+                ${
+                  selected
+                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    : hovered
+                    ? "border-white/10"
+                    : "border-white/5"
+                }
+              `}
             >
-              {/* Primary Information Group */}
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs text-gray-500 uppercase tracking-wider">
-                      Agent ID
-                    </label>
-                    {presetKey && (
-                      <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary text-[10px] uppercase tracking-wide shrink-0">
-                        {presetKey}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-300 font-mono break-all">
-                    {executor.agentId}
-                  </div>
+              <div className="flex flex-col h-full rounded-2xl overflow-hidden">
+                {/* Content Area */}
+                <div className="relative flex-1 flex flex-col overflow-hidden">
+                  {/* Empty State with Suggestions */}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                      }}
+                      animate={{
+                        opacity: 1,
+                      }}
+                      exit={{
+                        opacity: 0,
+                      }}
+                      transition={{
+                        duration: 0.2,
+                      }}
+                    >
+                      {/* Info Banner */}
+                      <motion.div
+                        initial={{
+                          y: -10,
+                          opacity: 0,
+                        }}
+                        animate={{
+                          y: 0,
+                          opacity: 1,
+                        }}
+                        transition={{
+                          ...springTransition,
+                          delay: 0.1,
+                        }}
+                        onClick={toggleCollapse}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors duration-200"
+                      >
+                        <button className="flex items-center gap-3 text-gray-600 hover:text-gray-400 transition-colors duration-300">
+                          <Info className="h-3.5 w-3.5" />
+                          <p className="text-xs leading-[16.5px] -tracking-[0.16px]">
+                            Learn about {executorTypeName}
+                          </p>
+                        </button>
+                      </motion.div>
+                      <hr className="border-t border-[rgb(41,47,53)]" />
+                      {/* Suggestions */}
+                      <div className="flex items-start h-[260px]">
+                        <div className="flex-1 flex flex-col gap-4 px-6 pt-4">
+                          <motion.span
+                            initial={{
+                              opacity: 0,
+                              x: -10,
+                            }}
+                            animate={{
+                              opacity: 1,
+                              x: 0,
+                            }}
+                            transition={{
+                              ...springTransition,
+                              delay: 0.15,
+                            }}
+                            className="text-gray-600 text-xs leading-[16.5px] -tracking-[0.16px]"
+                          >
+                            Try to...
+                          </motion.span>
+                          <div className="flex flex-col gap-3">
+                            {suggestions.map((suggestion, index) => {
+                              const Icon = suggestion.icon;
+                              return (
+                                <motion.button
+                                  key={index}
+                                  initial={{
+                                    opacity: 0,
+                                    x: -20,
+                                  }}
+                                  animate={{
+                                    opacity: 1,
+                                    x: 0,
+                                  }}
+                                  transition={{
+                                    ...springTransition,
+                                    delay: 0.2 + index * 0.05,
+                                  }}
+                                  whileHover={{
+                                    x: 4,
+                                    scale: 1.02,
+                                  }}
+                                  whileTap={{
+                                    scale: 0.98,
+                                  }}
+                                  className="flex items-center gap-1 p-0.5 rounded text-gray-400 hover:text-gray-300 hover:bg-white/5 transition-all duration-200"
+                                >
+                                  <Icon className="h-3 w-3" />
+                                  <span className="text-xs leading-[16.5px] -tracking-[0.16px]">
+                                    {suggestion.label}
+                                  </span>
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
-
-                {/* Agent Type - Always show */}
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-500 uppercase tracking-wider">
-                    Type
-                  </label>
-                  <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400">
-                    {agentTypeLabel}
-                  </div>
-                </div>
-
-                {/* Agent Role - Show if available */}
-                {agentRole && (
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-500 uppercase tracking-wider">
-                      Role
-                    </label>
-                    <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-300 capitalize break-words">
-                      {agentRole}
-                    </div>
-                  </div>
-                )}
-
-                {/* Model - Show if available */}
-                {executor.model && (
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-500 uppercase tracking-wider">
-                      Model
-                    </label>
-                    <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400 font-mono break-all">
-                      {executor.model}
-                    </div>
-                  </div>
-                )}
               </div>
-
-              {/* Configuration Group - Always show if any config exists */}
-              {(Array.isArray(capabilities) && capabilities.length > 0) || (toolIds && toolIds.length > 0) || executor.toolMode ? (
-                <div className="pt-2 border-t border-white/5 space-y-3">
-                  <h3 className="text-xs text-gray-500 uppercase tracking-wider font-medium">
-                    Configuration
-                  </h3>
-
-                  {/* Capabilities - Always show if available */}
-                  {Array.isArray(capabilities) && capabilities.length > 0 && (
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider">
-                        Capabilities
-                      </label>
-                      <div className="flex flex-wrap gap-1.5 min-h-[24px]">
-                        {capabilities.map((capability, idx) => (
-                          <Badge 
-                            key={`${capability}-${idx}`} 
-                            variant="outline" 
-                            className="border-white/15 bg-white/5 text-gray-100 text-[11px] px-2 py-0.5"
-                          >
-                            {capability}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tools - Always show section */}
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-500 uppercase tracking-wider">
-                      Tools
-                    </label>
-                    {toolIds && toolIds.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5 min-h-[24px]">
-                        {toolIds.map((toolId, idx) => (
-                          <Badge 
-                            key={`${toolId}-${idx}`} 
-                            variant="secondary" 
-                            className="bg-primary/15 text-primary-foreground border-primary/30 text-[11px] px-2 py-0.5 break-all"
-                          >
-                            {toolId}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="px-3 py-2 rounded-lg bg-black/10 border border-white/5 text-xs text-gray-500">
-                        No tools configured
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tool Mode - Show if available */}
-                  {executor.toolMode && (
-                    <div className="flex items-center justify-between py-2">
-                      <label className="text-xs text-gray-400 uppercase tracking-wider">
-                        Tool Mode
-                      </label>
-                      <div className="px-3 py-1.5 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400 capitalize">
-                        {executor.toolMode}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                // Show empty state if no configuration
-                <div className="pt-2 border-t border-white/5 space-y-2">
-                  <h3 className="text-xs text-gray-500 uppercase tracking-wider font-medium">
-                    Configuration
-                  </h3>
-                  <div className="px-3 py-2 rounded-lg bg-black/10 border border-white/5 text-xs text-gray-500">
-                    No capabilities or tools configured
-                  </div>
-                </div>
-              )}
-
-              {/* Details Section */}
-              {(systemPromptPreview || displayDescription) && (
-                <div className="pt-2 border-t border-white/5 space-y-3">
-                  <h3 className="text-xs text-gray-500 uppercase tracking-wider font-medium">
-                    Details
-                  </h3>
-                  {systemPromptPreview && (
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider">
-                        System Prompt
-                      </label>
-                      <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-xs text-gray-200 max-h-32 overflow-hidden whitespace-pre-wrap leading-relaxed">
-                        {systemPromptPreview}
-                      </div>
-                    </div>
-                  )}
-                  {displayDescription && (
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-500 uppercase tracking-wider">
-                        Description
-                      </label>
-                      <div className="px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-gray-400">
-                        {displayDescription}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </motion.div>
-          </div>
-        </div>
-      </Node>
-    </ExecutorNodeWrapper>
+            {/* ReactFlow Handles */}
+            {handles.target && (
+              <Handle position={Position.Left} type="target" />
+            )}
+            {handles.source && (
+              <Handle position={Position.Right} type="source" />
+            )}
+            {/* Connection Handles */}
+            {handles.target && (
+              <ConnectionHandle position="left" visible={hovered} />
+            )}
+            {handles.source && (
+              <ConnectionHandle position="right" visible={hovered} />
+            )}
+          </motion.div>
+        </>
+      )}
+    </motion.div>
   );
 });
 

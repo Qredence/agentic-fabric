@@ -86,14 +86,7 @@ const toolsItems: NodeLibraryItem[] = [
     category: "tools",
     iconColor: "#FBBF24", // Yellow
   },
-  {
-    id: "executor",
-    label: "Guardrails",
-    description: "Add safety checks and validation",
-    icon: Shield,
-    category: "tools",
-    iconColor: "#FBBF24", // Yellow
-  },
+  
   {
     id: "function-executor",
     label: "MCP",
@@ -224,15 +217,16 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
         draggable
         onDragStart={(e) => handleDragStart(e, item.id)}
         onClick={() => handleAddNode(item.id)}
-        className="cursor-grab rounded-md border bg-muted p-3 text-sm shadow-sm transition-colors hover:bg-muted/70 active:cursor-grabbing"
+        className="group relative cursor-grab rounded-full border bg-muted p-3 text-sm shadow-sm transition-colors hover:bg-muted/70 active:cursor-grabbing"
       >
-        <div className="flex items-start gap-2">
-          <Icon className="size-4 mt-0.5 shrink-0" style={{ color: iconColor }} />
-          <div className="flex-1 min-w-0">
-            <div className="font-medium">{item.label}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">
-              {item.description}
-            </div>
+        <div className="flex items-center gap-2">
+          <Icon className="size-4 shrink-0" style={{ color: iconColor }} />
+          <div className="font-medium text-[12px]">{item.label}</div>
+        </div>
+        {/* Description tooltip on hover */}
+        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block pointer-events-none">
+          <div className="bg-popover border rounded-md px-3 py-2 text-xs text-popover-foreground shadow-lg whitespace-nowrap max-w-xs">
+            {item.description}
           </div>
         </div>
       </div>
@@ -251,7 +245,7 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
         >
           {config.label}
         </h4>
-        <div className="space-y-2">
+        <div className="space-y-0">
           {config.items.map(renderNodeItem)}
         </div>
       </div>
@@ -262,9 +256,11 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
     <Panel
       position="center-left"
       className={cn(
-        "ml-4 w-[280px] space-y-4 p-3",
-        "max-h-[calc(100vh-3.5rem)] overflow-y-auto"
+        "m-0 ml-6 mt-8 w-[224px] space-y-4 p-3",
+        "bottom-6 overflow-y-auto",
+        "bg-white/12 backdrop-blur-sm"
       )}
+      style={{ height: "calc(100vh - 6.5rem)" }}
     >
       <div>
         <h3 className="text-sm font-semibold mb-1">Node Library</h3>

@@ -37,16 +37,7 @@ export const MAGENTIC_AGENT_PRESETS: MagenticAgentPreset[] = [
       "You are the web research specialist. Use browsing tools to gather and summarise authoritative information that helps the team.",
     toolIds: ["web-browser", "http-client"],
   },
-  {
-    key: "file",
-    label: "File Surfer Agent",
-    description: "Reads local files, synthesises insights, updates task ledger.",
-    agentRole: "file-surfer",
-    capabilities: ["filesystem-read", "document-analysis"],
-    systemPrompt:
-      "You inspect local and remote documents. Extract precise facts and report them back clearly.",
-    toolIds: ["filesystem-reader"],
-  },
+
   {
     key: "coder",
     label: "Coder Agent",
@@ -57,16 +48,7 @@ export const MAGENTIC_AGENT_PRESETS: MagenticAgentPreset[] = [
       "You are responsible for writing and executing code to achieve the assigned goal. Produce correct, well-tested programs and explain results.",
     toolIds: ["hosted-code-interpreter"],
   },
-  {
-    key: "terminal",
-    label: "Terminal Agent",
-    description: "Executes shell tasks, inspects system state, manipulates files.",
-    agentRole: "terminal",
-    capabilities: ["shell-access", "system-inspection"],
-    systemPrompt:
-      "Run shell commands safely to gather diagnostics or modify the environment. Ask for confirmation before destructive actions.",
-    toolIds: ["shell-runner"],
-  },
+
   {
     key: "critic",
     label: "Critic Agent",

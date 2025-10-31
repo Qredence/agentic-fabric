@@ -47,18 +47,19 @@ export function TopNavigation({
   return (
     <div
       className={cn(
-        "flex items-center justify-between h-14 px-6",
-        "bg-[#1E1E1E] border-b border-white/10",
+        "absolute top-0 left-0 right-0 w-full",
+        "flex items-center justify-between h-14 px-6 bg-transparent",
+        "border-b border-transparent",
         "text-white z-50"
       )}
     >
       {/* Left side: Project name/status */}
       <div className="flex items-center gap-2">
-        <h1 className="text-sm font-medium text-gray-200">{displayName}</h1>
+        <h1 className="text-lg font-semibold text-gray-200">{displayName}</h1>
       </div>
 
       {/* Right side: Action buttons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mt-6 p-[8px] bg-white/8 rounded-full">
         {validation && (
           <Button
             variant="ghost"
@@ -114,7 +115,7 @@ export function TopNavigation({
           variant="default"
           size="sm"
           onClick={onPublish}
-          className="bg-red-600 hover:bg-red-700 text-white rounded-full"
+          className="bg-black/64 dark:bg-white/64 hover:bg-black/80 dark:hover:bg-white/80 text-white dark:text-black rounded-full"
         >
           <Upload className="size-4" />
           Publish

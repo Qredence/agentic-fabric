@@ -55,7 +55,6 @@ import type { SwitchCaseNodeData } from "@/components/ai-elements/edge-groups/sw
 // Import workflow builder components
 import { NodeLibrary } from "@/components/workflow-builder/node-library";
 import { PropertiesPanel } from "@/components/workflow-builder/properties-panel";
-import { WorkflowControls } from "@/components/workflow-builder/workflow-controls";
 import { ExportDialog } from "@/components/workflow-builder/export-dialog";
 import { ImportDialog } from "@/components/workflow-builder/import-dialog";
 import { TopNavigation } from "@/components/workflow-builder/top-navigation";
@@ -456,9 +455,31 @@ const WorkflowCanvas = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [currentTool, setCurrentTool] = useState<"pointer" | "pan">("pointer");
 
+  // Undo/Redo history management
+  const [history, setHistory] = useState<Array<{ nodes: any[]; edges: Edge[] }>>([
+    { nodes: initialNodes as any[], edges: initialEdges },
+  ]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  // Save state to history
+  const saveToHistory = useCallback(
+    (newNodes: any[], newEdges: Edge[]) => {
+      setHistory((prev) => {
+        const newHistory = prev.slice(0, historyIndex + 1);
+        newHistory.push({ nodes: JSON.parse(JSON.stringify(newNodes)), edges: JSON.parse(JSON.stringify(newEdges)) });
+        return newHistory.slice(-50); // Keep last 50 states
+      });
+      setHistoryIndex((prev) => Math.min(prev + 1, 49));
+    },
+    [historyIndex]
+  );
+
   // Convert React Flow state to Workflow format
   const currentWorkflow = useMemo(() => {
-    return reactFlowToWorkflow(nodes as any, edges, "workflow-1", "Multi-Agent Workflow");
+    return reactFlowToWorkflow(nodes as any, edges, "workflow-1", "Agentic Fabric");
   }, [nodes, edges]);
 
   // Handle node selection - wrapper to sync selected node state
@@ -466,6 +487,14 @@ const WorkflowCanvas = () => {
     (changes: NodeChange[]) => {
       const nextNodes = applyNodeChanges(changes, nodes);
       setNodes(nextNodes);
+      
+      // Save to history if it's a significant change (not just selection or position)
+      const significantChanges = changes.filter(
+        (change) => change.type !== "select" && change.type !== "position"
+      );
+      if (significantChanges.length > 0) {
+        saveToHistory(nextNodes, edges);
+      }
 
       if (selectedNode) {
         const updated = nextNodes.find((node) => node.id === selectedNode.id);
@@ -474,14 +503,18 @@ const WorkflowCanvas = () => {
         );
       }
     },
-    [nodes, selectedNode, setNodes]
+    [nodes, selectedNode, setNodes, edges, saveToHistory]
   );
 
   const handleConnect = useCallback(
     (connection: Connection) => {
-      setEdges((eds) => addEdge({ ...connection, type: "animated" }, eds));
+      setEdges((eds) => {
+        const newEdges = addEdge({ ...connection, type: "animated" }, eds);
+        saveToHistory(nodes, newEdges);
+        return newEdges;
+      });
     },
-    [setEdges]
+    [setEdges, nodes, saveToHistory]
   );
 
   // Handle inserting node on edge
@@ -542,22 +575,27 @@ const WorkflowCanvas = () => {
           };
         }
 
+        const newNodes = [...nds, newNode];
+        
         // Split edge: remove old edge, add two new edges
         setEdges((eds) => {
           const filtered = eds.filter((e) => e.id !== edgeDropdownState.edgeId);
-          return [
+          const newEdges = [
             ...filtered,
             { id: nanoid(), source: edge.source, target: newNode.id, type: "animated" },
             { id: nanoid(), source: newNode.id, target: edge.target, type: "animated" },
           ];
+          // Save to history after all changes
+          saveToHistory(newNodes, newEdges);
+          return newEdges;
         });
 
-        return [...nds, newNode];
+        return newNodes;
       });
 
       setEdgeDropdownState(null);
     },
-    [edgeDropdownState, edges, setNodes, setEdges]
+    [edgeDropdownState, edges, setNodes, setEdges, saveToHistory]
   );
 
   const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
@@ -628,10 +666,12 @@ const WorkflowCanvas = () => {
           };
         }
 
-        return [...nds, newNode];
+        const newNodes = [...nds, newNode];
+        saveToHistory(newNodes, edges);
+        return newNodes;
       });
     },
-    [reactFlow, setNodes]
+    [reactFlow, setNodes, edges, saveToHistory]
   );
 
   const handleDragStart = useCallback(
@@ -692,10 +732,12 @@ const WorkflowCanvas = () => {
           };
         }
 
-        return [...nds, newNode];
+        const newNodes = [...nds, newNode];
+        saveToHistory(newNodes, edges);
+        return newNodes;
       });
     },
-    [reactFlow, setNodes]
+    [reactFlow, setNodes, edges, saveToHistory]
   );
 
   const handleAddMagenticScaffold = useCallback(() => {
@@ -920,7 +962,7 @@ const WorkflowCanvas = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="relative h-full w-full">
       <TopNavigation
         projectName={currentWorkflow.name || "MCP Draft"}
         projectStatus={currentWorkflow.metadata?.custom?.status as string | undefined}
@@ -934,7 +976,7 @@ const WorkflowCanvas = () => {
           console.log("Validate workflow");
         }}
       />
-      <div ref={flowWrapperRef} className="flex-1 w-full overflow-hidden">
+      <div ref={flowWrapperRef} className="absolute inset-0 w-full h-full overflow-hidden">
         <Canvas
           className="h-full w-full"
           connectionLineComponent={ConnectionLine}
@@ -957,11 +999,6 @@ const WorkflowCanvas = () => {
           selectionOnDrag={currentTool === "pointer"}
           edgeTypes={createEdgeTypes(handleEdgeHover)}
         >
-        <WorkflowControls
-          workflow={currentWorkflow}
-          onExport={() => setExportDialogOpen(true)}
-          onImport={() => setImportDialogOpen(true)}
-        />
         <NodeLibrary
           onAddNode={handleAddNode}
           onDragStart={handleDragStart}
@@ -976,62 +1013,74 @@ const WorkflowCanvas = () => {
             onClose={() => setEdgeDropdownState(null)}
           />
         )}
-            <PropertiesPanel
-              selectedNode={
-                selectedNode
-                  ? {
-                      id: selectedNode.id,
-                      type: selectedNode.type || "executor",
-                      data: selectedNode.data as any,
-                    }
-                  : null
+        {selectedNode && (
+          <PropertiesPanel
+            selectedNode={{
+              id: selectedNode.id,
+              type: selectedNode.type || "executor",
+              data: selectedNode.data as any,
+            }}
+            onUpdate={handleNodeUpdate}
+            onDelete={(nodeId) => {
+              setNodes((nds) => {
+                const newNodes = nds.filter((n) => n.id !== nodeId);
+                saveToHistory(newNodes, edges);
+                return newNodes;
+              });
+              if (selectedNode?.id === nodeId) {
+                setSelectedNode(null);
               }
-              onUpdate={handleNodeUpdate}
-              onDelete={(nodeId) => {
-                setNodes((nds) => nds.filter((n) => n.id !== nodeId));
-                if (selectedNode?.id === nodeId) {
-                  setSelectedNode(null);
-                }
-              }}
-              onDuplicate={(nodeId) => {
-                const nodeToDuplicate = nodes.find((n) => n.id === nodeId);
-                if (nodeToDuplicate) {
-                  const newId = nanoid();
-                  const duplicatedNode = {
-                    ...nodeToDuplicate,
-                    id: newId,
-                    position: {
-                      x: nodeToDuplicate.position.x + 50,
-                      y: nodeToDuplicate.position.y + 50,
-                    },
-                  };
-                  setNodes((nds) => [...nds, duplicatedNode]);
-                }
-              }}
-              onEvaluate={(nodeId) => {
-                // TODO: Implement node evaluation
-                console.log("Evaluate node", nodeId);
-              }}
-            />
+            }}
+            onDuplicate={(nodeId) => {
+              const nodeToDuplicate = nodes.find((n) => n.id === nodeId);
+              if (nodeToDuplicate) {
+                const newId = nanoid();
+                const duplicatedNode = {
+                  ...nodeToDuplicate,
+                  id: newId,
+                  position: {
+                    x: nodeToDuplicate.position.x + 50,
+                    y: nodeToDuplicate.position.y + 50,
+                  },
+                };
+                setNodes((nds) => {
+                  const newNodes = [...nds, duplicatedNode];
+                  saveToHistory(newNodes, edges);
+                  return newNodes;
+                });
+              }
+            }}
+            onEvaluate={(nodeId) => {
+              // TODO: Implement node evaluation
+              console.log("Evaluate node", nodeId);
+            }}
+          />
+        )}
           <BottomControls
             onUndo={() => {
-              // TODO: Implement undo
-              console.log("Undo");
+              if (canUndo) {
+                const newIndex = historyIndex - 1;
+                setHistoryIndex(newIndex);
+                const state = history[newIndex];
+                setNodes(state.nodes as any);
+                setEdges(state.edges);
+              }
             }}
             onRedo={() => {
-              // TODO: Implement redo
-              console.log("Redo");
+              if (canRedo) {
+                const newIndex = historyIndex + 1;
+                setHistoryIndex(newIndex);
+                const state = history[newIndex];
+                setNodes(state.nodes as any);
+                setEdges(state.edges);
+              }
             }}
             onToolChange={(tool) => {
               setCurrentTool(tool);
-              // TODO: Implement tool switching
-              if (tool === "pan") {
-                reactFlow.getViewport();
-              }
             }}
             currentTool={currentTool}
-            canUndo={false}
-            canRedo={false}
+            canUndo={canUndo}
+            canRedo={canRedo}
           />
         </Canvas>
         <ExportDialog
