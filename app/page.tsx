@@ -4,18 +4,21 @@ import React, { memo, useCallback, useRef, useState, useMemo, type DragEvent } f
 import {
   ReactFlowProvider,
   addEdge,
+  applyNodeChanges,
   useEdgesState,
   useNodesState,
   useReactFlow,
   type Connection,
   type Edge,
   type Node as ReactFlowNode,
-  type NodeProps,
+  type NodeChange,
+  type XYPosition,
 } from "@xyflow/react";
 import { Canvas } from "@/components/ai-elements/canvas";
 import { Connection as ConnectionLine } from "@/components/ai-elements/connection";
 import { Edge as WorkflowEdgeComponent } from "@/components/ai-elements/edge";
 import { TemporaryEdge, AnimatedEdge } from "@/components/ai-elements/edge";
+import { EdgeNodeDropdown } from "@/components/workflow-builder/edge-node-dropdown";
 import {
   Node,
   NodeContent,
@@ -43,8 +46,11 @@ import { RequestInfoExecutorNode } from "@/components/ai-elements/executors/requ
 
 // Import edge group components
 import { FanInNode } from "@/components/ai-elements/edge-groups/fan-in-node";
+import type { FanInNodeData } from "@/components/ai-elements/edge-groups/fan-in-node";
 import { FanOutNode } from "@/components/ai-elements/edge-groups/fan-out-node";
+import type { FanOutNodeData } from "@/components/ai-elements/edge-groups/fan-out-node";
 import { SwitchCaseNode } from "@/components/ai-elements/edge-groups/switch-case-node";
+import type { SwitchCaseNodeData } from "@/components/ai-elements/edge-groups/switch-case-node";
 
 // Import workflow builder components
 import { NodeLibrary } from "@/components/workflow-builder/node-library";
@@ -52,6 +58,8 @@ import { PropertiesPanel } from "@/components/workflow-builder/properties-panel"
 import { WorkflowControls } from "@/components/workflow-builder/workflow-controls";
 import { ExportDialog } from "@/components/workflow-builder/export-dialog";
 import { ImportDialog } from "@/components/workflow-builder/import-dialog";
+import { TopNavigation } from "@/components/workflow-builder/top-navigation";
+import { BottomControls } from "@/components/workflow-builder/bottom-controls";
 
 // Import types and utilities
 import type {
@@ -72,6 +80,10 @@ import {
   createNodeDataFromExecutorType,
 } from "@/lib/workflow/conversion";
 import type { Workflow } from "@/lib/workflow/workflow";
+import type { FanInEdgeGroup, FanOutEdgeGroup, SwitchCaseEdgeGroup } from "@/lib/workflow/edges";
+import type { ExecutorType } from "@/lib/workflow/executors";
+import { MAGENTIC_AGENT_PRESETS } from "@/lib/workflow/magentic-presets";
+import type { MagenticAgentPresetKey } from "@/lib/workflow/magentic-presets";
 import type { BaseExecutor } from "@/lib/workflow/types";
 
 type WorkflowNode = WorkflowReactFlowNode;
@@ -244,6 +256,112 @@ const initialEdges: WorkflowEdge[] = [
   },
 ];
 
+type EdgeGroupNodeType = "fan-in" | "fan-out" | "switch-case";
+
+const isEdgeGroupNodeType = (nodeType: string): nodeType is EdgeGroupNodeType => {
+  return nodeType === "fan-in" || nodeType === "fan-out" || nodeType === "switch-case";
+};
+
+const parseNodeTypeToken = (
+  value: string
+): { baseType: string; presetKey?: MagenticAgentPresetKey } => {
+  const [baseType, preset] = value.split(":");
+  return {
+    baseType,
+    presetKey: preset as MagenticAgentPresetKey | undefined,
+  };
+};
+
+function createDefaultFanInGroup(id: string): FanInEdgeGroup {
+  return {
+    id,
+    type: "fan-in",
+    sources: [],
+    target: "",
+    edges: [],
+  };
+}
+
+function createDefaultFanOutGroup(id: string): FanOutEdgeGroup {
+  return {
+    id,
+    type: "fan-out",
+    source: "",
+    targets: [],
+    edges: [],
+    broadcastMode: "parallel",
+  };
+}
+
+function createDefaultSwitchCaseGroup(id: string): SwitchCaseEdgeGroup {
+  return {
+    id,
+    type: "switch-case",
+    source: "",
+    cases: [],
+    switchExpression: "message.type",
+  };
+}
+
+function createEdgeGroupNode(nodeType: EdgeGroupNodeType, position: XYPosition): WorkflowReactFlowNode {
+  const id = `${nodeType}-${nanoid()}`;
+
+  if (nodeType === "fan-in") {
+    const group = createDefaultFanInGroup(id);
+    const data: FanInNodeData = {
+      variant: "fan-in",
+      handles: {
+        target: true,
+        source: true,
+        sourceCount: group.sources.length,
+      },
+      group,
+    };
+    return {
+      id,
+      type: nodeType,
+      position,
+      data: data as WorkflowNodeDataWithIndex,
+    };
+  }
+
+  if (nodeType === "fan-out") {
+    const group = createDefaultFanOutGroup(id);
+    const data: FanOutNodeData = {
+      variant: "fan-out",
+      handles: {
+        target: true,
+        source: true,
+        targetCount: group.targets.length,
+      },
+      group,
+    };
+    return {
+      id,
+      type: nodeType,
+      position,
+      data: data as WorkflowNodeDataWithIndex,
+    };
+  }
+
+  const group = createDefaultSwitchCaseGroup(id);
+  const data: SwitchCaseNodeData = {
+    variant: "switch-case",
+    handles: {
+      target: true,
+      source: true,
+      caseCount: group.cases.length,
+    },
+    group,
+  };
+  return {
+    id,
+    type: nodeType,
+    position,
+    data: data as WorkflowNodeDataWithIndex,
+  };
+}
+
 const WorkflowStepNode = memo(({ id, data }: { id: string; data: WorkflowStepNodeData }) => (
   <Node handles={data.handles}>
     <NodeHeader>
@@ -302,22 +420,31 @@ const nodeTypes: Record<string, React.ComponentType<any>> = {
   executor: ExecutorNode,
   "function-executor": FunctionExecutorNode,
   "agent-executor": AgentExecutorNode,
+  "magentic-agent-executor": AgentExecutorNode,
   "workflow-executor": WorkflowExecutorNode,
   "request-info-executor": RequestInfoExecutorNode,
+  "magentic-orchestrator-executor": ExecutorNode,
   // Edge group node types
   "fan-in": FanInNode,
   "fan-out": FanOutNode,
   "switch-case": SwitchCaseNode,
 };
 
-const edgeTypes = {
+// Create edge types with handlers
+const createEdgeTypes = (onEdgeHover?: (edgeId: string, position: XYPosition, screenPosition: { x: number; y: number }) => void) => ({
+  animated: (props: any) => (
+    <AnimatedEdge {...props} onHover={onEdgeHover ? (pos: XYPosition, screenPos: { x: number; y: number }) => onEdgeHover(props.id, pos, screenPos) : undefined} />
+  ),
+  temporary: TemporaryEdge,
+});
+
+const edgeTypesBase = {
   animated: AnimatedEdge,
   temporary: TemporaryEdge,
 };
 
-
 const WorkflowCanvas = () => {
-  const [nodes, setNodes, onNodesChange] =
+  const [nodes, setNodes] =
     useNodesState(initialNodes as any);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const reactFlow = useReactFlow();
@@ -327,6 +454,7 @@ const WorkflowCanvas = () => {
   const [selectedNode, setSelectedNode] = useState<ReactFlowNode<WorkflowNodeDataWithIndex> | null>(null);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [currentTool, setCurrentTool] = useState<"pointer" | "pan">("pointer");
 
   // Convert React Flow state to Workflow format
   const currentWorkflow = useMemo(() => {
@@ -335,20 +463,18 @@ const WorkflowCanvas = () => {
 
   // Handle node selection - wrapper to sync selected node state
   const handleNodesChangeWrapper = useCallback(
-    (changes: Parameters<typeof onNodesChange>[0]) => {
-      onNodesChange(changes);
-      // Update selected node if it was changed
+    (changes: NodeChange[]) => {
+      const nextNodes = applyNodeChanges(changes, nodes);
+      setNodes(nextNodes);
+
       if (selectedNode) {
-        const updatedNode = nodes.find((n) => n.id === selectedNode.id);
-        if (updatedNode) {
-          setSelectedNode(updatedNode as ReactFlowNode<WorkflowNodeDataWithIndex>);
-        } else {
-          // Node was deleted
-          setSelectedNode(null);
-        }
+        const updated = nextNodes.find((node) => node.id === selectedNode.id);
+        setSelectedNode(
+          updated ? (updated as ReactFlowNode<WorkflowNodeDataWithIndex>) : null
+        );
       }
     },
-    [onNodesChange, selectedNode, nodes]
+    [nodes, selectedNode, setNodes]
   );
 
   const handleConnect = useCallback(
@@ -356,6 +482,82 @@ const WorkflowCanvas = () => {
       setEdges((eds) => addEdge({ ...connection, type: "animated" }, eds));
     },
     [setEdges]
+  );
+
+  // Handle inserting node on edge
+  const [edgeDropdownState, setEdgeDropdownState] = useState<{
+    edgeId: string;
+    position: XYPosition;
+    screenPosition: { x: number; y: number };
+  } | null>(null);
+
+  const handleEdgeHover = useCallback(
+    (edgeId: string, position: XYPosition, screenPosition: { x: number; y: number }) => {
+      setEdgeDropdownState({
+        edgeId,
+        position,
+        screenPosition,
+      });
+    },
+    []
+  );
+
+  const handleInsertNodeOnEdge = useCallback(
+    (nodeType: string) => {
+      if (!edgeDropdownState) return;
+
+      const edge = edges.find((e) => e.id === edgeDropdownState.edgeId);
+      if (!edge) {
+        setEdgeDropdownState(null);
+        return;
+      }
+
+      const position = edgeDropdownState.position;
+      const { baseType, presetKey } = parseNodeTypeToken(nodeType);
+
+      // Create new node
+      setNodes((nds) => {
+        let newNode: ReactFlowNode<WorkflowNodeDataWithIndex>;
+        
+        if (isEdgeGroupNodeType(baseType)) {
+          newNode = createEdgeGroupNode(baseType, position);
+        } else {
+          const executorId = nanoid();
+          const preset = presetKey
+            ? MAGENTIC_AGENT_PRESETS.find((item) => item.key === presetKey)
+            : undefined;
+          const executor = createExecutorFromNodeType(
+            baseType,
+            executorId,
+            preset?.label || `New ${baseType}`,
+            { presetKey }
+          );
+          const nodeData = createNodeDataFromExecutorType(baseType as ExecutorType, executor);
+
+          newNode = {
+            id: executorId,
+            type: baseType,
+            position,
+            data: { ...nodeData, ...{} } as WorkflowNodeDataWithIndex,
+          };
+        }
+
+        // Split edge: remove old edge, add two new edges
+        setEdges((eds) => {
+          const filtered = eds.filter((e) => e.id !== edgeDropdownState.edgeId);
+          return [
+            ...filtered,
+            { id: nanoid(), source: edge.source, target: newNode.id, type: "animated" },
+            { id: nanoid(), source: newNode.id, target: edge.target, type: "animated" },
+          ];
+        });
+
+        return [...nds, newNode];
+      });
+
+      setEdgeDropdownState(null);
+    },
+    [edgeDropdownState, edges, setNodes, setEdges]
   );
 
   const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
@@ -378,40 +580,49 @@ const WorkflowCanvas = () => {
 
       setNodes((nds) => {
         let newNode: ReactFlowNode<WorkflowNodeDataWithIndex>;
+        const { baseType, presetKey } = parseNodeTypeToken(nodeType);
 
-        // Handle legacy node types
-        if (nodeType === "textBlock") {
+        if (baseType === "textBlock") {
           newNode = {
             id: nanoid(),
-            type: nodeType,
+            type: baseType,
             position,
             data: { ...defaultTextBlockData(), ...{} } as WorkflowNodeDataWithIndex,
           };
-        } else if (nodeType === "attribute") {
+        } else if (baseType === "attribute") {
           newNode = {
             id: nanoid(),
-            type: nodeType,
+            type: baseType,
             position,
             data: { ...defaultAttributeNodeData(), ...{} } as WorkflowNodeDataWithIndex,
           };
-        } else if (nodeType === "workflow") {
+        } else if (baseType === "workflow") {
           newNode = {
             id: nanoid(),
-            type: nodeType,
+            type: baseType,
             position,
             data: { ...defaultWorkflowStepData({
               label: `New Step ${nds.length + 1}`,
             }), ...{} } as WorkflowNodeDataWithIndex,
           };
+        } else if (isEdgeGroupNodeType(baseType)) {
+          newNode = createEdgeGroupNode(baseType, position);
         } else {
-          // Handle new executor types
           const executorId = nanoid();
-          const executor = createExecutorFromNodeType(nodeType, executorId, `New ${nodeType}`);
-          const nodeData = createNodeDataFromExecutorType(nodeType as any, executor);
-          
+          const preset = presetKey
+            ? MAGENTIC_AGENT_PRESETS.find((item) => item.key === presetKey)
+            : undefined;
+          const executor = createExecutorFromNodeType(
+            baseType,
+            executorId,
+            preset?.label || `New ${baseType}`,
+            { presetKey }
+          );
+          const nodeData = createNodeDataFromExecutorType(baseType as ExecutorType, executor);
+
           newNode = {
             id: executorId,
-            type: nodeType,
+            type: baseType,
             position,
             data: { ...nodeData, ...{} } as WorkflowNodeDataWithIndex,
           };
@@ -445,11 +656,12 @@ const WorkflowCanvas = () => {
 
       setNodes((nds) => {
         let newNode: ReactFlowNode<WorkflowNodeDataWithIndex>;
+        const { baseType, presetKey } = parseNodeTypeToken(nodeType);
 
-        if (nodeType === "workflow") {
+        if (baseType === "workflow") {
           newNode = {
             id: nanoid(),
-            type: nodeType,
+            type: baseType,
             position: centerPosition,
             data: { ...defaultWorkflowStepData({
               label: `New Step ${nds.length + 1}`,
@@ -457,15 +669,24 @@ const WorkflowCanvas = () => {
               content: "Start connecting this step to build out the workflow.",
             }), ...{} } as WorkflowNodeDataWithIndex,
           };
+        } else if (isEdgeGroupNodeType(baseType)) {
+          newNode = createEdgeGroupNode(baseType, centerPosition);
         } else {
-          // Create new executor node
           const executorId = nanoid();
-          const executor = createExecutorFromNodeType(nodeType, executorId, `New ${nodeType}`);
-          const nodeData = createNodeDataFromExecutorType(nodeType as any, executor);
-          
+          const preset = presetKey
+            ? MAGENTIC_AGENT_PRESETS.find((item) => item.key === presetKey)
+            : undefined;
+          const executor = createExecutorFromNodeType(
+            baseType,
+            executorId,
+            preset?.label || `New ${baseType}`,
+            { presetKey }
+          );
+          const nodeData = createNodeDataFromExecutorType(baseType as ExecutorType, executor);
+
           newNode = {
             id: executorId,
-            type: nodeType,
+            type: baseType,
             position: centerPosition,
             data: { ...nodeData, ...{} } as WorkflowNodeDataWithIndex,
           };
@@ -477,16 +698,154 @@ const WorkflowCanvas = () => {
     [reactFlow, setNodes]
   );
 
+  const handleAddMagenticScaffold = useCallback(() => {
+    if (!flowWrapperRef.current) {
+      return;
+    }
+
+    const bounds = flowWrapperRef.current.getBoundingClientRect();
+    const centerPosition = reactFlow.screenToFlowPosition({
+      x: bounds.left + bounds.width / 2,
+      y: bounds.top + bounds.height / 2,
+    });
+
+    const currentNodes = reactFlow.getNodes() as ReactFlowNode<WorkflowNodeDataWithIndex>[];
+    const currentEdges = reactFlow.getEdges();
+
+    const findPresetKey = (node: ReactFlowNode<WorkflowNodeDataWithIndex>) => {
+      const executor = (node.data as any)?.executor as BaseExecutor | undefined;
+      const metadata = (executor?.metadata as any)?.magentic;
+      return metadata?.presetKey ?? metadata?.preset ?? undefined;
+    };
+
+    let orchestratorNode = currentNodes.find((node) => node.type === "magentic-orchestrator-executor");
+    if (!orchestratorNode) {
+      const orchestratorId = nanoid();
+      const orchestratorExecutor = createExecutorFromNodeType(
+        "magentic-orchestrator-executor",
+        orchestratorId,
+        "Magentic Orchestrator"
+      );
+      orchestratorNode = {
+        id: orchestratorId,
+        type: "magentic-orchestrator-executor",
+        position: centerPosition,
+        data: {
+          ...createNodeDataFromExecutorType(
+            "magentic-orchestrator-executor",
+            orchestratorExecutor
+          ),
+        } as WorkflowNodeDataWithIndex,
+      };
+    }
+
+    const orchestratorId = orchestratorNode.id;
+    const origin = orchestratorNode.position ?? centerPosition;
+
+    const radius = 280;
+    const presets = MAGENTIC_AGENT_PRESETS;
+    const angleStep = presets.length ? (Math.PI * 2) / presets.length : 0;
+    const nextNodesMap = new Map<string, ReactFlowNode<WorkflowNodeDataWithIndex>>();
+    currentNodes.forEach((node) => nextNodesMap.set(node.id, { ...node }));
+    nextNodesMap.set(orchestratorNode.id, { ...orchestratorNode, position: origin });
+
+    const agentNodes: ReactFlowNode<WorkflowNodeDataWithIndex>[] = presets.map((preset, index) => {
+      const angle = angleStep * index;
+      const targetPosition = {
+        x: origin.x + radius * Math.cos(angle),
+        y: origin.y + radius * Math.sin(angle),
+      };
+
+      const existing = [...nextNodesMap.values()].find(
+        (node) =>
+          node.type === "magentic-agent-executor" &&
+          findPresetKey(node) === preset.key
+      );
+
+      if (existing) {
+        const executor = (existing.data as any)?.executor as BaseExecutor | undefined;
+        const updatedExecutor = executor
+          ? {
+              ...executor,
+              metadata: {
+                ...(executor.metadata || {}),
+                magentic: {
+                  presetKey: preset.key,
+                  capabilities: preset.capabilities,
+                },
+                source: "agent-framework",
+              },
+              capabilities: preset.capabilities,
+              systemPrompt: preset.systemPrompt,
+              label: preset.label,
+              description: preset.description,
+              tools: preset.toolIds?.map((toolId) => ({ toolId, enabled: true })),
+            }
+          : undefined;
+
+        const updatedNode = {
+          ...existing,
+          position: targetPosition,
+          data: {
+            ...(existing.data as WorkflowNodeDataWithIndex),
+            executor: updatedExecutor ?? (existing.data as any).executor,
+            label: preset.label,
+            description: preset.description,
+          },
+        } as ReactFlowNode<WorkflowNodeDataWithIndex>;
+        nextNodesMap.set(updatedNode.id, updatedNode);
+        return updatedNode;
+      }
+
+      const agentId = nanoid();
+      const agentExecutor = createExecutorFromNodeType(
+        "magentic-agent-executor",
+        agentId,
+        preset.label,
+        { presetKey: preset.key }
+      );
+
+      const newNode: ReactFlowNode<WorkflowNodeDataWithIndex> = {
+        id: agentId,
+        type: "magentic-agent-executor",
+        position: targetPosition,
+        data: {
+          ...createNodeDataFromExecutorType("magentic-agent-executor", agentExecutor),
+        } as WorkflowNodeDataWithIndex,
+      };
+
+      nextNodesMap.set(agentId, newNode);
+      return newNode;
+    });
+
+    const nextEdges = [...currentEdges];
+    const ensureEdge = (source: string, target: string) => {
+      if (!nextEdges.some((edge) => edge.source === source && edge.target === target)) {
+        nextEdges.push({ id: nanoid(), source, target, type: "animated" });
+      }
+    };
+
+    agentNodes.forEach((agentNode) => {
+      ensureEdge(orchestratorId, agentNode.id);
+      ensureEdge(agentNode.id, orchestratorId);
+    });
+
+    setNodes(Array.from(nextNodesMap.values()));
+    setEdges(nextEdges);
+  }, [MAGENTIC_AGENT_PRESETS, reactFlow, setEdges, setNodes]);
+
   // Handle node update from properties panel
   const handleNodeUpdate = useCallback(
     (nodeId: string, updates: Partial<BaseExecutor>) => {
+      let updatedNode: ReactFlowNode<WorkflowNodeDataWithIndex> | null = null;
+
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id === nodeId && isExecutorNode(node as ReactFlowNode<WorkflowNodeDataWithIndex>)) {
             const currentData = node.data as any;
             if (currentData.executor) {
               const updatedExecutor = { ...currentData.executor, ...updates };
-              return {
+              const nextNode: ReactFlowNode<WorkflowNodeDataWithIndex> = {
                 ...node,
                 data: {
                   ...currentData,
@@ -495,21 +854,19 @@ const WorkflowCanvas = () => {
                   description: updates.description ?? currentData.description,
                 },
               };
+              updatedNode = nextNode;
+              return nextNode;
             }
           }
           return node;
         })
       );
-      
-      // Update selected node if it was the one that changed
+
       if (selectedNode?.id === nodeId) {
-        const updatedNode = nodes.find((n) => n.id === nodeId);
-        if (updatedNode) {
-          setSelectedNode(updatedNode as ReactFlowNode<WorkflowNodeDataWithIndex>);
-        }
+        setSelectedNode(updatedNode ?? null);
       }
     },
-    [setNodes, selectedNode, nodes]
+    [setNodes, selectedNode]
   );
 
   // Check if node is an executor node
@@ -542,23 +899,64 @@ const WorkflowCanvas = () => {
     [setNodes, setEdges, reactFlow]
   );
 
+  const handleEvaluate = useCallback(() => {
+    // TODO: Implement evaluate functionality
+    console.log("Evaluate workflow");
+  }, []);
+
+  const handleCode = useCallback(() => {
+    // TODO: Implement code view functionality
+    console.log("Show code");
+  }, []);
+
+  const handlePreview = useCallback(() => {
+    // TODO: Implement preview functionality
+    console.log("Preview workflow");
+  }, []);
+
+  const handlePublish = useCallback(() => {
+    // TODO: Implement publish functionality
+    console.log("Publish workflow");
+  }, []);
+
   return (
-    <div ref={flowWrapperRef} className="h-full w-full">
-      <Canvas
-        className="h-full w-full"
-        connectionLineComponent={ConnectionLine}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        fitView
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onConnect={handleConnect}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onEdgesChange={onEdgesChange}
-        onNodesChange={onNodesChange}
-        onNodeClick={handleNodeClick}
-      >
+    <div className="flex flex-col h-full w-full">
+      <TopNavigation
+        projectName={currentWorkflow.name || "MCP Draft"}
+        projectStatus={currentWorkflow.metadata?.custom?.status as string | undefined}
+        workflow={currentWorkflow}
+        onEvaluate={handleEvaluate}
+        onCode={handleCode}
+        onPreview={handlePreview}
+        onPublish={handlePublish}
+        onValidate={() => {
+          // TODO: Implement validation view/panel
+          console.log("Validate workflow");
+        }}
+      />
+      <div ref={flowWrapperRef} className="flex-1 w-full overflow-hidden">
+        <Canvas
+          className="h-full w-full"
+          connectionLineComponent={ConnectionLine}
+          edges={edges}
+          fitView
+          nodes={nodes}
+          nodeTypes={nodeTypes}
+          onConnect={handleConnect}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onEdgesChange={onEdgesChange}
+          onNodesChange={handleNodesChangeWrapper}
+          onNodeClick={handleNodeClick}
+          onPaneClick={() => {
+            setSelectedNode(null);
+            setEdgeDropdownState(null);
+          }}
+          panOnDrag={currentTool === "pan" ? [1, 2, 3] : false}
+          nodesDraggable={currentTool === "pointer"}
+          selectionOnDrag={currentTool === "pointer"}
+          edgeTypes={createEdgeTypes(handleEdgeHover)}
+        >
         <WorkflowControls
           workflow={currentWorkflow}
           onExport={() => setExportDialogOpen(true)}
@@ -567,7 +965,17 @@ const WorkflowCanvas = () => {
         <NodeLibrary
           onAddNode={handleAddNode}
           onDragStart={handleDragStart}
+          onAddMagenticScaffold={handleAddMagenticScaffold}
         />
+        {edgeDropdownState && (
+          <EdgeNodeDropdown
+            edgeId={edgeDropdownState.edgeId}
+            position={edgeDropdownState.position}
+            screenPosition={edgeDropdownState.screenPosition}
+            onSelectNode={handleInsertNodeOnEdge}
+            onClose={() => setEdgeDropdownState(null)}
+          />
+        )}
             <PropertiesPanel
               selectedNode={
                 selectedNode
@@ -579,18 +987,64 @@ const WorkflowCanvas = () => {
                   : null
               }
               onUpdate={handleNodeUpdate}
+              onDelete={(nodeId) => {
+                setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+                if (selectedNode?.id === nodeId) {
+                  setSelectedNode(null);
+                }
+              }}
+              onDuplicate={(nodeId) => {
+                const nodeToDuplicate = nodes.find((n) => n.id === nodeId);
+                if (nodeToDuplicate) {
+                  const newId = nanoid();
+                  const duplicatedNode = {
+                    ...nodeToDuplicate,
+                    id: newId,
+                    position: {
+                      x: nodeToDuplicate.position.x + 50,
+                      y: nodeToDuplicate.position.y + 50,
+                    },
+                  };
+                  setNodes((nds) => [...nds, duplicatedNode]);
+                }
+              }}
+              onEvaluate={(nodeId) => {
+                // TODO: Implement node evaluation
+                console.log("Evaluate node", nodeId);
+              }}
             />
-      </Canvas>
-      <ExportDialog
-        open={exportDialogOpen}
-        onOpenChange={setExportDialogOpen}
-        workflow={currentWorkflow}
-      />
-      <ImportDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        onImport={handleImport}
-      />
+          <BottomControls
+            onUndo={() => {
+              // TODO: Implement undo
+              console.log("Undo");
+            }}
+            onRedo={() => {
+              // TODO: Implement redo
+              console.log("Redo");
+            }}
+            onToolChange={(tool) => {
+              setCurrentTool(tool);
+              // TODO: Implement tool switching
+              if (tool === "pan") {
+                reactFlow.getViewport();
+              }
+            }}
+            currentTool={currentTool}
+            canUndo={false}
+            canRedo={false}
+          />
+        </Canvas>
+        <ExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          workflow={currentWorkflow}
+        />
+        <ImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          onImport={handleImport}
+        />
+      </div>
     </div>
   );
 };

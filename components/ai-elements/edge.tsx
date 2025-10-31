@@ -9,6 +9,7 @@ import {
   type Node,
   Position,
   useInternalNode,
+  useReactFlow,
 } from "@xyflow/react";
 
 /**
@@ -174,6 +175,7 @@ export const TemporaryEdge = ({
  * - Smooth Bezier curve connection
  * - Automatically calculates optimal handle positions
  * - Visual indicator shows flow direction
+ * - Interactive button on hover to add nodes
  */
 export const AnimatedEdge = ({
   id,
@@ -187,11 +189,16 @@ export const AnimatedEdge = ({
   targetY,
   sourcePosition,
   targetPosition,
-}: EdgeProps) => {
+  onHover,
+}: EdgeProps & {
+  onHover?: (position: { x: number; y: number }, screenPosition: { x: number; y: number }) => void;
+}) => {
   const sourceNode = source ? useInternalNode(source) : null;
   const targetNode = target ? useInternalNode(target) : null;
+  const [isHovered, setIsHovered] = React.useState(false);
+  const reactFlow = useReactFlow();
 
-  const { edgePath, sourceXFinal, sourceYFinal, targetXFinal, targetYFinal } =
+  const { edgePath, midPoint } =
     useMemo(() => {
       if (sourceNode && targetNode) {
         const params = getEdgeParams(sourceNode, targetNode);
@@ -203,12 +210,14 @@ export const AnimatedEdge = ({
           targetY: params.ty,
           targetPosition: params.targetPos,
         });
+        
+        // Calculate midpoint
+        const midX = (params.sx + params.tx) / 2;
+        const midY = (params.sy + params.ty) / 2;
+        
         return {
           edgePath: path,
-          sourceXFinal: params.sx,
-          sourceYFinal: params.sy,
-          targetXFinal: params.tx,
-          targetYFinal: params.ty,
+          midPoint: { x: midX, y: midY },
         };
       }
 
@@ -221,12 +230,14 @@ export const AnimatedEdge = ({
         targetY,
         targetPosition: targetPosition || Position.Left,
       });
+      
+      // Calculate midpoint
+      const midX = (sourceX + targetX) / 2;
+      const midY = (sourceY + targetY) / 2;
+      
       return {
         edgePath: path,
-        sourceXFinal: sourceX,
-        sourceYFinal: sourceY,
-        targetXFinal: targetX,
-        targetYFinal: targetY,
+        midPoint: { x: midX, y: midY },
       };
     }, [
       sourceNode,
@@ -238,6 +249,7 @@ export const AnimatedEdge = ({
       sourcePosition,
       targetPosition,
     ]);
+
 
   if (!edgePath) {
     return null;
@@ -253,6 +265,8 @@ export const AnimatedEdge = ({
           strokeWidth: 2,
           ...style,
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       />
       {/* Animated circle indicator */}
       <circle
@@ -283,6 +297,38 @@ export const AnimatedEdge = ({
           keyTimes="0;1"
         />
       </circle>
+      {/* Interactive button in the middle - shown on hover */}
+      {isHovered && midPoint && onHover && (
+        <foreignObject
+          x={midPoint.x - 16}
+          y={midPoint.y - 16}
+          width="32"
+          height="32"
+          className="pointer-events-auto"
+          onClick={(e) => {
+            e.stopPropagation();
+            const screenPos = reactFlow.flowToScreenPosition(midPoint);
+            onHover(midPoint, screenPos);
+          }}
+        >
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background border-2 border-primary shadow-lg cursor-pointer hover:bg-primary/10 transition-colors">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              className="text-primary"
+            >
+              <path
+                d="M8 3V13M3 8H13"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+        </foreignObject>
+      )}
     </>
   );
 };
