@@ -13,8 +13,8 @@ import {
 } from "react";
 
 type ToolApprovalContextValue = {
-  approval: ToolUIPart["approval"];
-  state: ToolUIPart["state"];
+  approval?: any;
+  state?: any;
 };
 
 const ToolApprovalContext = createContext<ToolApprovalContextValue | null>(
@@ -30,8 +30,8 @@ const useToolApproval = () => {
 };
 
 export type ToolApprovalProps = ComponentProps<typeof Alert> & {
-  approval?: ToolUIPart["approval"];
-  state: ToolUIPart["state"];
+  approval?: any;
+  state?: any;
 };
 
 export const ToolApproval = memo(

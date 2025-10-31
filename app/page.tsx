@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useCallback, useRef, type DragEvent } from "react";
+import React, { memo, useCallback, useRef, useState, useMemo, type DragEvent } from "react";
 import {
   ReactFlowProvider,
   addEdge,
@@ -13,8 +13,9 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 import { Canvas } from "@/components/ai-elements/canvas";
-import { Connection } from "@/components/ai-elements/connection";
+import { Connection as ConnectionLine } from "@/components/ai-elements/connection";
 import { Edge as WorkflowEdgeComponent } from "@/components/ai-elements/edge";
+import { TemporaryEdge, AnimatedEdge } from "@/components/ai-elements/edge";
 import {
   Node,
   NodeContent,
@@ -25,7 +26,6 @@ import {
 } from "@/components/ai-elements/node";
 import { Panel } from "@/components/ai-elements/panel";
 import { Toolbar } from "@/components/ai-elements/toolbar";
-import BottomLeftPromptInput from "@/components/ai-elements/@prompt-input";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TextBlockCard } from "@/components/ai-elements/text-block-card";
@@ -33,10 +33,30 @@ import { AttributeNode } from "@/components/ai-elements/attribute-node";
 import { Action, Actions } from "@/components/ai-elements/actions";
 import { Pencil, Trash2, Maximize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { nanoid } from "nanoid";
+
+// Import executor node components
+import { ExecutorNode } from "@/components/ai-elements/executors/executor-node";
+import { FunctionExecutorNode } from "@/components/ai-elements/executors/function-executor-node";
+import { AgentExecutorNode } from "@/components/ai-elements/executors/agent-executor-node";
+import { WorkflowExecutorNode } from "@/components/ai-elements/executors/workflow-executor-node";
+import { RequestInfoExecutorNode } from "@/components/ai-elements/executors/request-info-executor-node";
+
+// Import edge group components
+import { FanInNode } from "@/components/ai-elements/edge-groups/fan-in-node";
+import { FanOutNode } from "@/components/ai-elements/edge-groups/fan-out-node";
+import { SwitchCaseNode } from "@/components/ai-elements/edge-groups/switch-case-node";
+
+// Import workflow builder components
+import { NodeLibrary } from "@/components/workflow-builder/node-library";
+import { PropertiesPanel } from "@/components/workflow-builder/properties-panel";
+import { WorkflowControls } from "@/components/workflow-builder/workflow-controls";
+import { ExportDialog } from "@/components/workflow-builder/export-dialog";
+import { ImportDialog } from "@/components/workflow-builder/import-dialog";
+
+// Import types and utilities
 import type {
   AttributeNodeData,
   TextBlockNodeData,
-  WorkflowNodeData,
   WorkflowStepNodeData,
 } from "@/lib/workflow/types";
 import {
@@ -44,8 +64,17 @@ import {
   defaultTextBlockData,
   defaultWorkflowStepData,
 } from "@/lib/workflow/types";
+import type { WorkflowReactFlowNode, WorkflowNodeData, WorkflowNodeDataWithIndex } from "@/lib/workflow/conversion";
+import {
+  reactFlowToWorkflow,
+  workflowToReactFlow,
+  createExecutorFromNodeType,
+  createNodeDataFromExecutorType,
+} from "@/lib/workflow/conversion";
+import type { Workflow } from "@/lib/workflow/workflow";
+import type { BaseExecutor } from "@/lib/workflow/types";
 
-type WorkflowNode = ReactFlowNode<WorkflowNodeData>;
+type WorkflowNode = WorkflowReactFlowNode;
 type WorkflowEdge = Edge;
 
 const nodeIds = {
@@ -64,89 +93,89 @@ const initialNodes: WorkflowNode[] = [
     id: nodeIds.start,
     type: "workflow",
     position: { x: 0, y: 0 },
-    data: defaultWorkflowStepData({
+    data: { ...defaultWorkflowStepData({
       handles: { target: false, source: true },
       label: "Start",
       description: "Initialize workflow",
       content: "Triggered by user action at 09:30 AM",
       footer: "Status: Ready",
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
   {
     id: nodeIds.process1,
     type: "workflow",
     position: { x: 500, y: 0 },
-    data: defaultWorkflowStepData({
+    data: { ...defaultWorkflowStepData({
       handles: { target: true, source: true },
       label: "Process Data",
       description: "Transform input",
       content: "Validating 1,234 records and applying business rules",
       footer: "Duration: ~2.5s",
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
   {
     id: nodeIds.decision,
     type: "workflow",
     position: { x: 1000, y: 0 },
-    data: defaultWorkflowStepData({
+    data: { ...defaultWorkflowStepData({
       handles: { target: true, source: true },
       label: "Decision Point",
       description: "Route based on conditions",
       content: "Evaluating: data.status === 'valid' && data.score > 0.8",
       footer: "Confidence: 94%",
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
   {
     id: nodeIds.output1,
     type: "workflow",
     position: { x: 1500, y: -300 },
-    data: defaultWorkflowStepData({
+    data: { ...defaultWorkflowStepData({
       handles: { target: true, source: true },
       label: "Success Path",
       description: "Handle success case",
       content: "1,156 records passed validation (93.7%)",
       footer: "Next: Send to production",
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
   {
     id: nodeIds.output2,
     type: "workflow",
     position: { x: 1500, y: 300 },
-    data: defaultWorkflowStepData({
+    data: { ...defaultWorkflowStepData({
       handles: { target: true, source: true },
       label: "Error Path",
       description: "Handle error case",
       content: "78 records failed validation (6.3%)",
       footer: "Next: Queue for review",
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
   {
     id: nodeIds.process2,
     type: "workflow",
     position: { x: 2000, y: 0 },
-    data: defaultWorkflowStepData({
+    data: { ...defaultWorkflowStepData({
       handles: { target: true, source: false },
       label: "Complete",
       description: "Finalize workflow",
       content: "All records processed and routed successfully",
       footer: "Total time: 4.2s",
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
   {
     id: nodeIds.textBlock,
     type: "textBlock",
     position: { x: 600, y: -250 },
-    data: defaultTextBlockData({
+    data: { ...defaultTextBlockData({
       title: "Creative brief",
       placeholder: "Outline the project scope and key messaging",
       showSuggestions: true,
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
   {
     id: nodeIds.attribute,
     type: "attribute",
     position: { x: 600, y: 250 },
-    data: defaultAttributeNodeData({
+    data: { ...defaultAttributeNodeData({
       title: "Generation settings",
       attributes: [
         {
@@ -172,7 +201,7 @@ const initialNodes: WorkflowNode[] = [
           value: 40,
         },
       ],
-    }),
+    }), ...{} } as WorkflowNodeDataWithIndex,
   },
 ];
 
@@ -215,7 +244,7 @@ const initialEdges: WorkflowEdge[] = [
   },
 ];
 
-const WorkflowStepNode = memo(({ id, data }: NodeProps<WorkflowStepNodeData>) => (
+const WorkflowStepNode = memo(({ id, data }: { id: string; data: WorkflowStepNodeData }) => (
   <Node handles={data.handles}>
     <NodeHeader>
       <NodeTitle>{data.label}</NodeTitle>
@@ -244,7 +273,7 @@ const TextBlockWorkflowNode = memo(({
   id,
   data,
   selected,
-}: NodeProps<TextBlockNodeData>) => {
+}: { id: string; data: TextBlockNodeData; selected?: boolean }) => {
   const { handles: _handles, ...cardProps } = data;
   void _handles;
 
@@ -255,7 +284,7 @@ const AttributeWorkflowNode = memo(({
   id,
   data,
   selected,
-}: NodeProps<AttributeNodeData>) => {
+}: { id: string; data: AttributeNodeData; selected?: boolean }) => {
   const { handles: _handles, ...attributeProps } = data;
   void _handles;
 
@@ -264,64 +293,63 @@ const AttributeWorkflowNode = memo(({
   );
 });
 
-const nodeTypes = {
+const nodeTypes: Record<string, React.ComponentType<any>> = {
+  // Legacy node types (kept for backward compatibility)
   workflow: WorkflowStepNode,
   textBlock: TextBlockWorkflowNode,
   attribute: AttributeWorkflowNode,
+  // New executor node types
+  executor: ExecutorNode,
+  "function-executor": FunctionExecutorNode,
+  "agent-executor": AgentExecutorNode,
+  "workflow-executor": WorkflowExecutorNode,
+  "request-info-executor": RequestInfoExecutorNode,
+  // Edge group node types
+  "fan-in": FanInNode,
+  "fan-out": FanOutNode,
+  "switch-case": SwitchCaseNode,
 };
 
 const edgeTypes = {
-  animated: WorkflowEdgeComponent.Animated,
-  temporary: WorkflowEdgeComponent.Temporary,
+  animated: AnimatedEdge,
+  temporary: TemporaryEdge,
 };
 
-type NodeLibraryPanelProps = {
-  onDragStart: (event: DragEvent<HTMLDivElement>, nodeType: string) => void;
-  onAddNode: () => void;
-};
-
-const NodeLibraryPanel = ({
-  onDragStart,
-  onAddNode,
-}: NodeLibraryPanelProps) => (
-  <Panel position="center-left" className="ml-4 w-52 space-y-3 p-3">
-    <div>
-      <h3 className="text-sm font-semibold">Node library</h3>
-      <p className="text-xs text-muted-foreground">Drag onto the canvas</p>
-    </div>
-    <div
-      draggable
-      onDragStart={(event) => onDragStart(event, "workflow")}
-      className="cursor-grab rounded-md border bg-muted p-2 text-sm shadow-sm transition-colors hover:bg-muted/70"
-    >
-      Workflow step
-    </div>
-    <div
-      draggable
-      onDragStart={(event) => onDragStart(event, "textBlock")}
-      className="cursor-grab rounded-md border bg-muted p-2 text-sm shadow-sm transition-colors hover:bg-muted/70"
-    >
-      Text Block
-    </div>
-    <div
-      draggable
-      onDragStart={(event) => onDragStart(event, "attribute")}
-      className="cursor-grab rounded-md border bg-muted p-2 text-sm shadow-sm transition-colors hover:bg-muted/70"
-    >
-      Attribute Node
-    </div>
-    <Button size="sm" className="w-full" onClick={onAddNode}>
-      Add to center
-    </Button>
-  </Panel>
-);
 
 const WorkflowCanvas = () => {
   const [nodes, setNodes, onNodesChange] =
-    useNodesState<WorkflowNode>(initialNodes);
+    useNodesState(initialNodes as any);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const reactFlow = useReactFlow();
   const flowWrapperRef = useRef<HTMLDivElement>(null);
+
+  // State management for new features
+  const [selectedNode, setSelectedNode] = useState<ReactFlowNode<WorkflowNodeDataWithIndex> | null>(null);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
+  // Convert React Flow state to Workflow format
+  const currentWorkflow = useMemo(() => {
+    return reactFlowToWorkflow(nodes as any, edges, "workflow-1", "Multi-Agent Workflow");
+  }, [nodes, edges]);
+
+  // Handle node selection - wrapper to sync selected node state
+  const handleNodesChangeWrapper = useCallback(
+    (changes: Parameters<typeof onNodesChange>[0]) => {
+      onNodesChange(changes);
+      // Update selected node if it was changed
+      if (selectedNode) {
+        const updatedNode = nodes.find((n) => n.id === selectedNode.id);
+        if (updatedNode) {
+          setSelectedNode(updatedNode as ReactFlowNode<WorkflowNodeDataWithIndex>);
+        } else {
+          // Node was deleted
+          setSelectedNode(null);
+        }
+      }
+    },
+    [onNodesChange, selectedNode, nodes]
+  );
 
   const handleConnect = useCallback(
     (connection: Connection) => {
@@ -349,30 +377,43 @@ const WorkflowCanvas = () => {
       });
 
       setNodes((nds) => {
-        let newNode: WorkflowNode;
+        let newNode: ReactFlowNode<WorkflowNodeDataWithIndex>;
 
+        // Handle legacy node types
         if (nodeType === "textBlock") {
           newNode = {
             id: nanoid(),
             type: nodeType,
             position,
-            data: defaultTextBlockData(),
+            data: { ...defaultTextBlockData(), ...{} } as WorkflowNodeDataWithIndex,
           };
         } else if (nodeType === "attribute") {
           newNode = {
             id: nanoid(),
             type: nodeType,
             position,
-            data: defaultAttributeNodeData(),
+            data: { ...defaultAttributeNodeData(), ...{} } as WorkflowNodeDataWithIndex,
           };
-        } else {
+        } else if (nodeType === "workflow") {
           newNode = {
             id: nanoid(),
             type: nodeType,
             position,
-            data: defaultWorkflowStepData({
+            data: { ...defaultWorkflowStepData({
               label: `New Step ${nds.length + 1}`,
-            }),
+            }), ...{} } as WorkflowNodeDataWithIndex,
+          };
+        } else {
+          // Handle new executor types
+          const executorId = nanoid();
+          const executor = createExecutorFromNodeType(nodeType, executorId, `New ${nodeType}`);
+          const nodeData = createNodeDataFromExecutorType(nodeType as any, executor);
+          
+          newNode = {
+            id: executorId,
+            type: nodeType,
+            position,
+            data: { ...nodeData, ...{} } as WorkflowNodeDataWithIndex,
           };
         }
 
@@ -390,37 +431,122 @@ const WorkflowCanvas = () => {
     []
   );
 
-  const handleAddNode = useCallback(() => {
-    if (!flowWrapperRef.current) {
-      return;
-    }
+  const handleAddNode = useCallback(
+    (nodeType: string = "executor") => {
+      if (!flowWrapperRef.current) {
+        return;
+      }
 
-    const bounds = flowWrapperRef.current.getBoundingClientRect();
-    const centerPosition = reactFlow.screenToFlowPosition({
-      x: bounds.left + bounds.width / 2,
-      y: bounds.top + bounds.height / 2,
-    });
+      const bounds = flowWrapperRef.current.getBoundingClientRect();
+      const centerPosition = reactFlow.screenToFlowPosition({
+        x: bounds.left + bounds.width / 2,
+        y: bounds.top + bounds.height / 2,
+      });
 
-    setNodes((nds) => [
-      ...nds,
-      {
-        id: nanoid(),
-        type: "workflow",
-        position: centerPosition,
-        data: defaultWorkflowStepData({
-          label: `New Step ${nds.length + 1}`,
-          description: "Added from panel",
-          content: "Start connecting this step to build out the workflow.",
-        }),
-      },
-    ]);
-  }, [reactFlow, setNodes]);
+      setNodes((nds) => {
+        let newNode: ReactFlowNode<WorkflowNodeDataWithIndex>;
+
+        if (nodeType === "workflow") {
+          newNode = {
+            id: nanoid(),
+            type: nodeType,
+            position: centerPosition,
+            data: { ...defaultWorkflowStepData({
+              label: `New Step ${nds.length + 1}`,
+              description: "Added from panel",
+              content: "Start connecting this step to build out the workflow.",
+            }), ...{} } as WorkflowNodeDataWithIndex,
+          };
+        } else {
+          // Create new executor node
+          const executorId = nanoid();
+          const executor = createExecutorFromNodeType(nodeType, executorId, `New ${nodeType}`);
+          const nodeData = createNodeDataFromExecutorType(nodeType as any, executor);
+          
+          newNode = {
+            id: executorId,
+            type: nodeType,
+            position: centerPosition,
+            data: { ...nodeData, ...{} } as WorkflowNodeDataWithIndex,
+          };
+        }
+
+        return [...nds, newNode];
+      });
+    },
+    [reactFlow, setNodes]
+  );
+
+  // Handle node update from properties panel
+  const handleNodeUpdate = useCallback(
+    (nodeId: string, updates: Partial<BaseExecutor>) => {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === nodeId && isExecutorNode(node as ReactFlowNode<WorkflowNodeDataWithIndex>)) {
+            const currentData = node.data as any;
+            if (currentData.executor) {
+              const updatedExecutor = { ...currentData.executor, ...updates };
+              return {
+                ...node,
+                data: {
+                  ...currentData,
+                  executor: updatedExecutor,
+                  label: updates.label ?? currentData.label,
+                  description: updates.description ?? currentData.description,
+                },
+              };
+            }
+          }
+          return node;
+        })
+      );
+      
+      // Update selected node if it was the one that changed
+      if (selectedNode?.id === nodeId) {
+        const updatedNode = nodes.find((n) => n.id === nodeId);
+        if (updatedNode) {
+          setSelectedNode(updatedNode as ReactFlowNode<WorkflowNodeDataWithIndex>);
+        }
+      }
+    },
+    [setNodes, selectedNode, nodes]
+  );
+
+  // Check if node is an executor node
+  const isExecutorNode = (node: ReactFlowNode<WorkflowNodeDataWithIndex>): boolean => {
+    const data = node.data as any;
+    return (
+      data?.variant === "executor" ||
+      data?.variant === "function-executor" ||
+      data?.variant === "agent-executor" ||
+      data?.variant === "workflow-executor" ||
+      data?.variant === "request-info-executor"
+    );
+  };
+
+  // Handle node selection
+  const handleNodeClick = useCallback(
+    (_event: React.MouseEvent, node: any) => {
+      setSelectedNode(node as ReactFlowNode<WorkflowNodeDataWithIndex>);
+    },
+    []
+  );
+
+  // Handle workflow import
+  const handleImport = useCallback(
+    (importedNodes: any[], importedEdges: Edge[]) => {
+      setNodes(importedNodes as any);
+      setEdges(importedEdges);
+      reactFlow.fitView();
+    },
+    [setNodes, setEdges, reactFlow]
+  );
 
   return (
     <div ref={flowWrapperRef} className="h-full w-full">
       <Canvas
         className="h-full w-full"
-        connectionLineComponent={Connection}
+        connectionLineComponent={ConnectionLine}
         edges={edges}
         edgeTypes={edgeTypes}
         fitView
@@ -431,54 +557,40 @@ const WorkflowCanvas = () => {
         onDrop={handleDrop}
         onEdgesChange={onEdgesChange}
         onNodesChange={onNodesChange}
+        onNodeClick={handleNodeClick}
       >
-        <Panel position="top-left" className="space-y-2 p-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold">Workflow controls</h2>
-            <ThemeToggle />
-          </div>
-          <Actions>
-            <Action
-              tooltip="Fit view to canvas"
-              label="Fit view"
-              onClick={() => reactFlow.fitView()}
-            >
-              <Maximize2 className="size-4" />
-            </Action>
-            <Action
-              tooltip="Zoom in"
-              label="Zoom in"
-              onClick={() => reactFlow.zoomIn()}
-            >
-              <ZoomIn className="size-4" />
-            </Action>
-            <Action
-              tooltip="Zoom out"
-              label="Zoom out"
-              onClick={() => reactFlow.zoomOut()}
-            >
-              <ZoomOut className="size-4" />
-            </Action>
-            <Action
-              tooltip="Reset zoom"
-              label="Reset zoom"
-              onClick={() => {
-                reactFlow.setZoom(1);
-                reactFlow.setCenter(0, 0);
-              }}
-            >
-              <RotateCcw className="size-4" />
-            </Action>
-          </Actions>
-        </Panel>
-        <Panel position="bottom-left" className="m-4">
-          <BottomLeftPromptInput />
-        </Panel>
-        <NodeLibraryPanel
+        <WorkflowControls
+          workflow={currentWorkflow}
+          onExport={() => setExportDialogOpen(true)}
+          onImport={() => setImportDialogOpen(true)}
+        />
+        <NodeLibrary
           onAddNode={handleAddNode}
           onDragStart={handleDragStart}
         />
+            <PropertiesPanel
+              selectedNode={
+                selectedNode
+                  ? {
+                      id: selectedNode.id,
+                      type: selectedNode.type || "executor",
+                      data: selectedNode.data as any,
+                    }
+                  : null
+              }
+              onUpdate={handleNodeUpdate}
+            />
       </Canvas>
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        workflow={currentWorkflow}
+      />
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImport}
+      />
     </div>
   );
 };
