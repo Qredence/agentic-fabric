@@ -154,6 +154,10 @@ export function reactFlowToWorkflow(
       };
 
       if (Object.keys(nodePositions).length > 0) {
+        // For backwards compatibility, node positions are stored in both metadata.custom.nodePositions
+        // and metadata.nodePositions. Older consumers may expect the root-level property, while newer
+        // code should use metadata.custom.nodePositions. Remove the root-level property only after
+        // all consumers have migrated.
         (metadata.custom as Record<string, unknown>).nodePositions = nodePositions;
         (metadata as Record<string, unknown>).nodePositions = nodePositions;
       }

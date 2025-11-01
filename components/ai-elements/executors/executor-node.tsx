@@ -47,8 +47,6 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel(executorType);
-  const executorTypeDescription = getExecutorTypeDescription(executorType);
   const executorTypeName = executorType;
   
   // Get model from executor (for agent executors) or default

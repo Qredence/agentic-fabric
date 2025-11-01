@@ -3,7 +3,7 @@
 import React, { memo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
-import { Info, ChevronDown, ChevronUp, ArrowLeftRight, Code, Settings, FileCode } from "lucide-react";
+import { Info, ChevronDown, ChevronUp, Code, Settings, FileCode } from "lucide-react";
 import type { FunctionExecutor } from "@/lib/workflow/executors";
 import { getExecutorTypeLabel, getExecutorTypeDescription } from "@/lib/workflow/executors";
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
@@ -44,8 +44,6 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.functionName || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel("function-executor");
-  const executorTypeDescription = getExecutorTypeDescription("function-executor");
   const executorTypeName = "function-executor";
   
   // Get model from metadata or default

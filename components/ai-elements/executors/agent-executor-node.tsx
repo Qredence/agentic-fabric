@@ -55,8 +55,6 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   const agentRole = typedExecutor.agentRole || magenticMeta.agentRole;
 
   const displayLabel = label || executor.label || agentRole || executor.agentId || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel("agent-executor");
-  const executorTypeDescription = getExecutorTypeDescription("agent-executor");
   const executorTypeName = "agent-executor";
   
   // Get model from executor or default

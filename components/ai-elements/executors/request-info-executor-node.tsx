@@ -44,8 +44,6 @@ export const RequestInfoExecutorNode = memo(({ id, data, selected }: RequestInfo
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.requestType || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel("request-info-executor");
-  const executorTypeDescription = getExecutorTypeDescription("request-info-executor");
   const executorTypeName = "request-info-executor";
   
   // Get model from metadata or default
