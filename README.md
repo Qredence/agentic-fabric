@@ -1,4 +1,5 @@
 # Agentic Fabric
+![agentic_fabric](https://github.com/user-attachments/assets/3f3dd262-0289-4f7d-abe2-b0a0199a57ed)
 
 A visual workflow builder for orchestrating AI agents and creating complex multi-agent systems. Build sophisticated AI workflows with a drag-and-drop interface, powered by React Flow and Next.js 16.
 
