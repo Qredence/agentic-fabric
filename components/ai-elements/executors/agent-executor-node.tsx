@@ -5,7 +5,7 @@ import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
 import { Info, ChevronDown, ChevronUp, Settings, User, Zap, MessageSquare } from "lucide-react";
 import type { AgentExecutor, ToolReference } from "@/lib/workflow/executors";
-import { getExecutorTypeLabel, getExecutorTypeDescription } from "@/lib/workflow/executors";
+
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**
