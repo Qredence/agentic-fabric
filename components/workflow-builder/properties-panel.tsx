@@ -21,13 +21,11 @@ import {
 } from "@/components/ui/collapsible";
 import {
   Trash2,
-  Copy,
   ExternalLink,
   ChevronDown,
   ChevronUp,
   Pencil,
   Plus,
-  Play,
   BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";

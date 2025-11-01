@@ -11,7 +11,6 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Plus, Bot, Square, ArrowLeftRight, Network, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { MAGENTIC_AGENT_PRESETS } from "@/lib/workflow/magentic-presets";
 import { getExecutorTypeLabel } from "@/lib/workflow/executors";
 import type { XYPosition } from "@xyflow/react";

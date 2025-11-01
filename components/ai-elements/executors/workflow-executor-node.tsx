@@ -44,8 +44,6 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.workflowId || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel("workflow-executor");
-  const executorTypeDescription = getExecutorTypeDescription("workflow-executor");
   const executorTypeName = "workflow-executor";
   
   // Get model from metadata or default
