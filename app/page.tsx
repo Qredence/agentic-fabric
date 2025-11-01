@@ -437,10 +437,7 @@ const createEdgeTypes = (onEdgeHover?: (edgeId: string, position: XYPosition, sc
   temporary: TemporaryEdge,
 });
 
-const edgeTypesBase = {
-  animated: AnimatedEdge,
-  temporary: TemporaryEdge,
-};
+
 
 const WorkflowCanvas = () => {
   const [nodes, setNodes] =
