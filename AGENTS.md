@@ -19,6 +19,7 @@ Defined in `lib/workflow/magentic-presets.ts`. The `MAGENTIC_AGENT_PRESET_MAP` a
 | `web` | Web Surfer Agent | web-surfer | Gathers external facts via browsing and summarisation. | `web-browser`, `http-client` |
 | `file` | File Surfer Agent | file-surfer | Surfaces, previews, and manages files for agent workflows. | `file-browser`, `file-preview` |
 | `coder` | Coder Agent | coder | Writes and executes code to satisfy delegated subtasks. | `hosted-code-interpreter` |
+| `terminal` | Terminal Agent | terminal | Executes shell commands, manages files, and interacts with the system environment. | `terminal-emulator`, `file-manager` |
 | `critic` | Critic Agent | critic | Reviews teammate output for accuracy, completeness, and quality gates. | `analysis-notes` |
 
 Each preset carries a tailored system prompt and capability list that the editor surfaces; choose the preset to auto-populate those defaults or switch to `custom` for free-form configuration.
