@@ -86,7 +86,6 @@ const toolsItems: NodeLibraryItem[] = [
     category: "tools",
     iconColor: "#FBBF24", // Yellow
   },
-  
   {
     id: "function-executor",
     label: "MCP",
