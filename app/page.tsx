@@ -386,6 +386,7 @@ const WorkflowStepNode = memo(({ id, data }: { id: string; data: WorkflowStepNod
     </Toolbar>
   </Node>
 ))
+WorkflowStepNode.displayName = "WorkflowStepNode"
 
 const TextBlockWorkflowNode = memo(
   ({ id, data, selected }: { id: string; data: TextBlockNodeData; selected?: boolean }) => {
@@ -395,6 +396,7 @@ const TextBlockWorkflowNode = memo(
     return <TextBlockCard {...cardProps} data-id={id} isSelected={selected} />
   },
 )
+TextBlockWorkflowNode.displayName = "TextBlockWorkflowNode"
 
 const AttributeWorkflowNode = memo(
   ({ id, data, selected }: { id: string; data: AttributeNodeData; selected?: boolean }) => {
@@ -404,6 +406,7 @@ const AttributeWorkflowNode = memo(
     return <AttributeNode {...attributeProps} data-id={id} isSelected={selected} />
   },
 )
+AttributeWorkflowNode.displayName = "AttributeWorkflowNode"
 
 const nodeTypes: Record<string, React.ComponentType<any>> = {
   // Legacy node types (kept for backward compatibility)
