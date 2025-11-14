@@ -470,7 +470,7 @@ const WorkflowCanvas = () => {
     (newNodes: any[], newEdges: Edge[]) => {
       setHistory((prev) => {
         const newHistory = prev.slice(0, historyIndex + 1)
-        newHistory.push({ nodes: JSON.parse(JSON.stringify(newNodes)), edges: JSON.parse(JSON.stringify(newEdges)) })
+        newHistory.push({ nodes: structuredClone(newNodes), edges: structuredClone(newEdges) })
         return newHistory.slice(-50) // Keep last 50 states
       })
       setHistoryIndex((prev) => Math.min(prev + 1, 49))
