@@ -5,7 +5,6 @@ import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
 import { Info, ChevronDown, ChevronUp, UserCheck, Globe, MessageSquare } from "lucide-react";
 import type { RequestInfoExecutor } from "@/lib/workflow/executors";
-import { getExecutorTypeLabel, getExecutorTypeDescription } from "@/lib/workflow/executors";
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**
@@ -44,8 +43,6 @@ export const RequestInfoExecutorNode = memo(({ id, data, selected }: RequestInfo
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.requestType || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel("request-info-executor");
-  const executorTypeDescription = getExecutorTypeDescription("request-info-executor");
   const executorTypeName = "request-info-executor";
   
   // Get model from metadata or default

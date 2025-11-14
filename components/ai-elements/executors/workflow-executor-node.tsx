@@ -5,7 +5,6 @@ import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
 import { Info, ChevronDown, ChevronUp, Square, ArrowRightLeft, List } from "lucide-react";
 import type { WorkflowExecutor } from "@/lib/workflow/executors";
-import { getExecutorTypeLabel, getExecutorTypeDescription } from "@/lib/workflow/executors";
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**
@@ -44,8 +43,6 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.workflowId || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel("workflow-executor");
-  const executorTypeDescription = getExecutorTypeDescription("workflow-executor");
   const executorTypeName = "workflow-executor";
   
   // Get model from metadata or default

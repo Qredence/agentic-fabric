@@ -5,7 +5,6 @@ import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
 import { Info, ChevronDown, ChevronUp, Settings, User, Zap, MessageSquare } from "lucide-react";
 import type { AgentExecutor, ToolReference } from "@/lib/workflow/executors";
-import { getExecutorTypeLabel, getExecutorTypeDescription } from "@/lib/workflow/executors";
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**
@@ -55,8 +54,6 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   const agentRole = typedExecutor.agentRole || magenticMeta.agentRole;
 
   const displayLabel = label || executor.label || agentRole || executor.agentId || executor.id;
-  const executorTypeLabel = getExecutorTypeLabel("agent-executor");
-  const executorTypeDescription = getExecutorTypeDescription("agent-executor");
   const executorTypeName = "agent-executor";
   
   // Get model from executor or default
