@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfabric.example/schema/executor/base-executor/v1",
+  "allOf": [
+    { "$ref": "https://agenticfabric.example/schema/executor/base-props/v1" },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "executor" },
+        "handler": { "type": ["string", "null"] }
+      },
+      "required": ["type"]
+    }
+  ]
+}

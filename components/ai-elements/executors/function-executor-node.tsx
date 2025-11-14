@@ -3,9 +3,8 @@
 import React, { memo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
-import { Info, ChevronDown, ChevronUp, Code, Settings, FileCode } from "lucide-react";
+import { Info, ChevronDown, ChevronUp, ArrowLeftRight, Code, Settings, FileCode } from "lucide-react";
 import type { FunctionExecutor } from "@/lib/workflow/executors";
-
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**

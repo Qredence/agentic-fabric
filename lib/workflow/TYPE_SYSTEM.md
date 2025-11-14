@@ -22,23 +22,23 @@ Additionally, the framework includes:
 ## 1. Base Types (`lib/workflow/types.ts`)
 
 ### Core Identifiers
-```typescript
+\`\`\`typescript
 type ExecutorId = string;
 type EdgeId = string;
-```
+\`\`\`
 
 ### Base Executor
-```typescript
+\`\`\`typescript
 interface BaseExecutor {
   id: ExecutorId;
   type: string;
   label?: string;
   description?: string;
 }
-```
+\`\`\`
 
 ### Base Edge
-```typescript
+\`\`\`typescript
 interface BaseEdge {
   id: EdgeId;
   source: ExecutorId;
@@ -52,10 +52,10 @@ type EdgeCondition = {
   expression?: string;
   caseValue?: string;
 };
-```
+\`\`\`
 
 ### Base Message
-```typescript
+\`\`\`typescript
 interface BaseMessage {
   id: string;
   type: string;
@@ -66,10 +66,10 @@ interface BaseMessage {
 }
 
 type MessageRole = "system" | "user" | "assistant" | "tool";
-```
+\`\`\`
 
 ### Workflow Context
-```typescript
+\`\`\`typescript
 interface WorkflowContext<T extends BaseMessage = BaseMessage> {
   executorId: ExecutorId;
   messages: T[];
@@ -79,10 +79,10 @@ interface WorkflowContext<T extends BaseMessage = BaseMessage> {
   getState: <K extends keyof SharedState>(key: K) => SharedState[K] | undefined;
   setState: <K extends keyof SharedState>(key: K, value: SharedState[K]) => void;
 }
-```
+\`\`\`
 
 ### Edge Groups
-```typescript
+\`\`\`typescript
 interface BaseEdgeGroup {
   id: string;
   type: EdgeGroupType;
@@ -90,14 +90,14 @@ interface BaseEdgeGroup {
 }
 
 type EdgeGroupType = "single" | "fan-in" | "fan-out" | "switch-case";
-```
+\`\`\`
 
 ---
 
 ## 2. Executors (`lib/workflow/executors.ts`)
 
 ### Executor Types
-```typescript
+\`\`\`typescript
 // Base executor type
 type Executor = BaseExecutor;
 
@@ -152,10 +152,10 @@ interface MagenticOrchestratorExecutor extends BaseExecutor {
   type: "magentic-orchestrator-executor";
   workflowType: string;
 }
-```
+\`\`\`
 
 ### Executor Union Type
-```typescript
+\`\`\`typescript
 type ExecutorType =
   | "executor"
   | "function-executor"
@@ -164,22 +164,22 @@ type ExecutorType =
   | "request-info-executor"
   | "magentic-agent-executor"
   | "magentic-orchestrator-executor";
-```
+\`\`\`
 
 ---
 
 ## 3. Edge Groups (`lib/workflow/edges.ts`)
 
 ### Single Edge Group
-```typescript
+\`\`\`typescript
 interface SingleEdgeGroup extends BaseEdgeGroup {
   type: "single";
   edge: BaseEdge;
 }
-```
+\`\`\`
 
 ### Fan-In Edge Group
-```typescript
+\`\`\`typescript
 interface FanInEdgeGroup extends BaseEdgeGroup {
   type: "fan-in";
   sources: ExecutorId[];
@@ -188,10 +188,10 @@ interface FanInEdgeGroup extends BaseEdgeGroup {
   aggregationStrategy: "merge" | "concat" | "first" | "last";
   customAggregator?: string;
 }
-```
+\`\`\`
 
 ### Fan-Out Edge Group
-```typescript
+\`\`\`typescript
 interface FanOutEdgeGroup extends BaseEdgeGroup {
   type: "fan-out";
   source: ExecutorId;
@@ -199,10 +199,10 @@ interface FanOutEdgeGroup extends BaseEdgeGroup {
   edges: BaseEdge[];
   broadcastMode: "parallel" | "sequential";
 }
-```
+\`\`\`
 
 ### Switch-Case Edge Group
-```typescript
+\`\`\`typescript
 interface SwitchCaseEdgeGroup extends BaseEdgeGroup {
   type: "switch-case";
   source: ExecutorId;
@@ -222,23 +222,23 @@ interface Default {
   target: ExecutorId;
   edge: BaseEdge;
 }
-```
+\`\`\`
 
 ### Edge Group Union
-```typescript
+\`\`\`typescript
 type EdgeGroup =
   | SingleEdgeGroup
   | FanInEdgeGroup
   | FanOutEdgeGroup
   | SwitchCaseEdgeGroup;
-```
+\`\`\`
 
 ---
 
 ## 4. Messages (`lib/workflow/messages.ts`)
 
 ### Chat Message
-```typescript
+\`\`\`typescript
 interface ChatMessage extends BaseMessage {
   type: "chat";
   role: MessageRole;
@@ -250,10 +250,10 @@ type ChatContent = {
   value: string;
   metadata?: Record<string, unknown>;
 };
-```
+\`\`\`
 
 ### Request Info Message
-```typescript
+\`\`\`typescript
 interface RequestInfoMessage extends BaseMessage {
   type: "request-info";
   requestType: string;
@@ -268,10 +268,10 @@ interface RequestResponse<T = unknown> {
   error?: ErrorResponse;
   timestamp: string;
 }
-```
+\`\`\`
 
 ### Magentic Messages
-```typescript
+\`\`\`typescript
 interface MagenticRequestMessage extends BaseMessage {
   type: "magentic-request";
   action: string;
@@ -292,10 +292,10 @@ interface MagenticStartMessage extends BaseMessage {
   initialData: unknown;
   parameters?: Record<string, unknown>;
 }
-```
+\`\`\`
 
 ### Message Union
-```typescript
+\`\`\`typescript
 type WorkflowMessage =
   | ChatMessage
   | RequestInfoMessage
@@ -303,14 +303,14 @@ type WorkflowMessage =
   | MagenticResponseMessage
   | MagenticStartMessage
   | BaseMessage;
-```
+\`\`\`
 
 ---
 
 ## 5. Content (`lib/workflow/content.ts`)
 
 ### Content Types
-```typescript
+\`\`\`typescript
 interface BaseContent {
   type: string;
   metadata?: Record<string, unknown>;
@@ -392,10 +392,10 @@ interface UsageContent extends BaseContent {
   completionTokens?: number;
   totalTokens?: number;
 }
-```
+\`\`\`
 
 ### Content Union
-```typescript
+\`\`\`typescript
 type WorkflowContent =
   | TextContent
   | TextReasoningContent
@@ -409,24 +409,24 @@ type WorkflowContent =
   | HostedFileContent
   | HostedVectorStoreContent
   | UsageContent;
-```
+\`\`\`
 
 ---
 
 ## 6. Events (`lib/workflow/events.ts`)
 
 ### Base Event
-```typescript
+\`\`\`typescript
 interface BaseEvent {
   id: string;
   type: string;
   timestamp: string;
   metadata?: Record<string, unknown>;
 }
-```
+\`\`\`
 
 ### Workflow Events
-```typescript
+\`\`\`typescript
 interface WorkflowStartedEvent extends BaseEvent {
   type: "workflow-started";
   workflowId: string;
@@ -458,10 +458,10 @@ interface RequestInfoEvent extends BaseEvent {
   requestData: unknown;
   correlationId: string;
 }
-```
+\`\`\`
 
 ### Executor Events
-```typescript
+\`\`\`typescript
 interface BaseExecutorEvent extends BaseEvent {
   executorId: ExecutorId;
   workflowId: string;
@@ -487,10 +487,10 @@ interface ExecutorFailedEvent extends BaseExecutorEvent {
     details?: unknown;
   };
 }
-```
+\`\`\`
 
 ### Agent Events
-```typescript
+\`\`\`typescript
 interface AgentRunEvent extends BaseEvent {
   type: "agent-run";
   agentId: string;
@@ -536,10 +536,10 @@ interface MagenticFinalResultEvent extends BaseEvent {
   workflowId: string;
   result: unknown;
 }
-```
+\`\`\`
 
 ### Event Union
-```typescript
+\`\`\`typescript
 type WorkflowEvent =
   | WorkflowStartedEvent
   | WorkflowFailedEvent
@@ -554,14 +554,14 @@ type WorkflowEvent =
   | MagenticAgentDeltaEvent
   | MagenticOrchestratorMessageEvent
   | MagenticFinalResultEvent;
-```
+\`\`\`
 
 ---
 
 ## 7. Agents (`lib/workflow/agent.ts`)
 
 ### Agent Protocol
-```typescript
+\`\`\`typescript
 interface AgentProtocol {
   id: string;
   name: string;
@@ -582,20 +582,20 @@ interface AgentRunOptions {
   stream?: boolean;
   metadata?: Record<string, unknown>;
 }
-```
+\`\`\`
 
 ### Base Agent
-```typescript
+\`\`\`typescript
 interface BaseAgent extends AgentProtocol {
   type?: "base-agent";
   contextProviders?: ContextProvider[];
   middleware?: AgentMiddleware[];
   thread?: AgentThread;
 }
-```
+\`\`\`
 
 ### Chat Agent
-```typescript
+\`\`\`typescript
 interface ChatAgent extends Omit<BaseAgent, "type"> {
   type: "chat-agent";
   chatClient: ChatClientProtocol;
@@ -617,29 +617,29 @@ interface ChatClientProtocol {
     options?: ChatOptions
   ) => AsyncIterable<ChatResponseUpdate>;
 }
-```
+\`\`\`
 
 ### Workflow Agent
-```typescript
+\`\`\`typescript
 interface WorkflowAgent extends Omit<BaseAgent, "type"> {
   type: "workflow-agent";
   workflow: WorkflowDefinition;
   inputAdapter?: (messages: unknown[]) => unknown[];
   outputAdapter?: (output: unknown[]) => unknown[];
 }
-```
+\`\`\`
 
 ### Agent Union
-```typescript
+\`\`\`typescript
 type WorkflowAgentType = BaseAgent | ChatAgent | WorkflowAgent;
-```
+\`\`\`
 
 ---
 
 ## 8. Tools (`lib/workflow/tools.ts`)
 
 ### Tool Protocol
-```typescript
+\`\`\`typescript
 interface ToolProtocol {
   id: string;
   name: string;
@@ -656,10 +656,10 @@ interface ToolParameter {
   enum?: (string | number)[];
   default?: unknown;
 }
-```
+\`\`\`
 
 ### AI Function
-```typescript
+\`\`\`typescript
 interface AIFunction<TArgs = Record<string, unknown>, TReturn = unknown> {
   id: string;
   name: string;
@@ -673,10 +673,10 @@ interface JSONSchema {
   properties: Record<string, JSONSchemaProperty>;
   required?: string[];
 }
-```
+\`\`\`
 
 ### Hosted Tools
-```typescript
+\`\`\`typescript
 interface HostedCodeInterpreterTool {
   id: string;
   type: "hosted-code-interpreter";
@@ -718,10 +718,10 @@ interface HostedMCPTool {
   toolName: string;
   parameters?: Record<string, unknown>;
 }
-```
+\`\`\`
 
 ### MCP Tools
-```typescript
+\`\`\`typescript
 interface MCPStdioTool {
   id: string;
   type: "mcp-stdio";
@@ -754,10 +754,10 @@ interface MCPWebsocketTool {
   toolName: string;
   reconnectInterval?: number;
 }
-```
+\`\`\`
 
 ### Tool Union
-```typescript
+\`\`\`typescript
 type WorkflowTool =
   | ToolProtocol
   | AIFunction
@@ -768,14 +768,14 @@ type WorkflowTool =
   | MCPStdioTool
   | MCPStreamableHTTPTool
   | MCPWebsocketTool;
-```
+\`\`\`
 
 ---
 
 ## 9. Workflows (`lib/workflow/workflow.ts`)
 
 ### Workflow Definition
-```typescript
+\`\`\`typescript
 interface Workflow {
   id: string;
   name: string;
@@ -802,10 +802,10 @@ interface WorkflowState {
   currentExecutors?: ExecutorId[];
   sharedState?: SharedState;
 }
-```
+\`\`\`
 
 ### Workflow Builder
-```typescript
+\`\`\`typescript
 class WorkflowBuilder {
   workflow: Workflow;
   
@@ -815,7 +815,7 @@ class WorkflowBuilder {
   setMetadata(metadata: WorkflowMetadata): this;
   build(): Workflow;
 }
-```
+\`\`\`
 
 ---
 
@@ -847,4 +847,3 @@ Helper functions throughout the system:
 
 - [Microsoft Agent Framework Documentation](https://learn.microsoft.com/en-us/agent-framework/user-guide/workflows/core-concepts/overview)
 - [Agent Framework GitHub Repository](https://github.com/microsoft/agent-framework)
-

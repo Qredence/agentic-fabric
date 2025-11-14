@@ -106,4 +106,3 @@ export const SwitchCaseNode = memo(({ id, data, selected }: SwitchCaseNodeProps)
 });
 
 SwitchCaseNode.displayName = "SwitchCaseNode";
-

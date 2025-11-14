@@ -170,13 +170,6 @@ export const TemporaryEdge = ({
 };
 
 /**
- * Props for AnimatedEdge component
- */
-interface AnimatedEdgeProps extends EdgeProps {
-  onHover?: (position: { x: number; y: number }, screenPosition: { x: number; y: number }) => void;
-}
-
-/**
  * Animated Edge Component
  * - Includes a moving circle indicator along the path
  * - Smooth Bezier curve connection
@@ -197,7 +190,9 @@ export const AnimatedEdge = ({
   sourcePosition,
   targetPosition,
   onHover,
-}: AnimatedEdgeProps) => {
+}: EdgeProps & {
+  onHover?: (position: { x: number; y: number }, screenPosition: { x: number; y: number }) => void;
+}) => {
   const sourceNode = source ? useInternalNode(source) : null;
   const targetNode = target ? useInternalNode(target) : null;
   const [isHovered, setIsHovered] = React.useState(false);

@@ -204,4 +204,3 @@ export function isAgentEvent(event: BaseEvent): event is AgentRunEvent | AgentRu
 export function isMagenticEvent(event: BaseEvent): boolean {
   return event.type.startsWith("magentic-");
 }
-

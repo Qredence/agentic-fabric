@@ -101,4 +101,3 @@ export const FanInNode = memo(({ id, data, selected }: FanInNodeProps) => {
 });
 
 FanInNode.displayName = "FanInNode";
-

@@ -1,35 +1,17 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
-import { Panel } from "@/components/ai-elements/panel";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Trash2,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  Pencil,
-  Plus,
-  BookOpen,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { BaseExecutor } from "@/lib/workflow/types";
+import { useState } from "react"
+import { Panel } from "@/components/ai-elements/panel"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Trash2, ExternalLink, ChevronDown, ChevronUp, Pencil, Plus, BookOpen } from "lucide-react"
+import { cn } from "@/lib/utils"
+import type { BaseExecutor } from "@/lib/workflow/types"
 import type {
   FunctionExecutor,
   AgentExecutor,
@@ -37,126 +19,120 @@ import type {
   RequestInfoExecutor,
   MagenticAgentExecutor,
   MagenticOrchestratorExecutor,
-} from "@/lib/workflow/executors";
-import { FunctionExecutorEditor } from "./executor-editors/function-executor-editor";
-import { AgentExecutorEditor } from "./executor-editors/agent-executor-editor";
-import { WorkflowExecutorEditor } from "./executor-editors/workflow-executor-editor";
-import { RequestInfoExecutorEditor } from "./executor-editors/request-info-executor-editor";
-import { MagenticAgentExecutorEditor } from "./executor-editors/magentic-agent-executor-editor";
-import { MagenticOrchestratorExecutorEditor } from "./executor-editors/magentic-orchestrator-executor-editor";
+} from "@/lib/workflow/executors"
+import { FunctionExecutorEditor } from "./executor-editors/function-executor-editor"
+import { AgentExecutorEditor } from "./executor-editors/agent-executor-editor"
+import { WorkflowExecutorEditor } from "./executor-editors/workflow-executor-editor"
+import { RequestInfoExecutorEditor } from "./executor-editors/request-info-executor-editor"
+import { MagenticAgentExecutorEditor } from "./executor-editors/magentic-agent-executor-editor"
+import { MagenticOrchestratorExecutorEditor } from "./executor-editors/magentic-orchestrator-executor-editor"
 
 interface PropertiesPanelProps {
   selectedNode: {
-    id: string;
-    type: string;
+    id: string
+    type: string
     data: {
-      executor?: BaseExecutor;
-      executorType?: string;
-      label?: string;
-      description?: string;
-    };
-  } | null;
-  onUpdate: (nodeId: string, updates: Partial<BaseExecutor>) => void;
-  onDelete?: (nodeId: string) => void;
-  onDuplicate?: (nodeId: string) => void;
-  onEvaluate?: (nodeId: string) => void;
+      executor?: BaseExecutor
+      executorType?: string
+      label?: string
+      description?: string
+    }
+  } | null
+  onUpdate: (nodeId: string, updates: Partial<BaseExecutor>) => void
+  onDelete?: (nodeId: string) => void
+  onDuplicate?: (nodeId: string) => void
+  onEvaluate?: (nodeId: string) => void
 }
 
-export function PropertiesPanel({
-  selectedNode,
-  onUpdate,
-  onDelete,
-  onDuplicate,
-  onEvaluate,
-}: PropertiesPanelProps) {
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const [includeChatHistory, setIncludeChatHistory] = useState(true);
-  const [verbosity, setVerbosity] = useState("medium");
-  const [summary, setSummary] = useState("auto");
-  const [displayResponseInChat, setDisplayResponseInChat] = useState(true);
-  const [showInProgressMessages, setShowInProgressMessages] = useState(true);
-  const [showSearchSources, setShowSearchSources] = useState(true);
-  const [continueOnError, setContinueOnError] = useState(false);
-  const [writeToConversationHistory, setWriteToConversationHistory] = useState(true);
+export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate, onEvaluate }: PropertiesPanelProps) {
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
+  const [includeChatHistory, setIncludeChatHistory] = useState(true)
+  const [verbosity, setVerbosity] = useState("medium")
+  const [summary, setSummary] = useState("auto")
+  const [continueOnError, setContinueOnError] = useState(false)
+  const [writeToConversationHistory, setWriteToConversationHistory] = useState(true)
 
   if (!selectedNode || !selectedNode.data.executor) {
     return (
-      <Panel position="center-right" className="mr-4 w-[400px] p-4">
+      <Panel
+        position="center-right"
+        className="mr-4 w-[min(100%,480px)] p-0"
+        role="region"
+        aria-label="Properties Panel"
+      >
         <div className="text-sm text-muted-foreground text-center py-8">
           Select a node to view and edit its properties
         </div>
       </Panel>
-    );
+    )
   }
 
-  const executor = selectedNode.data.executor;
-  const executorType = selectedNode.data.executorType || executor.type;
-  const nodeLabel = selectedNode.data.label || executor.label || executor.id;
-  const nodeDescription =
-    selectedNode.data.description ||
-    executor.description ||
-    "Configure the executor settings";
+  const executor = selectedNode.data.executor
+  const executorType = selectedNode.data.executorType || executor.type
+  const nodeLabel = selectedNode.data.label || executor.label || executor.id
+  const nodeDescription = selectedNode.data.description || executor.description || "Configure the executor settings"
 
   const handleChange = (field: keyof BaseExecutor, value: unknown) => {
-    onUpdate(selectedNode.id, { [field]: value } as Partial<BaseExecutor>);
-  };
+    onUpdate(selectedNode.id, { [field]: value } as Partial<BaseExecutor>)
+  }
 
   const handleExecutorChange = (updates: Partial<BaseExecutor>) => {
-    onUpdate(selectedNode.id, updates);
-  };
+    onUpdate(selectedNode.id, updates)
+  }
 
   const handleNameChange = (value: string) => {
-    onUpdate(selectedNode.id, { label: value } as Partial<BaseExecutor>);
-  };
+    onUpdate(selectedNode.id, { label: value } as Partial<BaseExecutor>)
+  }
 
   const handleInstructionsChange = (value: string) => {
+    const agentExecutor = executor as AgentExecutor
     // Check executorType instead of checking if systemPrompt property exists
     // This handles both preset-based and newly created agent executors
     if (executorType === "agent-executor" || executorType === "magentic-agent-executor") {
       onUpdate(selectedNode.id, {
         systemPrompt: value,
-      } as Partial<BaseExecutor>);
+      } as Partial<BaseExecutor>)
     } else if (executorType === "magentic-orchestrator-executor") {
       // For orchestrator, instructions might be stored differently
-      handleChange("description" as keyof BaseExecutor, value);
+      handleChange("description" as keyof BaseExecutor, value)
     }
-  };
+  }
 
   const getInstructionsValue = (): string => {
-    const agentExecutor = executor as AgentExecutor;
+    const agentExecutor = executor as AgentExecutor
     return (
       (agentExecutor as any).systemPrompt ||
       (agentExecutor as any).instructions ||
       executor.description ||
       "You are a helpful assistant."
-    );
-  };
+    )
+  }
 
   return (
     <Panel
       position="center-right"
       className={cn(
-        "mr-4 w-[400px] p-0",
+        "mr-4 w-[min(100%,480px)] p-0",
         "max-h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col"
       )}
+      role="region"
+      aria-labelledby={`panel-title-${selectedNode.id}`}
     >
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
         {/* Header Section */}
-        <div className="space-y-1 border-b border-border pb-4">
+        <div className="space-y-1 border-b border-border bg-secondary rounded-t-md px-4 py-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold text-foreground truncate">
+              <h2 id={`panel-title-${selectedNode.id}`} className="text-lg font-semibold text-foreground truncate">
                 {nodeLabel}
               </h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {nodeDescription}
-              </p>
+              <p className="text-sm text-muted-foreground mt-0.5">{nodeDescription}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors duration-200 ease-out"
                 title="Documentation"
               >
                 <BookOpen className="h-4 w-4" />
@@ -164,7 +140,7 @@ export function PropertiesPanel({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors duration-200 ease-out"
                 onClick={() => onDelete?.(selectedNode.id)}
                 title="Delete node"
               >
@@ -219,10 +195,7 @@ export function PropertiesPanel({
               Include chat history
             </Label>
             <div className="flex items-center h-[34px]">
-              <Switch
-                checked={includeChatHistory}
-                onCheckedChange={setIncludeChatHistory}
-              />
+              <Switch checked={includeChatHistory} onCheckedChange={setIncludeChatHistory} />
             </div>
           </div>
 
@@ -233,9 +206,7 @@ export function PropertiesPanel({
             </Label>
             <Select
               value={(executor as AgentExecutor).model || "gpt-5"}
-              onValueChange={(value) =>
-                handleChange("model" as keyof BaseExecutor, value)
-              }
+              onValueChange={(value) => handleChange("model" as keyof BaseExecutor, value)}
             >
               <SelectTrigger id="model-select" className="w-[140px]">
                 <SelectValue />
@@ -267,11 +238,12 @@ export function PropertiesPanel({
 
           {/* Tools field */}
           <div className="flex items-center justify-between h-[34px]">
-            <Label htmlFor="tools" className="text-sm font-normal">Tools</Label>
+            <Label htmlFor="tools" className="text-sm font-normal">
+              Tools
+            </Label>
             <div className="flex items-center gap-2 h-[34px]">
               <div className="px-3 h-[34px] flex items-center rounded-md border bg-muted/50 text-sm text-muted-foreground min-w-[140px] text-right">
-                {Array.isArray((executor as AgentExecutor).tools) &&
-                (executor as AgentExecutor).tools?.length > 0
+                {Array.isArray((executor as AgentExecutor).tools) && (executor as AgentExecutor).tools?.length > 0
                   ? `${(executor as AgentExecutor).tools.length} tool(s) configured`
                   : "No tools configured"}
               </div>
@@ -301,9 +273,7 @@ export function PropertiesPanel({
 
         {/* Model Parameters Section */}
         <div className="space-y-3 pt-2 border-t border-border">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Model parameters
-          </h3>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Model parameters</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between h-[34px]">
               <Label htmlFor="verbosity-select" className="text-sm font-normal">
@@ -338,63 +308,17 @@ export function PropertiesPanel({
           </div>
         </div>
 
-        {/* ChatKit Section */}
-        <div className="space-y-3 pt-2 border-t border-border">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            ChatKit
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between h-[34px]">
-              <Label htmlFor="display-response" className="text-sm font-normal">
-                Display response in chat
-              </Label>
-              <div className="flex items-center h-[34px]">
-                <Switch
-                  checked={displayResponseInChat}
-                  onCheckedChange={setDisplayResponseInChat}
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-between h-[34px]">
-              <Label htmlFor="in-progress-messages" className="text-sm font-normal">
-                Show in-progress messages
-              </Label>
-              <div className="flex items-center h-[34px]">
-                <Switch
-                  checked={showInProgressMessages}
-                  onCheckedChange={setShowInProgressMessages}
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-between h-[34px]">
-              <Label htmlFor="search-sources" className="text-sm font-normal">
-                Show search sources
-              </Label>
-              <div className="flex items-center h-[34px]">
-                <Switch
-                  checked={showSearchSources}
-                  onCheckedChange={setShowSearchSources}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Advanced Section */}
         <div className="space-y-3 pt-2 border-t border-border">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Advanced
-          </h3>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Advanced</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between h-[34px]">
               <Label htmlFor="continue-error" className="text-sm font-normal">
                 Continue on error
               </Label>
               <div className="flex items-center h-[34px]">
-                <Switch
-                  checked={continueOnError}
-                  onCheckedChange={setContinueOnError}
-                />
+                <Switch checked={continueOnError} onCheckedChange={setContinueOnError} />
               </div>
             </div>
             <div className="flex items-center justify-between h-[34px]">
@@ -402,10 +326,7 @@ export function PropertiesPanel({
                 Write to conversation history
               </Label>
               <div className="flex items-center h-[34px]">
-                <Switch
-                  checked={writeToConversationHistory}
-                  onCheckedChange={setWriteToConversationHistory}
-                />
+                <Switch checked={writeToConversationHistory} onCheckedChange={setWriteToConversationHistory} />
               </div>
             </div>
           </div>
@@ -424,70 +345,40 @@ export function PropertiesPanel({
           <CollapsibleContent className="space-y-3 pt-2">
             <div className="space-y-2">
               <Label htmlFor="executor-id">Executor ID</Label>
-              <Input
-                id="executor-id"
-                value={executor.id}
-                disabled
-                className="font-mono text-xs bg-muted"
-              />
+              <Input id="executor-id" value={executor.id} disabled className="font-mono text-xs bg-muted" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="executor-type">Type</Label>
-              <Input
-                id="executor-type"
-                value={executorType}
-                disabled
-                className="font-mono text-xs bg-muted"
-              />
+              <Input id="executor-type" value={executorType} disabled className="font-mono text-xs bg-muted" />
             </div>
             {/* Type-specific editors */}
             {executorType === "function-executor" && (
-              <FunctionExecutorEditor
-                executor={executor as FunctionExecutor}
-                onChange={handleExecutorChange}
-              />
+              <FunctionExecutorEditor executor={executor as FunctionExecutor} onChange={handleExecutorChange} />
             )}
 
             {executorType === "agent-executor" && (
-              <AgentExecutorEditor
-                executor={executor as AgentExecutor}
-                onChange={handleExecutorChange}
-              />
+              <AgentExecutorEditor executor={executor as AgentExecutor} onChange={handleExecutorChange} />
             )}
 
             {executorType === "magentic-agent-executor" && (
               <MagenticAgentExecutorEditor
                 executor={executor as MagenticAgentExecutor}
-                onChange={
-                  handleExecutorChange as (
-                    updates: Partial<MagenticAgentExecutor>
-                  ) => void
-                }
+                onChange={handleExecutorChange as (updates: Partial<MagenticAgentExecutor>) => void}
               />
             )}
 
             {executorType === "workflow-executor" && (
-              <WorkflowExecutorEditor
-                executor={executor as WorkflowExecutor}
-                onChange={handleExecutorChange}
-              />
+              <WorkflowExecutorEditor executor={executor as WorkflowExecutor} onChange={handleExecutorChange} />
             )}
 
             {executorType === "request-info-executor" && (
-              <RequestInfoExecutorEditor
-                executor={executor as RequestInfoExecutor}
-                onChange={handleExecutorChange}
-              />
+              <RequestInfoExecutorEditor executor={executor as RequestInfoExecutor} onChange={handleExecutorChange} />
             )}
 
             {executorType === "magentic-orchestrator-executor" && (
               <MagenticOrchestratorExecutorEditor
                 executor={executor as MagenticOrchestratorExecutor}
-                onChange={
-                  handleExecutorChange as (
-                    updates: Partial<MagenticOrchestratorExecutor>
-                  ) => void
-                }
+                onChange={handleExecutorChange as (updates: Partial<MagenticOrchestratorExecutor>) => void}
               />
             )}
           </CollapsibleContent>
@@ -495,12 +386,12 @@ export function PropertiesPanel({
       </div>
 
       {/* Bottom Actions - Footer */}
-      <div className="border-t border-border p-4 flex items-center justify-between">
+      <div className="border-t border-border bg-secondary px-4 py-3 flex items-center justify-between">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setIsMoreOpen(!isMoreOpen)}
-          className="text-sm text-muted-foreground hover:text-foreground gap-2"
+          className="text-sm text-muted-foreground hover:text-foreground gap-2 transition-colors duration-200 ease-out"
         >
           {isMoreOpen ? (
             <>
@@ -518,12 +409,12 @@ export function PropertiesPanel({
           variant="ghost"
           size="sm"
           onClick={() => onEvaluate?.(selectedNode.id)}
-          className="text-sm text-foreground hover:text-foreground gap-2"
+          className="text-sm text-foreground hover:text-foreground gap-2 transition-colors duration-200 ease-out"
         >
           Evaluate
           <ExternalLink className="h-4 w-4" />
         </Button>
       </div>
     </Panel>
-  );
+  )
 }

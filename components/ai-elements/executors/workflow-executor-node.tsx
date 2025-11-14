@@ -5,7 +5,6 @@ import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
 import { Info, ChevronDown, ChevronUp, Square, ArrowRightLeft, List } from "lucide-react";
 import type { WorkflowExecutor } from "@/lib/workflow/executors";
-// Removed unused imports getExecutorTypeLabel, getExecutorTypeDescription
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**

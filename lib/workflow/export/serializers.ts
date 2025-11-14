@@ -280,4 +280,3 @@ export function downloadWorkflow(
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
-

@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { Info, ChevronDown, ChevronUp, Settings, Activity, UserCheck } from "lucide-react";
 import type { BaseExecutor } from "@/lib/workflow/types";
 import type { ExecutorType } from "@/lib/workflow/executors";
-
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**

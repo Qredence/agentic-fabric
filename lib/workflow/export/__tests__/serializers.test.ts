@@ -144,4 +144,3 @@ describe("Workflow Serializers", () => {
     });
   });
 });
-

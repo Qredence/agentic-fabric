@@ -23,6 +23,11 @@ export interface BaseExecutor {
   label?: string;
   description?: string;
   metadata?: Record<string, unknown>;
+  version?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  acl?: Acl;
+  status?: StatusFlag;
 }
 
 /**
@@ -34,6 +39,11 @@ export interface BaseEdge {
   target: ExecutorId;
   condition?: EdgeCondition;
   metadata?: Record<string, unknown>;
+  version?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  acl?: Acl;
+  status?: StatusFlag;
 }
 
 /**
@@ -98,6 +108,15 @@ export type EdgeGroupType =
   | "fan-in"
   | "fan-out"
   | "switch-case";
+
+export type StatusFlag = "draft" | "active" | "disabled" | "deprecated";
+
+export interface Acl {
+  owner: string;
+  read?: string[];
+  write?: string[];
+  roles?: string[];
+}
 
 /**
  * Finish reason for chat responses

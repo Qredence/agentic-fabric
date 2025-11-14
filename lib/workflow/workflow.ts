@@ -393,4 +393,3 @@ export function workflowDefinitionToWorkflow(
     metadata: definition.metadata,
   };
 }
-

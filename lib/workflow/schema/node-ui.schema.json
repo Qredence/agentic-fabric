@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfabric.example/schema/node/ui/v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "variant": { "const": "workflow" },
+        "handles": { "$ref": "#/$defs/handles" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "content": { "type": "string" },
+        "footer": { "type": "string" }
+      },
+      "required": ["variant", "handles", "label", "description", "content", "footer"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "variant": { "const": "textBlock" },
+        "handles": { "$ref": "#/$defs/handles" },
+        "title": { "type": "string" },
+        "model": { "type": "string" },
+        "placeholder": { "type": "string" },
+        "showSuggestions": { "type": "boolean" },
+        "collapsed": { "type": "boolean" }
+      },
+      "required": ["variant", "handles", "title", "model", "placeholder", "showSuggestions", "collapsed"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "variant": { "const": "attribute" },
+        "handles": { "$ref": "#/$defs/handles" },
+        "title": { "type": "string" },
+        "model": { "type": "string" },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "type"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "type": { "type": "string", "enum": ["input", "progress", "checkbox", "select", "slider"] },
+              "value": {},
+              "options": { "type": "array", "items": { "type": "string" } },
+              "min": { "type": "number" },
+              "max": { "type": "number" },
+              "step": { "type": "number" }
+            }
+          }
+        },
+        "collapsed": { "type": "boolean" }
+      },
+      "required": ["variant", "handles", "title", "model", "attributes", "collapsed"]
+    }
+  ],
+  "$defs": {
+    "handles": {
+      "type": "object",
+      "required": ["target", "source"],
+      "properties": {
+        "target": { "type": "boolean" },
+        "source": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AI Workflow Builder",
   description: "Visual editor for building and previewing AI workflows with React Flow",
+    generator: 'v0.app'
 };
 
 export default function RootLayout({

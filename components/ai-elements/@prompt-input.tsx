@@ -69,5 +69,3 @@ export function BottomLeftPromptInput() {
 }
 
 export default BottomLeftPromptInput;
-
-

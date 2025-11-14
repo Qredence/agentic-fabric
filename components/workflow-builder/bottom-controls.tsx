@@ -2,12 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Undo2,
-  Redo2,
-  Hand,
-  MousePointer2,
-} from "lucide-react";
+import { Undo2, Redo2, Frame, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ToolType = "pointer" | "pan";
@@ -15,19 +10,21 @@ type ToolType = "pointer" | "pan";
 interface BottomControlsProps {
   onUndo?: () => void;
   onRedo?: () => void;
-  onToolChange?: (tool: ToolType) => void;
-  currentTool?: ToolType;
   canUndo?: boolean;
   canRedo?: boolean;
+  onFitView?: () => void;
+  locked?: boolean;
+  onToggleLock?: () => void;
 }
 
 export function BottomControls({
   onUndo,
   onRedo,
-  onToolChange,
-  currentTool = "pointer",
   canUndo = false,
   canRedo = false,
+  onFitView,
+  locked = false,
+  onToggleLock,
 }: BottomControlsProps) {
   return (
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
@@ -42,6 +39,7 @@ export function BottomControls({
           onClick={onUndo}
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
+          aria-label="Undo"
         >
           <Undo2 className="h-4 w-4" />
         </Button>
@@ -55,36 +53,32 @@ export function BottomControls({
           onClick={onRedo}
           disabled={!canRedo}
           title="Redo (Ctrl+Shift+Z)"
+          aria-label="Redo"
         >
           <Redo2 className="h-4 w-4" />
         </Button>
-        <div className="w-px h-6 bg-border mx-1" />
         <Button
-          variant={currentTool === "pointer" ? "secondary" : "ghost"}
+          variant="ghost"
           size="icon"
-          className={cn(
-            "h-8 w-8 rounded-full",
-            currentTool === "pointer" && "bg-primary/10"
-          )}
-          onClick={() => onToolChange?.("pointer")}
-          title="Selection tool"
+          className="h-8 w-8 rounded-full"
+          onClick={onFitView}
+          title="Auto-fit view"
+          aria-label="Auto-fit view"
         >
-          <MousePointer2 className="h-4 w-4" />
+          <Frame className="h-4 w-4" />
         </Button>
         <Button
-          variant={currentTool === "pan" ? "secondary" : "ghost"}
+          variant={locked ? "secondary" : "ghost"}
           size="icon"
-          className={cn(
-            "h-8 w-8 rounded-full",
-            currentTool === "pan" && "bg-primary/10"
-          )}
-          onClick={() => onToolChange?.("pan")}
-          title="Pan tool"
+          className={cn("h-8 w-8 rounded-full", locked && "bg-primary/10")}
+          onClick={onToggleLock}
+          title={locked ? "Unlock node edits" : "Lock node edits"}
+          aria-label={locked ? "Unlock node edits" : "Lock node edits"}
+          aria-pressed={locked}
         >
-          <Hand className="h-4 w-4" />
+          <Lock className="h-4 w-4" />
         </Button>
       </div>
     </div>
   );
 }
-

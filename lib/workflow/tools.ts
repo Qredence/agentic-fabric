@@ -240,4 +240,3 @@ export function getToolTypeLabel(tool: WorkflowTool): string {
   }
   return "Tool Protocol";
 }
-

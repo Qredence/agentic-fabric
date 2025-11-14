@@ -86,6 +86,7 @@ const toolsItems: NodeLibraryItem[] = [
     category: "tools",
     iconColor: "#FBBF24", // Yellow
   },
+  
   {
     id: "function-executor",
     label: "MCP",
@@ -270,23 +271,7 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
         renderCategory
       )}
 
-      <div className="pt-2 border-t">
-        <Button
-          size="sm"
-          className="w-full"
-          onClick={() => handleAddNode("executor")}
-        >
-          Add Executor to Center
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          className="w-full mt-2"
-          onClick={onAddMagenticScaffold}
-        >
-          Scaffold Magentic Workflow
-        </Button>
-      </div>
+      
     </Panel>
   );
 }

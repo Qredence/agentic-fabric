@@ -117,4 +117,3 @@ export function isMagenticMessage(
     message.type === "magentic-start"
   );
 }
-

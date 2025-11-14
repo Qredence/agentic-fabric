@@ -267,4 +267,3 @@ export function agentToExecutor(
     description: `Agent executor: ${"name" in agent ? agent.name : executorId}`,
   };
 }
-

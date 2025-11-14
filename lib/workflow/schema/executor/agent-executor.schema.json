@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfabric.example/schema/executor/agent/v1",
+  "allOf": [
+    { "$ref": "https://agenticfabric.example/schema/executor/base-props/v1" },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "agent-executor" },
+        "agentId": { "type": "string" },
+        "agentType": { "type": "string", "enum": ["chat", "workflow", "magentic"] },
+        "systemPrompt": { "type": "string" },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["toolId"],
+            "properties": {
+              "toolId": { "type": "string" },
+              "enabled": { "type": "boolean" },
+              "parameters": { "type": "object" }
+            }
+          }
+        },
+        "model": { "type": "string" },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.7 },
+        "maxTokens": { "type": "integer", "minimum": 1 },
+        "toolMode": { "type": "string", "enum": ["auto", "required", "none"], "default": "auto" }
+      },
+      "required": ["type", "agentId"]
+    }
+  ]
+}

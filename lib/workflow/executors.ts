@@ -3,7 +3,10 @@ import type {
   ExecutorId,
   WorkflowContext,
   BaseMessage,
+  Acl,
+  StatusFlag,
 } from "./types";
+import type { EdgeGroup } from "./edges";
 
 /**
  * Base executor handler function type
@@ -54,6 +57,12 @@ export interface WorkflowDefinition {
   executors: BaseExecutor[];
   edges: EdgeDefinition[];
   metadata?: Record<string, unknown>;
+  edgeGroups?: EdgeGroup[];
+  version?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  acl?: Acl;
+  status?: StatusFlag;
 }
 
 /**
@@ -234,4 +243,3 @@ export function getExecutorTypeDescription(type: ExecutorType): string {
   };
   return descriptions[type] || "";
 }
-

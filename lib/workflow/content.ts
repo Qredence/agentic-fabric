@@ -152,4 +152,3 @@ export function isFunctionCallContent(
 export function isErrorContent(content: BaseContent): content is ErrorContent {
   return content.type === "error";
 }
-
