@@ -852,6 +852,18 @@ const WorkflowCanvas = () => {
     setEdges(nextEdges)
   }, [reactFlow, setEdges, setNodes])
 
+  // Check if node is an executor node
+  const isExecutorNode = (node: ReactFlowNode<WorkflowNodeDataWithIndex>): boolean => {
+    const data = node.data as any
+    return (
+      data?.variant === "executor" ||
+      data?.variant === "function-executor" ||
+      data?.variant === "agent-executor" ||
+      data?.variant === "workflow-executor" ||
+      data?.variant === "request-info-executor"
+    )
+  }
+
   // Handle node update from properties panel
   const handleNodeUpdate = useCallback(
     (nodeId: string, updates: Partial<BaseExecutor>) => {
@@ -887,18 +899,6 @@ const WorkflowCanvas = () => {
     [setNodes, selectedNode],
   )
 
-  // Check if node is an executor node
-  const isExecutorNode = (node: ReactFlowNode<WorkflowNodeDataWithIndex>): boolean => {
-    const data = node.data as any
-    return (
-      data?.variant === "executor" ||
-      data?.variant === "function-executor" ||
-      data?.variant === "agent-executor" ||
-      data?.variant === "workflow-executor" ||
-      data?.variant === "request-info-executor"
-    )
-  }
-
   // Handle node selection
   const handleNodeClick = useCallback((_event: React.MouseEvent, node: any) => {
     setSelectedNode(node as ReactFlowNode<WorkflowNodeDataWithIndex>)
@@ -916,22 +916,18 @@ const WorkflowCanvas = () => {
 
   const handleEvaluate = useCallback(() => {
     // TODO: Implement evaluate functionality
-    console.log("Evaluate workflow")
   }, [])
 
   const handleCode = useCallback(() => {
     // TODO: Implement code view functionality
-    console.log("Show code")
   }, [])
 
   const handlePreview = useCallback(() => {
     // TODO: Implement preview functionality
-    console.log("Preview workflow")
   }, [])
 
   const handlePublish = useCallback(() => {
     // TODO: Implement publish functionality
-    console.log("Publish workflow")
   }, [])
 
   const handleNodeDragStart = useCallback((_event: React.MouseEvent, node: ReactFlowNode) => {
@@ -949,20 +945,20 @@ const WorkflowCanvas = () => {
         return
       }
 
+      // Calculate node bounds once (assuming standard node dimensions)
+      const nodeWidth = 300
+      const nodeHeight = 200
+
+      const draggedBounds = {
+        left: draggedNode.position.x,
+        right: draggedNode.position.x + nodeWidth,
+        top: draggedNode.position.y,
+        bottom: draggedNode.position.y + nodeHeight,
+      }
+
       // Check for overlapping nodes (excluding the dragged node itself)
       const overlappingNode = nodes.find((n) => {
         if (n.id === draggedNodeId) return false
-
-        // Calculate node bounds (assuming standard node dimensions)
-        const nodeWidth = 300
-        const nodeHeight = 200
-
-        const draggedBounds = {
-          left: draggedNode.position.x,
-          right: draggedNode.position.x + nodeWidth,
-          top: draggedNode.position.y,
-          bottom: draggedNode.position.y + nodeHeight,
-        }
 
         const targetBounds = {
           left: n.position.x,
@@ -1020,7 +1016,6 @@ const WorkflowCanvas = () => {
         onPublish={handlePublish}
         onValidate={() => {
           // TODO: Implement validation view/panel
-          console.log("Validate workflow")
         }}
       />
       <div ref={flowWrapperRef} className="absolute inset-0 w-full h-full overflow-hidden">
@@ -1106,7 +1101,6 @@ const WorkflowCanvas = () => {
             }}
               onEvaluate={(nodeId) => {
                 // TODO: Implement node evaluation
-                console.log("Evaluate node", nodeId)
               }}
             />
           )}
