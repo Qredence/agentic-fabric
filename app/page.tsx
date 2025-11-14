@@ -441,10 +441,7 @@ const createEdgeTypes = (
   temporary: TemporaryEdge,
 })
 
-const edgeTypesBase = {
-  animated: AnimatedEdge,
-  temporary: TemporaryEdge,
-}
+
 
 const WorkflowCanvas = () => {
   const [nodes, setNodes] = useNodesState(initialNodes as any)
