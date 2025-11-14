@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,15 @@ interface ExportDialogProps {
 export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps) {
   const [format, setFormat] = useState<"json" | "yaml">("json");
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const serialized = useMemo(() => {
     if (!workflow) return null;
@@ -51,7 +60,13 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
     if (!serialized) return;
     await navigator.clipboard.writeText(serialized);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   if (!workflow) {
