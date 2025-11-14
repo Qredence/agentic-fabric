@@ -531,6 +531,9 @@ const WorkflowCanvas = () => {
     [],
   )
 
+  // Memoize edge types to prevent unnecessary re-renders
+  const edgeTypes = useMemo(() => createEdgeTypes(handleEdgeHover), [handleEdgeHover])
+
   const handleInsertNodeOnEdge = useCallback(
     (nodeType: string) => {
       if (!edgeDropdownState) return
@@ -1039,7 +1042,7 @@ const WorkflowCanvas = () => {
           panOnDrag={[1]}
           nodesDraggable={!locked}
           selectionOnDrag={false}
-          edgeTypes={createEdgeTypes(handleEdgeHover)}
+          edgeTypes={edgeTypes}
           onNodeDragStart={handleNodeDragStart}
           onNodeDragStop={handleNodeDragStop}
         >
