@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfabric.example/schema/executor/union/v1",
+  "oneOf": [
+    { "$ref": "https://agenticfabric.example/schema/executor/agent/v1" },
+    { "$ref": "https://agenticfabric.example/schema/executor/function/v1" },
+    { "$ref": "https://agenticfabric.example/schema/executor/workflow/v1" },
+    { "$ref": "https://agenticfabric.example/schema/executor/request-info/v1" },
+    { "$ref": "https://agenticfabric.example/schema/executor/magentic-agent/v1" },
+    { "$ref": "https://agenticfabric.example/schema/executor/magentic-orchestrator/v1" },
+    { "$ref": "https://agenticfabric.example/schema/executor/base-executor/v1" }
+  ]
+}

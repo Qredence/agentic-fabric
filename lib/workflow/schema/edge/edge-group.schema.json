@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfabric.example/schema/edge/group/v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "single" },
+        "edge": { "$ref": "https://agenticfabric.example/schema/edge/v1" }
+      },
+      "required": ["id", "type", "edge"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "fan-in" },
+        "sources": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "target": { "type": "string" },
+        "edges": { "type": "array", "items": { "$ref": "https://agenticfabric.example/schema/edge/v1" } },
+        "aggregationStrategy": { "type": "string", "enum": ["merge", "first", "all", "custom"] },
+        "customAggregator": { "type": "string" }
+      },
+      "required": ["id", "type", "sources", "target", "edges"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "fan-out" },
+        "source": { "type": "string" },
+        "targets": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "edges": { "type": "array", "items": { "$ref": "https://agenticfabric.example/schema/edge/v1" } },
+        "broadcastMode": { "type": "string", "enum": ["parallel", "sequential", "condition-based"] }
+      },
+      "required": ["id", "type", "source", "targets", "edges"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "switch-case" },
+        "source": { "type": "string" },
+        "switchExpression": { "type": "string" },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "value", "target", "edge"],
+            "properties": {
+              "id": { "type": "string" },
+              "value": {},
+              "target": { "type": "string" },
+              "condition": { "type": "string" },
+              "edge": { "$ref": "https://agenticfabric.example/schema/edge/v1" }
+            }
+          }
+        },
+        "default": {
+          "type": "object",
+          "required": ["target", "edge"],
+          "properties": {
+            "target": { "type": "string" },
+            "edge": { "$ref": "https://agenticfabric.example/schema/edge/v1" }
+          }
+        }
+      },
+      "required": ["id", "type", "source", "switchExpression", "cases"]
+    }
+  ]
+}

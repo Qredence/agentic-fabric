@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfabric.example/schema/executor/magentic-agent/v1",
+  "allOf": [
+    { "$ref": "https://agenticfabric.example/schema/executor/base-props/v1" },
+    {
+      "type": "object",
+      "properties": {
+        "type": { "const": "magentic-agent-executor" },
+        "agentRole": { "type": "string" },
+        "capabilities": { "type": "array", "items": { "type": "string" } },
+        "systemPrompt": { "type": "string" },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["toolId"],
+            "properties": {
+              "toolId": { "type": "string" },
+              "enabled": { "type": "boolean" },
+              "parameters": { "type": "object" }
+            }
+          }
+        }
+      },
+      "required": ["type", "agentRole"]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfabric.example/schema/edge/v1",
+  "type": "object",
+  "required": ["id", "source", "target"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+    "source": { "type": "string" },
+    "target": { "type": "string" },
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": { "type": { "const": "always" } },
+          "required": ["type"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "predicate" },
+            "expression": { "type": "string" },
+            "operator": { "type": "string", "enum": ["equals", "not-equals", "contains", "greater-than", "less-than"] },
+            "value": {}
+          },
+          "required": ["type", "expression"]
+        },
+        {
+          "type": "object",
+          "properties": { "type": { "const": "case" }, "caseValue": { "type": ["string", "number", "boolean"] } },
+          "required": ["type", "caseValue"]
+        }
+      ]
+    },
+    "label": { "type": "string" },
+    "style": { "type": "object" },
+    "metadata": { "type": "object" },
+    "version": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}
