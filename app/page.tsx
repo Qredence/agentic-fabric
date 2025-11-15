@@ -42,16 +42,17 @@ import { SwitchCaseNode } from "@/components/ai-elements/edge-groups/switch-case
 import type { SwitchCaseNodeData } from "@/components/ai-elements/edge-groups/switch-case-node"
 
 // Import workflow builder components
-import { NodeLibrary } from "@/components/workflow-builder/node-library"
+import dynamic from "next/dynamic"
+const NodeLibrary = dynamic(() => import("@/components/workflow-builder/node-library").then((m) => m.NodeLibrary), { ssr: false })
 import { PropertiesPanel } from "@/components/workflow-builder/properties-panel"
 import { ExportDialog } from "@/components/workflow-builder/export-dialog"
 import { ImportDialog } from "@/components/workflow-builder/import-dialog"
 import { TopNavigation } from "@/components/workflow-builder/top-navigation"
 import { BottomControls } from "@/components/workflow-builder/bottom-controls"
+import { ParametersInspector } from "@/components/workflow-builder/parameters-inspector"
+import { useTrackpadNavigation } from "@/hooks/use-trackpad-navigation"
 
 // Import types and utilities
-import type { AttributeNodeData, TextBlockNodeData, WorkflowStepNodeData } from "@/lib/workflow/types"
-import { defaultAttributeNodeData, defaultTextBlockData, defaultWorkflowStepData } from "@/lib/workflow/types"
 import type { WorkflowReactFlowNode, WorkflowNodeDataWithIndex } from "@/lib/workflow/conversion"
 import {
   reactFlowToWorkflow,
@@ -62,200 +63,95 @@ import type { FanInEdgeGroup, FanOutEdgeGroup, SwitchCaseEdgeGroup } from "@/lib
 import type { ExecutorType } from "@/lib/workflow/executors"
 import { MAGENTIC_AGENT_PRESETS } from "@/lib/workflow/magentic-presets"
 import type { MagenticAgentPresetKey } from "@/lib/workflow/magentic-presets"
-import type { BaseExecutor } from "@/lib/workflow/types"
 
 type WorkflowNode = WorkflowReactFlowNode
 type WorkflowEdge = Edge
 
-const nodeIds = {
-  start: "start",
-  process1: "process1",
-  process2: "process2",
-  decision: "decision",
-  output1: "output1",
-  output2: "output2",
-  textBlock: "textBlock",
-  attribute: "attribute",
-}
+// Optimized orchestrator-centric initial scaffold
+const orchestratorId = nanoid()
+const agentAId = nanoid()
+const agentBId = nanoid()
+const requestId = nanoid()
+const functionId = nanoid()
+const childWorkflowId = nanoid()
+
+const orchestratorExec = createExecutorFromNodeType(
+  "executor",
+  orchestratorId,
+  "Orchestrator",
+) as any
+const agentAExec = createExecutorFromNodeType(
+  "magentic-agent-executor",
+  agentAId,
+  "Agent A",
+) as any
+const agentBExec = createExecutorFromNodeType(
+  "magentic-agent-executor",
+  agentBId,
+  "Agent B",
+) as any
+const requestExec = createExecutorFromNodeType(
+  "request-info-executor",
+  requestId,
+  "Fetch Data",
+) as any
+const functionExec = createExecutorFromNodeType(
+  "function-executor",
+  functionId,
+  "Process Data",
+) as any
+const childWorkflowExec = createExecutorFromNodeType(
+  "workflow-executor",
+  childWorkflowId,
+  "Child Workflow",
+) as any
 
 const initialNodes: WorkflowNode[] = [
   {
-    id: nodeIds.start,
-    type: "workflow",
-    position: { x: 0, y: 0 },
-    data: {
-      ...defaultWorkflowStepData({
-        handles: { target: false, source: true },
-        label: "Start",
-        description: "Initialize workflow",
-        content: "Triggered by user action at 09:30 AM",
-        footer: "Status: Ready",
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
+    id: orchestratorId,
+    type: "executor",
+    position: { x: 600, y: 0 },
+    data: createNodeDataFromExecutorType("executor", orchestratorExec) as WorkflowNodeDataWithIndex,
   },
   {
-    id: nodeIds.process1,
-    type: "workflow",
-    position: { x: 500, y: 0 },
-    data: {
-      ...defaultWorkflowStepData({
-        handles: { target: true, source: true },
-        label: "Process Data",
-        description: "Transform input",
-        content: "Validating 1,234 records and applying business rules",
-        footer: "Duration: ~2.5s",
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
+    id: agentAId,
+    type: "magentic-agent-executor",
+    position: { x: 200, y: -200 },
+    data: createNodeDataFromExecutorType("magentic-agent-executor", agentAExec) as WorkflowNodeDataWithIndex,
   },
   {
-    id: nodeIds.decision,
-    type: "workflow",
-    position: { x: 1000, y: 0 },
-    data: {
-      ...defaultWorkflowStepData({
-        handles: { target: true, source: true },
-        label: "Decision Point",
-        description: "Route based on conditions",
-        content: "Evaluating: data.status === 'valid' && data.score > 0.8",
-        footer: "Confidence: 94%",
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
+    id: agentBId,
+    type: "magentic-agent-executor",
+    position: { x: 200, y: 200 },
+    data: createNodeDataFromExecutorType("magentic-agent-executor", agentBExec) as WorkflowNodeDataWithIndex,
   },
   {
-    id: nodeIds.output1,
-    type: "workflow",
-    position: { x: 1500, y: -300 },
-    data: {
-      ...defaultWorkflowStepData({
-        handles: { target: true, source: true },
-        label: "Success Path",
-        description: "Handle success case",
-        content: "1,156 records passed validation (93.7%)",
-        footer: "Next: Send to production",
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
+    id: requestId,
+    type: "request-info-executor",
+    position: { x: 1000, y: -200 },
+    data: createNodeDataFromExecutorType("request-info-executor", requestExec) as WorkflowNodeDataWithIndex,
   },
   {
-    id: nodeIds.output2,
-    type: "workflow",
-    position: { x: 1500, y: 300 },
-    data: {
-      ...defaultWorkflowStepData({
-        handles: { target: true, source: true },
-        label: "Error Path",
-        description: "Handle error case",
-        content: "78 records failed validation (6.3%)",
-        footer: "Next: Queue for review",
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
+    id: functionId,
+    type: "function-executor",
+    position: { x: 1000, y: 200 },
+    data: createNodeDataFromExecutorType("function-executor", functionExec) as WorkflowNodeDataWithIndex,
   },
   {
-    id: nodeIds.process2,
-    type: "workflow",
-    position: { x: 2000, y: 0 },
-    data: {
-      ...defaultWorkflowStepData({
-        handles: { target: true, source: false },
-        label: "Complete",
-        description: "Finalize workflow",
-        content: "All records processed and routed successfully",
-        footer: "Total time: 4.2s",
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
-  },
-  {
-    id: nodeIds.textBlock,
-    type: "textBlock",
-    position: { x: 600, y: -250 },
-    data: {
-      ...defaultTextBlockData({
-        title: "Creative brief",
-        placeholder: "Outline the project scope and key messaging",
-        showSuggestions: true,
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
-  },
-  {
-    id: nodeIds.attribute,
-    type: "attribute",
-    position: { x: 600, y: 250 },
-    data: {
-      ...defaultAttributeNodeData({
-        title: "Generation settings",
-        attributes: [
-          {
-            id: "tone",
-            label: "Tone",
-            type: "select",
-            options: ["Formal", "Neutral", "Playful"],
-            value: "Neutral",
-          },
-          {
-            id: "temperature",
-            label: "Temperature",
-            type: "slider",
-            min: 0,
-            max: 1,
-            step: 0.05,
-            value: 0.7,
-          },
-          {
-            id: "length",
-            label: "Length",
-            type: "progress",
-            value: 40,
-          },
-        ],
-      }),
-      ...{},
-    } as WorkflowNodeDataWithIndex,
+    id: childWorkflowId,
+    type: "workflow-executor",
+    position: { x: 1400, y: 0 },
+    data: createNodeDataFromExecutorType("workflow-executor", childWorkflowExec) as WorkflowNodeDataWithIndex,
   },
 ]
 
 const initialEdges: WorkflowEdge[] = [
-  {
-    id: "edge1",
-    source: nodeIds.start,
-    target: nodeIds.process1,
-    type: "animated",
-  },
-  {
-    id: "edge2",
-    source: nodeIds.process1,
-    target: nodeIds.decision,
-    type: "animated",
-  },
-  {
-    id: "edge3",
-    source: nodeIds.decision,
-    target: nodeIds.output1,
-    type: "animated",
-  },
-  {
-    id: "edge4",
-    source: nodeIds.decision,
-    target: nodeIds.output2,
-    type: "temporary",
-  },
-  {
-    id: "edge5",
-    source: nodeIds.output1,
-    target: nodeIds.process2,
-    type: "animated",
-  },
-  {
-    id: "edge6",
-    source: nodeIds.output2,
-    target: nodeIds.process2,
-    type: "temporary",
-  },
+  { id: nanoid(), source: orchestratorId, target: agentAId, type: "animated" },
+  { id: nanoid(), source: orchestratorId, target: agentBId, type: "animated" },
+  { id: nanoid(), source: agentAId, target: requestId, type: "animated" },
+  { id: nanoid(), source: agentBId, target: functionId, type: "animated" },
+  { id: nanoid(), source: requestId, target: childWorkflowId, type: "animated" },
+  { id: nanoid(), source: functionId, target: childWorkflowId, type: "animated" },
 ]
 
 type EdgeGroupNodeType = "fan-in" | "fan-out" | "switch-case"
@@ -362,58 +258,7 @@ function createEdgeGroupNode(nodeType: EdgeGroupNodeType, position: XYPosition):
   }
 }
 
-const WorkflowStepNode = memo(({ id, data }: { id: string; data: WorkflowStepNodeData }) => (
-  <Node handles={data.handles}>
-    <NodeHeader>
-      <NodeTitle>{data.label}</NodeTitle>
-      <NodeDescription>{data.description}</NodeDescription>
-    </NodeHeader>
-    <NodeContent>
-      <p className="text-sm">{data.content}</p>
-    </NodeContent>
-    <NodeFooter>
-      <p className="text-muted-foreground text-xs">{data.footer}</p>
-    </NodeFooter>
-    <Toolbar>
-      <Actions>
-        <Action tooltip="Edit node" label="Edit" aria-label="Edit node">
-          <Pencil className="size-4" />
-        </Action>
-        <Action tooltip="Delete node" label="Delete" aria-label="Delete node">
-          <Trash2 className="size-4" />
-        </Action>
-      </Actions>
-    </Toolbar>
-  </Node>
-))
-WorkflowStepNode.displayName = "WorkflowStepNode"
-
-const TextBlockWorkflowNode = memo(
-  ({ id, data, selected }: { id: string; data: TextBlockNodeData; selected?: boolean }) => {
-    const { handles: _handles, ...cardProps } = data
-    void _handles
-
-    return <TextBlockCard {...cardProps} data-id={id} isSelected={selected} />
-  },
-)
-TextBlockWorkflowNode.displayName = "TextBlockWorkflowNode"
-
-const AttributeWorkflowNode = memo(
-  ({ id, data, selected }: { id: string; data: AttributeNodeData; selected?: boolean }) => {
-    const { handles: _handles, ...attributeProps } = data
-    void _handles
-
-    return <AttributeNode {...attributeProps} data-id={id} isSelected={selected} />
-  },
-)
-AttributeWorkflowNode.displayName = "AttributeWorkflowNode"
-
 const nodeTypes: Record<string, React.ComponentType<any>> = {
-  // Legacy node types (kept for backward compatibility)
-  workflow: WorkflowStepNode,
-  textBlock: TextBlockWorkflowNode,
-  attribute: AttributeWorkflowNode,
-  // New executor node types
   executor: ExecutorNode,
   "function-executor": FunctionExecutorNode,
   "agent-executor": AgentExecutorNode,
@@ -450,12 +295,15 @@ const WorkflowCanvas = () => {
   const [nodes, setNodes] = useNodesState(initialNodes as any)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const reactFlow = useReactFlow()
+  const [navSettings] = useState({ panSensitivity: 1.0, zoomSensitivity: 0.003, inertiaFriction: 0.92, maxMomentumSpeed: 3.0, enableWheelPan: false })
   const flowWrapperRef = useRef<HTMLDivElement>(null)
+  const { navigating } = useTrackpadNavigation(flowWrapperRef as any, reactFlow as any, navSettings)
 
   // State management for new features
   const [selectedNode, setSelectedNode] = useState<ReactFlowNode<WorkflowNodeDataWithIndex> | null>(null)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [inspectOpen, setInspectOpen] = useState(false)
   const [locked, setLocked] = useState(false)
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null)
 
@@ -617,33 +465,7 @@ const WorkflowCanvas = () => {
         let newNode: ReactFlowNode<WorkflowNodeDataWithIndex>
         const { baseType, presetKey } = parseNodeTypeToken(nodeType)
 
-        if (baseType === "textBlock") {
-          newNode = {
-            id: nanoid(),
-            type: baseType,
-            position,
-            data: { ...defaultTextBlockData(), ...{} } as WorkflowNodeDataWithIndex,
-          }
-        } else if (baseType === "attribute") {
-          newNode = {
-            id: nanoid(),
-            type: baseType,
-            position,
-            data: { ...defaultAttributeNodeData(), ...{} } as WorkflowNodeDataWithIndex,
-          }
-        } else if (baseType === "workflow") {
-          newNode = {
-            id: nanoid(),
-            type: baseType,
-            position,
-            data: {
-              ...defaultWorkflowStepData({
-                label: `New Step ${nds.length + 1}`,
-              }),
-              ...{},
-            } as WorkflowNodeDataWithIndex,
-          }
-        } else if (isEdgeGroupNodeType(baseType)) {
+        if (isEdgeGroupNodeType(baseType)) {
           newNode = createEdgeGroupNode(baseType, position)
         } else {
           const executorId = nanoid()
@@ -669,7 +491,7 @@ const WorkflowCanvas = () => {
     [reactFlow, setNodes, edges, saveToHistory],
   )
 
-  const handleDragStart = useCallback((event: DragEvent<HTMLDivElement>, nodeType: string) => {
+  const handleDragStart = useCallback((event: DragEvent<HTMLElement>, nodeType: string) => {
     event.dataTransfer.setData("application/reactflow", nodeType)
     event.dataTransfer.effectAllowed = "move"
   }, [])
@@ -690,21 +512,86 @@ const WorkflowCanvas = () => {
         let newNode: ReactFlowNode<WorkflowNodeDataWithIndex>
         const { baseType, presetKey } = parseNodeTypeToken(nodeType)
 
-        if (baseType === "workflow") {
-          newNode = {
-            id: nanoid(),
-            type: baseType,
-            position: centerPosition,
-            data: {
-              ...defaultWorkflowStepData({
-                label: `New Step ${nds.length + 1}`,
-                description: "Added from panel",
-                content: "Start connecting this step to build out the workflow.",
-              }),
-              ...{},
-            } as WorkflowNodeDataWithIndex,
+        if (nodeType === "scaffold:group-chat") {
+          // Create a simple group chat scaffold: coordinator + 3 agents fully connected
+          const center = centerPosition
+          const coordinatorId = nanoid()
+          const coordinatorExec = createExecutorFromNodeType("executor", coordinatorId, "Coordinator")
+          const coordinatorNode: ReactFlowNode<WorkflowNodeDataWithIndex> = {
+            id: coordinatorId,
+            type: "executor",
+            position: center,
+            data: createNodeDataFromExecutorType("executor", coordinatorExec) as WorkflowNodeDataWithIndex,
           }
-        } else if (isEdgeGroupNodeType(baseType)) {
+          const radius = 240
+          const agents: ReactFlowNode<WorkflowNodeDataWithIndex>[] = []
+          const edgesToAdd: Edge[] = []
+          for (let i = 0; i < 3; i++) {
+            const angle = (Math.PI * 2 * i) / 3
+            const pos = { x: center.x + radius * Math.cos(angle), y: center.y + radius * Math.sin(angle) }
+            const aid = nanoid()
+            const aexec = createExecutorFromNodeType("agent-executor", aid, `Agent ${i + 1}`)
+            const anode: ReactFlowNode<WorkflowNodeDataWithIndex> = {
+              id: aid,
+              type: "agent-executor",
+              position: pos,
+              data: createNodeDataFromExecutorType("agent-executor", aexec) as WorkflowNodeDataWithIndex,
+            }
+            agents.push(anode)
+            edgesToAdd.push({ id: nanoid(), source: coordinatorId, target: aid, type: "animated" })
+            edgesToAdd.push({ id: nanoid(), source: aid, target: coordinatorId, type: "animated" })
+          }
+          setNodes((nds) => {
+            const newNodes = [...nds, coordinatorNode, ...agents]
+            setEdges((eds) => [...eds, ...edgesToAdd])
+            saveToHistory(newNodes, edges)
+            return newNodes
+          })
+          return nds
+        }
+
+        if (nodeType === "scaffold:handoff") {
+          // Create triage agent with conditional routing to two specialists via switch-case
+          const triageId = nanoid()
+          const triageExec = createExecutorFromNodeType("agent-executor", triageId, "Triage Agent")
+          const triageNode: ReactFlowNode<WorkflowNodeDataWithIndex> = {
+            id: triageId,
+            type: "agent-executor",
+            position: { x: centerPosition.x - 200, y: centerPosition.y },
+            data: createNodeDataFromExecutorType("agent-executor", triageExec) as WorkflowNodeDataWithIndex,
+          }
+          const switchNode = createEdgeGroupNode("switch-case", { x: centerPosition.x, y: centerPosition.y })
+          const spec1Id = nanoid()
+          const spec1Exec = createExecutorFromNodeType("agent-executor", spec1Id, "Specialist A")
+          const spec1Node: ReactFlowNode<WorkflowNodeDataWithIndex> = {
+            id: spec1Id,
+            type: "agent-executor",
+            position: { x: centerPosition.x + 220, y: centerPosition.y - 140 },
+            data: createNodeDataFromExecutorType("agent-executor", spec1Exec) as WorkflowNodeDataWithIndex,
+          }
+          const spec2Id = nanoid()
+          const spec2Exec = createExecutorFromNodeType("agent-executor", spec2Id, "Specialist B")
+          const spec2Node: ReactFlowNode<WorkflowNodeDataWithIndex> = {
+            id: spec2Id,
+            type: "agent-executor",
+            position: { x: centerPosition.x + 220, y: centerPosition.y + 140 },
+            data: createNodeDataFromExecutorType("agent-executor", spec2Exec) as WorkflowNodeDataWithIndex,
+          }
+          setNodes((nds) => {
+            const newNodes = [...nds, triageNode, switchNode as any, spec1Node, spec2Node]
+            setEdges((eds) => [
+              ...eds,
+              { id: nanoid(), source: triageId, target: (switchNode as any).id, type: "animated" },
+              { id: nanoid(), source: (switchNode as any).id, target: spec1Id, type: "animated" },
+              { id: nanoid(), source: (switchNode as any).id, target: spec2Id, type: "animated" },
+            ])
+            saveToHistory(newNodes, edges)
+            return newNodes
+          })
+          return nds
+        }
+
+        if (isEdgeGroupNodeType(baseType)) {
           newNode = createEdgeGroupNode(baseType, centerPosition)
         } else {
           const executorId = nanoid()
@@ -727,7 +614,7 @@ const WorkflowCanvas = () => {
         return newNodes
       })
     },
-    [reactFlow, setNodes, edges, saveToHistory],
+    [reactFlow, setNodes, setEdges, edges, saveToHistory],
   )
 
   const handleAddMagenticScaffold = useCallback(() => {
@@ -745,7 +632,7 @@ const WorkflowCanvas = () => {
     const currentEdges = reactFlow.getEdges()
 
     const findPresetKey = (node: ReactFlowNode<WorkflowNodeDataWithIndex>) => {
-      const executor = (node.data as any)?.executor as BaseExecutor | undefined
+      const executor = (node.data as any)?.executor as any
       const metadata = (executor?.metadata as any)?.magentic
       return metadata?.presetKey ?? metadata?.preset ?? undefined
     }
@@ -790,7 +677,7 @@ const WorkflowCanvas = () => {
       )
 
       if (existing) {
-        const executor = (existing.data as any)?.executor as BaseExecutor | undefined
+        const executor = (existing.data as any)?.executor as any
         const updatedExecutor = executor
           ? {
               ...executor,
@@ -872,7 +759,7 @@ const WorkflowCanvas = () => {
 
   // Handle node update from properties panel
   const handleNodeUpdate = useCallback(
-    (nodeId: string, updates: Partial<BaseExecutor>) => {
+    (nodeId: string, updates: Partial<any>) => {
       let updatedNode: ReactFlowNode<WorkflowNodeDataWithIndex> | null = null
 
       setNodes((nds) =>
@@ -1021,10 +908,10 @@ const WorkflowCanvas = () => {
         onPreview={handlePreview}
         onPublish={handlePublish}
         onValidate={() => {
-          // TODO: Implement validation view/panel
+          setInspectOpen(true)
         }}
       />
-      <div ref={flowWrapperRef} className="absolute inset-0 w-full h-full overflow-hidden">
+      <div ref={flowWrapperRef} className={"absolute inset-0 w-full h-full overflow-hidden" + (navigating ? " flow-navigating" : "")}>
         <Canvas
           className="h-full w-full"
           connectionLineComponent={ConnectionLine}
@@ -1131,6 +1018,10 @@ const WorkflowCanvas = () => {
             }}
             canUndo={canUndo}
             canRedo={canRedo}
+            onEvaluate={handleEvaluate}
+            onValidate={() => {
+              setInspectOpen(true)
+            }}
             onFitView={() => {
               try {
                 reactFlow.fitView()
@@ -1142,6 +1033,7 @@ const WorkflowCanvas = () => {
         </Canvas>
         <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} workflow={currentWorkflow} />
         <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImport={handleImport} />
+        <ParametersInspector open={inspectOpen} onOpenChange={setInspectOpen} workflow={currentWorkflow as any} />
       </div>
     </div>
   )

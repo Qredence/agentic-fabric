@@ -6,7 +6,7 @@ type PanelProps = ComponentProps<typeof PanelPrimitive>
 
 export const Panel = ({ className, ...props }: PanelProps) => (
   <PanelPrimitive
-    className={cn("m-4 overflow-hidden rounded-md border bg-card text-card-foreground shadow-sm", className)}
+    className={cn("m-4 overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm", className)}
     {...props}
   />
 )

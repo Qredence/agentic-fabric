@@ -11,6 +11,7 @@ import {
   useInternalNode,
   useReactFlow,
 } from "@xyflow/react";
+import { cn } from "@/lib/utils";
 
 /**
  * Enhanced edge types with improved handle position calculation
@@ -158,11 +159,13 @@ export const TemporaryEdge = ({
     <BaseEdge
       id={id}
       path={edgePath}
-      className="stroke-2 stroke-ring"
       style={{
+        strokeWidth: 2,
+        stroke: (getComputedStyle(document.documentElement).getPropertyValue("--edge-color-secondary") || "#7a7a7a").trim(),
+        opacity: Number(getComputedStyle(document.documentElement).getPropertyValue("--edge-opacity-secondary") || 0.5),
         strokeDasharray: "8, 4",
         strokeLinecap: "round",
-        opacity: 0.7,
+        filter: "drop-shadow(0 0 2px rgba(0,0,0,0.2))",
         ...style,
       }}
     />
@@ -197,6 +200,7 @@ export const AnimatedEdge = ({
   const targetNode = target ? useInternalNode(target) : null;
   const [isHovered, setIsHovered] = React.useState(false);
   const reactFlow = useReactFlow();
+  const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const { edgePath, midPoint } =
     useMemo(() => {
@@ -262,41 +266,70 @@ export const AnimatedEdge = ({
         markerEnd={markerEnd}
         path={edgePath}
         style={{
-          strokeWidth: 2,
+          strokeWidth: isHovered ? 3 : 2,
+          stroke: (getComputedStyle(document.documentElement).getPropertyValue("--edge-color-primary") || "#6b6b6b").trim(),
+          opacity: isHovered
+            ? Math.min(
+                Number(getComputedStyle(document.documentElement).getPropertyValue("--edge-opacity-primary") || 0.8) + 0.1,
+                1
+              )
+            : Number(getComputedStyle(document.documentElement).getPropertyValue("--edge-opacity-primary") || 0.8),
+          transition: "all 0.2s ease-out",
           ...style,
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        className={cn(
+          "cursor-pointer",
+          isHovered && "drop-shadow-lg"
+        )}
       />
-      {/* Animated circle indicator */}
-      <circle
-        r="5"
-        fill="hsl(var(--primary))"
-        className="animate-pulse"
-        opacity={0.8}
-      >
-        <animateMotion
-          dur="2s"
-          repeatCount="indefinite"
-          path={edgePath}
-          keyPoints="0;1"
-          keyTimes="0;1"
-        />
-      </circle>
-      {/* Secondary trailing indicator for better visibility */}
-      <circle
-        r="3"
-        fill="hsl(var(--primary))"
-        opacity={0.5}
-      >
-        <animateMotion
-          dur="2s"
-          repeatCount="indefinite"
-          path={edgePath}
-          keyPoints="0.2;1.2"
-          keyTimes="0;1"
-        />
-      </circle>
+      {!prefersReducedMotion && (
+        <>
+          <circle 
+            r="6" 
+            fill="hsl(var(--primary))" 
+            className="animate-pulse" 
+            opacity={isHovered ? 0.9 : 0.7}
+          >
+            <animateMotion 
+              dur="3s" 
+              repeatCount="indefinite" 
+              path={edgePath} 
+              keyPoints="0;1" 
+              keyTimes="0;1" 
+            />
+          </circle>
+          <circle 
+            r="4" 
+            fill="hsl(var(--primary))" 
+            opacity={isHovered ? 0.6 : 0.4}
+          >
+            <animateMotion 
+              dur="3s" 
+              repeatCount="indefinite" 
+              path={edgePath} 
+              keyPoints="0.3;1.3" 
+              keyTimes="0;1" 
+              begin="0.5s"
+            />
+          </circle>
+          <circle 
+            r="2" 
+            fill="hsl(var(--primary))" 
+            opacity={isHovered ? 0.4 : 0.2}
+          >
+            <animateMotion 
+              dur="3s" 
+              repeatCount="indefinite" 
+              path={edgePath} 
+              keyPoints="0.6;1.6" 
+              keyTimes="0;1" 
+              begin="1s"
+            />
+          </circle>
+        </>
+      )}
       {/* Interactive button in the middle - shown on hover */}
       {isHovered && midPoint && onHover && (
         <foreignObject

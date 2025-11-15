@@ -34,7 +34,7 @@ export interface FunctionExecutor<TMessage extends BaseMessage = BaseMessage>
   functionCode?: string; // For code-based functions
   functionId?: string; // For registered functions
   parameters?: Record<string, unknown>;
-  handler: ExecutorHandler<TMessage>;
+  handler?: ExecutorHandler<TMessage>;
 }
 
 /**

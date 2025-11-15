@@ -1,0 +1,35 @@
+name: CI
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10.20.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Env check
+        run: pnpm env:check
+        env:
+          NEXT_PUBLIC_APP_NAME: CI
+      - name: Lint, typecheck, tests
+        run: pnpm verify
+      - name: Build
+        run: pnpm build:ci
+      - name: Test coverage
+        run: pnpm test:run --coverage
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage

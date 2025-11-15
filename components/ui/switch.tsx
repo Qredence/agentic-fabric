@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-interface SwitchProps {
+interface SwitchProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
@@ -15,6 +15,7 @@ export function Switch({
   onCheckedChange,
   disabled = false,
   className,
+  ...props
 }: SwitchProps) {
   return (
     <button
@@ -23,6 +24,7 @@ export function Switch({
       aria-checked={checked}
       disabled={disabled}
       onClick={() => onCheckedChange?.(!checked)}
+      {...props}
       className={cn(
         "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

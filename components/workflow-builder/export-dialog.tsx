@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Download, Copy, Check } from "lucide-react";
 import type { Workflow } from "@/lib/workflow/workflow";
+import { serializeTopology } from "@/lib/workflow/export/topology";
 import { serializeToJSON, serializeToYAML, downloadWorkflow } from "@/lib/workflow/export/serializers";
 import { validateWorkflowExtended } from "@/lib/workflow/export/validator";
 
@@ -66,6 +67,16 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
       clearTimeout(timeoutRef.current);
     }
     
+    timeoutRef.current = setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyTopology = async () => {
+    if (!workflow) return;
+    const topo = serializeTopology(workflow);
+    const text = JSON.stringify(topo, null, 2);
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
@@ -168,6 +179,10 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
                 Copy
               </>
             )}
+          </Button>
+          <Button variant="outline" onClick={handleCopyTopology} disabled={!workflow}>
+            <Copy className="size-4 mr-2" />
+            Copy Topology
           </Button>
           <Button onClick={handleDownload} disabled={!serialized || !!hasErrors}>
             <Download className="size-4 mr-2" />
