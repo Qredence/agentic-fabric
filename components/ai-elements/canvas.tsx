@@ -11,11 +11,11 @@ export const Canvas = ({ children, ...props }: CanvasProps) => (
     deleteKeyCode={["Backspace", "Delete"]}
     fitView
     panOnDrag={[2, 3]}
-    panOnScroll={false}
+    panOnScroll={true}
     selectionOnDrag={true}
     selectionKeyCode="Shift"
-    zoomOnScroll={true}
-    zoomOnPinch={true}
+    zoomOnScroll={false}
+    zoomOnPinch={false}
     zoomOnDoubleClick={false}
     snapToGrid={false}
     snapGrid={[15, 15]}

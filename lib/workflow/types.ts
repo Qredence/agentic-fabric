@@ -50,9 +50,11 @@ export interface BaseEdge {
  * Edge condition for conditional routing
  */
 export type EdgeCondition = {
-  type: "predicate" | "case";
-  expression?: string; // For predicate-based conditions
-  caseValue?: string; // For switch-case conditions
+  type: "predicate" | "case" | "always";
+  expression?: string;
+  caseValue?: string;
+  operator?: "equals" | "not-equals" | "contains" | "greater-than" | "less-than";
+  value?: unknown;
 };
 
 /**

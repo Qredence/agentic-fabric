@@ -1,42 +1,107 @@
 # Agents
 
+Comprehensive guide to agent implementations, their configuration, presets, and how they participate in workflows and orchestration.
+
 ## Architecture Overview
-- Agents implement `AgentProtocol`, `BaseAgent`, and supporting middleware/context types in `lib/workflow/agent.ts:1-200`, establishing the shared run signature, streaming hooks, and optional context providers.
-- Workflow nodes embed agents through the executor structures defined in `lib/workflow/executors.ts:1-120`, covering `AgentExecutor`, `MagenticAgentExecutor`, and `MagenticOrchestratorExecutor`.
-- Tool integration is expressed by `WorkflowTool` and helper types in `lib/workflow/tools.ts:1-120`, which agent options, presets, and UI components reference when mapping `toolIds`.
+
+- Shared protocol and types define how agents run, stream, and integrate tools.
+  - `AgentProtocol` and run/stream signatures: `lib/workflow/agent.ts:8-16`
+  - Common run options: `lib/workflow/agent.ts:21-30`
+- Workflow embedding via executors:
+  - Core `Executor` interface: `lib/workflow/executors.ts:21-25`
+  - `AgentExecutor` fields: `lib/workflow/executors.ts:90-100`
+  - Magentic orchestrator: `lib/workflow/executors.ts:145-150`
+- Tool integration types and labels: `lib/workflow/tools.ts:1-22`, `lib/workflow/tools.ts:225-242`
+
+## Agent Types & Purpose
+
+- Base/Chat/Workflow agents:
+  - `ChatAgent` for LLM chat clients and tool use: `lib/workflow/agent.ts:139-148`
+  - `WorkflowAgent` wraps a workflow as an agent: `lib/workflow/agent.ts:227-232`
+- Use Chat agents for conversational tasks with tools; use Workflow agents to expose orchestration or multi-step processes with custom input/output adapters.
+
+## Configuration Options
+
+- Protocol-level `AgentRunOptions` (system prompt, tools, model, temperature, maxTokens, toolMode, stream, metadata): `lib/workflow/agent.ts:21-30`
+- Executor-level configuration for UI editors (`AgentExecutor`): `lib/workflow/executors.ts:90-100`
+  - `agentId`, `agentType` (chat | workflow | magentic), `model`, `systemPrompt`, `temperature`, `maxTokens`, `toolMode`, `tools[]`
 
 ## Magentic Workflow Support
-- `createExecutorFromNodeType` seeds default orchestrator and agent executors, including metadata, preset wiring, and tool bindings for Magentic flows (`lib/workflow/conversion.ts:520-586`).
-- Runtime ↔ canvas conversions retain that metadata via `createNodeDataFromExecutorType`, letting the workflow builder rehydrate Magentic-specific editors (`lib/workflow/conversion.ts:601-643`).
-- Conversion tests pin these behaviours, asserting that the orchestrator enables progress tracking and that presets populate role/capability defaults (`lib/workflow/__tests__/conversion.test.ts:45-63`).
+
+- Default orchestration and agent wiring seeded via `createExecutorFromNodeType` with Magentic metadata: `lib/workflow/conversion.ts:504-596`
+- Canvas ↔ runtime conversions preserve metadata to rehydrate editors:
+  - React Flow → Workflow: `lib/workflow/conversion.ts:73-168`
+  - Workflow → React Flow: `lib/workflow/conversion.ts:173-232`
 
 ## Built-in Magentic Agent Presets
-Defined in `lib/workflow/magentic-presets.ts:1-87`. The `MAGENTIC_AGENT_PRESET_MAP` accessor is generated automatically, so adding a preset only requires updating the array.
 
-| Key | Label | Role | Core duties | Default tools |
+Defined in `lib/workflow/magentic-presets.ts:19-62`. Selecting a preset auto-populates label, description, role, capabilities, system prompt, and default tools. The `MAGENTIC_AGENT_PRESET_MAP` enables quick lookup.
+
+| Key | Label | Role | Core Duties | Default Tools |
 | --- | --- | --- | --- | --- |
-| `planner` | Planner Agent | planner | Breaks work into steps, owns fact and progress ledgers. | `magentic-task-ledger`, `magentic-progress-ledger` |
-| `web` | Web Surfer Agent | web-surfer | Gathers external facts via browsing and summarisation. | `web-browser`, `http-client` |
-| `file` | File Surfer Agent | file-surfer | Reads local/remote documents and updates the task ledger. | `filesystem-reader` |
-| `coder` | Coder Agent | coder | Writes and executes code to satisfy delegated subtasks. | `hosted-code-interpreter` |
-| `terminal` | Terminal Agent | terminal | Runs shell diagnostics and environment manipulations with safeguards. | `shell-runner` |
-| `critic` | Critic Agent | critic | Reviews teammate output for accuracy, completeness, and quality gates. | `analysis-notes` |
+| planner | Planner Agent | planner | Break work into steps; maintain fact/progress ledgers | magentic-task-ledger, magentic-progress-ledger |
+| web | Web Surfer Agent | web-surfer | Search and summarise authoritative sources | web-browser, http-client |
+| coder | Coder Agent | coder | Generate and run code to fulfil subtasks | hosted-code-interpreter |
+| critic | Critic Agent | critic | Review outputs for accuracy, completeness, and adherence | analysis-notes |
 
-Each preset carries a tailored system prompt and capability list that the editor surfaces; choose the preset to auto-populate those defaults or switch to `custom` for free-form configuration.
+## UI Editors & Metadata
 
-## Workflow Builder Integration
-- The node library exposes both the Magentic orchestrator and every preset as draggable items so builders can scaffold full teams quickly (`components/workflow-builder/node-library.tsx:149-166`).
-- Selecting a Magentic agent node opens the preset-aware editor, which keeps metadata in sync, allows manual overrides, and mirrors tool IDs into executor state (`components/workflow-builder/executor-editors/magentic-agent-executor-editor.tsx:69-211`).
-- Orchestrator nodes surface planning strategy, progress tracking, human-in-the-loop toggles, and internal notes, writing the choices back into executor metadata with the `source: "agent-framework"` marker (`components/workflow-builder/executor-editors/magentic-orchestrator-executor-editor.tsx:45-155`).
+- Magentic Agent editor supports preset selection and custom overrides:
+  - Preset handling and metadata merge: `components/workflow-builder/executor-editors/magentic-agent-executor-editor.tsx:69-107`
+  - Editable fields (role, capabilities, tools, system prompt): `components/workflow-builder/executor-editors/magentic-agent-executor-editor.tsx:143-211`
+- Magentic Orchestrator editor:
+  - Planning strategy, progress tracking, human-in-the-loop: `components/workflow-builder/executor-editors/magentic-orchestrator-executor-editor.tsx:75-140`
+- Generic Agent editor for non-Magentic agents: `components/workflow-builder/executor-editors/agent-executor-editor.tsx:39-130`
 
-## Extending and Customising
-1. Add or modify presets in `lib/workflow/magentic-presets.ts`, including a unique `key`, `agentRole`, concise `description`, capability list, and aligned `toolIds`. New IDs should correspond to entries exposed via `WorkflowTool` descriptors (`lib/workflow/tools.ts:1-120`).
-2. If the preset needs bespoke UI fields, extend the Magentic agent editor or introduce metadata handling similar to the existing merge helper (`components/workflow-builder/executor-editors/magentic-agent-executor-editor.tsx:53-128`).
-3. Update or add regression tests so `createExecutorFromNodeType` and React Flow conversions cover the new role defaults (`lib/workflow/__tests__/conversion.test.ts:45-63,231-248`).
-4. Optional: expose a convenience button in the node library, following the pattern used for existing presets (`components/workflow-builder/node-library.tsx:149-166`).
+## Tool Integration
 
-## Non-Magentic Agents
-For single-agent workflows, the generic agent editor configures chat or workflow-backed agents by setting IDs, model overrides, temperature, token limits, and tool invocation modes (`components/workflow-builder/executor-editors/agent-executor-editor.tsx:21-149`). This path bypasses Magentic scaffolding but still honours the underlying `AgentProtocol` contracts.
+- Tools can be protocol-based, AI functions, or hosted/MCP variants: `lib/workflow/tools.ts:160-186`
+- Labels for UI are derived via `getToolTypeLabel`: `lib/workflow/tools.ts:225-242`
+
+## Usage Examples
+
+### AgentExecutor in a Workflow
+
+```json
+{
+  "id": "agent-1",
+  "type": "agent-executor",
+  "label": "Agent",
+  "description": "Use an AI agent to process messages",
+  "agentId": "my-agent",
+  "agentType": "chat",
+  "model": "gpt-4",
+  "systemPrompt": "You are a helpful assistant.",
+  "temperature": 0.7,
+  "maxTokens": 1000,
+  "toolMode": "auto",
+  "tools": [{ "toolId": "hosted-code-interpreter", "enabled": true }]
+}
+```
+
+### Create a Magentic Orchestrator and Agent Programmatically
+
+```ts
+import { createExecutorFromNodeType } from '@/lib/workflow/conversion'
+
+const orchestrator = createExecutorFromNodeType('magentic-orchestrator-executor', 'orch-1', 'Magentic Orchestrator')
+const coderAgent = createExecutorFromNodeType('magentic-agent-executor', 'agent-coder', 'Coder', { presetKey: 'coder' })
+```
+
+### Editing via UI
+
+- Drag “Magentic Orchestrator” and “Magentic Agent” from the Node Library: `components/workflow-builder/node-library.tsx`
+- Select the node and edit fields in the corresponding editor.
 
 ## Validation
-Run `npm run test -- conversion` to confirm Magentic executor helpers continue to pass their invariants, or `npm run test` for the full suite once presets or editors change. The conversion tests provide targeted regression coverage for orchestrator and preset wiring.
+
+- Run focused conversion tests or the full suite:
+  - `pnpm test`
+  - `pnpm test -- conversion`
+- General verification: `pnpm verify` and `pnpm build:ci`
+
+## Extending Presets
+
+1. Add a new entry to `MAGENTIC_AGENT_PRESETS` with `key`, `label`, `description`, `agentRole`, `capabilities`, and `toolIds`.
+2. UI picks it up automatically via `MAGENTIC_AGENT_PRESET_MAP`.
+3. Optionally extend editors to surface bespoke fields.
