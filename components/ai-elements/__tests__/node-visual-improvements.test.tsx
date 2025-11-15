@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Node, NodeHeader, NodeContent, NodeFooter } from "@/components/ai-elements/node";
 import { AgentExecutorNode } from "@/components/ai-elements/executors/agent-executor-node";
 import { NodeSkeleton } from "@/components/ai-elements/loader";
 import { ReactFlowProvider } from "@xyflow/react";
