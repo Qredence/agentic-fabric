@@ -325,23 +325,6 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
                       {/* Suggestions */}
                       <div className="flex items-start h-[260px]">
                         <div className="flex-1 flex flex-col gap-4 px-6 pt-4">
-                          <motion.span
-                            initial={{
-                              opacity: 0,
-                              x: -10,
-                            }}
-                            animate={{
-                              opacity: 1,
-                              x: 0,
-                            }}
-                            transition={{
-                              ...springTransition,
-                              delay: 0.15,
-                            }}
-                            className="text-gray-600 text-xs leading-[16.5px] -tracking-[0.16px]"
-                          >
-                            Try to...
-                          </motion.span>
                           <div className="flex flex-col gap-3">
                             {suggestions.map((suggestion, index) => {
                               const Icon = suggestion.icon;

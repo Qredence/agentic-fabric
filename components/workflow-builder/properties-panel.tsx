@@ -1,15 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Panel } from "@/components/ai-elements/panel"
 import { Label } from "@/components/ui/label"
+import { useAgentConfigStore } from "@/components/providers/config-provider"
+import type { AgentConfig } from "@/lib/config/agent-config"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Trash2, ExternalLink, ChevronDown, ChevronUp, Pencil, Plus, BookOpen } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Trash2, ExternalLink, ChevronDown, ChevronUp, Pencil, Plus, BookOpen, Info, Cog } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { BaseExecutor } from "@/lib/workflow/types"
 import type {
@@ -45,12 +48,14 @@ interface PropertiesPanelProps {
 }
 
 export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate, onEvaluate }: PropertiesPanelProps) {
+  const { get, set } = useAgentConfigStore()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [includeChatHistory, setIncludeChatHistory] = useState(true)
   const [verbosity, setVerbosity] = useState("medium")
   const [summary, setSummary] = useState("auto")
   const [continueOnError, setContinueOnError] = useState(false)
   const [writeToConversationHistory, setWriteToConversationHistory] = useState(true)
+  const instructionsDebounceRef = useRef<number | null>(null)
 
   if (!selectedNode || !selectedNode.data.executor) {
     return (
@@ -68,9 +73,11 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
   }
 
   const executor = selectedNode.data.executor
+  const currentCfg: AgentConfig | undefined = get(selectedNode.id)
   const executorType = selectedNode.data.executorType || executor.type
   const nodeLabel = selectedNode.data.label || executor.label || executor.id
   const nodeDescription = selectedNode.data.description || executor.description || "Configure the executor settings"
+  const showGuardrails = true
 
   const handleChange = (field: keyof BaseExecutor, value: unknown) => {
     onUpdate(selectedNode.id, { [field]: value } as Partial<BaseExecutor>)
@@ -112,7 +119,7 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
     <Panel
       position="center-right"
       className={cn(
-        "mr-4 w-[min(100%,480px)] p-0",
+        "mr-4 sm:w-full md:w-[min(100%,480px)] p-0",
         "max-h-[calc(100vh-3.5rem)] overflow-hidden flex flex-col"
       )}
       role="region"
@@ -164,6 +171,26 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
           />
         </div>
 
+        {/* Input Pill */}
+        <div className="flex items-center gap-3">
+          <Label htmlFor="guardrails-input" className="text-sm font-normal whitespace-nowrap">
+            Input
+          </Label>
+          <div className="flex items-center justify-between rounded-md border bg-muted/50 px-3 py-1 h-[34px] min-w-[140px] w-full">
+            <div className="flex items-center gap-2 pr-2 w-full">
+              <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0">
+                <BookOpen className="h-4 w-4" />
+              </Button>
+              <span id="guardrails-input" className="text-sm text-foreground truncate flex-1">
+                {currentCfg?.guardrails?.inputField || "input_as_text"}
+              </span>
+              <span className="inline-flex items-center justify-center rounded-md bg-background px-1.5 py-0.5 text-[10px] font-medium tracking-[0.5px] text-foreground">
+                STRING
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Instructions Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -179,8 +206,15 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
           </div>
           <Textarea
             id="node-instructions"
-            value={getInstructionsValue()}
-            onChange={(e) => handleInstructionsChange(e.target.value)}
+            defaultValue={currentCfg?.prompt?.system || getInstructionsValue()}
+            onChange={(e) => {
+              if (instructionsDebounceRef.current) window.clearTimeout(instructionsDebounceRef.current)
+              const val = e.target.value
+              instructionsDebounceRef.current = window.setTimeout(() => {
+                const next = set(selectedNode.id, { prompt: { ...(currentCfg?.prompt || {}), system: val } })
+                onUpdate(selectedNode.id, { systemPrompt: next.prompt?.system } as Partial<BaseExecutor>)
+              }, 250)
+            }}
             placeholder="You are a helpful assistant."
             rows={4}
             className="resize-none"
@@ -205,8 +239,11 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
               Model
             </Label>
             <Select
-              value={(executor as AgentExecutor).model || "gpt-5"}
-              onValueChange={(value) => handleChange("model" as keyof BaseExecutor, value)}
+              defaultValue={currentCfg?.model?.model || (executor as AgentExecutor).model || "gpt-5"}
+              onValueChange={(value) => {
+                const next = set(selectedNode.id, { model: { ...(currentCfg?.model || {}), model: value } })
+                onUpdate(selectedNode.id, { model: next.model?.model } as Partial<BaseExecutor>)
+              }}
             >
               <SelectTrigger id="model-select" className="w-[140px]">
                 <SelectValue />
@@ -243,8 +280,8 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
             </Label>
             <div className="flex items-center gap-2 h-[34px]">
               <div className="px-3 h-[34px] flex items-center rounded-md border bg-muted/50 text-sm text-muted-foreground min-w-[140px] text-right">
-                {Array.isArray((executor as AgentExecutor).tools) && (executor as AgentExecutor).tools?.length > 0
-                  ? `${(executor as AgentExecutor).tools.length} tool(s) configured`
+                {Array.isArray((executor as AgentExecutor).tools) && ((executor as AgentExecutor).tools?.length ?? 0) > 0
+                  ? `${(executor as AgentExecutor).tools?.length ?? 0} tool(s) configured`
                   : "No tools configured"}
               </div>
               <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -271,6 +308,139 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
           </div>
         </div>
 
+        {/* Guardrails Section */}
+        {showGuardrails && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Guardrails</h3>
+          </div>
+
+          {/* PII */}
+          <div className="flex items-center justify-between h-[34px]">
+            <div className="inline-flex items-center gap-2">
+              <Label id="pii-label" htmlFor="pii" className="text-sm font-normal">Personally identifiable information</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Info" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
+                </TooltipTrigger>
+                <TooltipContent>Detects and redacts personally identifiable information</TooltipContent>
+              </Tooltip>
+              <Button variant="ghost" size="icon" aria-label="Settings" className="h-6 w-6"><Cog className="h-3 w-3" /></Button>
+            </div>
+            <div className="flex items-center h-[34px]">
+              <Switch
+                aria-labelledby="pii-label"
+                id="pii"
+                checked={!!currentCfg?.guardrails?.pii}
+                onCheckedChange={(checked) => {
+                  const next = set(selectedNode.id, { guardrails: { ...(currentCfg?.guardrails || {}), pii: checked } })
+                  onUpdate(selectedNode.id, { guardrails: next.guardrails } as Partial<BaseExecutor>)
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Moderation */}
+          <div className="flex items-center justify-between h-[34px]">
+            <div className="inline-flex items-center gap-2">
+              <Label id="moderation-label" htmlFor="moderation" className="text-sm font-normal">Moderation</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Info" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
+                </TooltipTrigger>
+                <TooltipContent>Flags unsafe or disallowed content</TooltipContent>
+              </Tooltip>
+              <Button variant="ghost" size="icon" aria-label="Settings" className="h-6 w-6"><Cog className="h-3 w-3" /></Button>
+            </div>
+            <div className="flex items-center h-[34px]">
+              <Switch
+                aria-labelledby="moderation-label"
+                id="moderation"
+                checked={!!currentCfg?.guardrails?.moderation}
+                onCheckedChange={(checked) => {
+                  const next = set(selectedNode.id, { guardrails: { ...(currentCfg?.guardrails || {}), moderation: checked } })
+                  onUpdate(selectedNode.id, { guardrails: next.guardrails } as Partial<BaseExecutor>)
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Jailbreak */}
+          <div className="flex items-center justify-between h-[34px]">
+            <div className="inline-flex items-center gap-2">
+              <Label id="jailbreak-label" htmlFor="jailbreak" className="text-sm font-normal">Jailbreak</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Info" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
+                </TooltipTrigger>
+                <TooltipContent>Detects attempts to bypass safety guardrails</TooltipContent>
+              </Tooltip>
+              <Button variant="ghost" size="icon" aria-label="Settings" className="h-6 w-6"><Cog className="h-3 w-3" /></Button>
+            </div>
+            <div className="flex items-center h-[34px]">
+              <Switch
+                aria-labelledby="jailbreak-label"
+                id="jailbreak"
+                checked={!!currentCfg?.guardrails?.jailbreak}
+                onCheckedChange={(checked) => {
+                  const next = set(selectedNode.id, { guardrails: { ...(currentCfg?.guardrails || {}), jailbreak: checked } })
+                  onUpdate(selectedNode.id, { guardrails: next.guardrails } as Partial<BaseExecutor>)
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Hallucination */}
+          <div className="flex items-center justify-between h-[34px]">
+            <div className="inline-flex items-center gap-2">
+              <Label id="hallucination-label" htmlFor="hallucination" className="text-sm font-normal">Hallucination</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Info" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
+                </TooltipTrigger>
+                <TooltipContent>Attempts to detect likely hallucinations</TooltipContent>
+              </Tooltip>
+              <Button variant="ghost" size="icon" aria-label="Settings" className="h-6 w-6"><Cog className="h-3 w-3" /></Button>
+            </div>
+            <div className="flex items-center h-[34px]">
+              <Switch
+                aria-labelledby="hallucination-label"
+                id="hallucination"
+                checked={!!currentCfg?.guardrails?.hallucination}
+                onCheckedChange={(checked) => {
+                  const next = set(selectedNode.id, { guardrails: { ...(currentCfg?.guardrails || {}), hallucination: checked } })
+                  onUpdate(selectedNode.id, { guardrails: next.guardrails } as Partial<BaseExecutor>)
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Continue on error */}
+          <div className="flex items-center justify-between h-[34px]">
+            <div className="inline-flex items-center gap-2">
+              <Label id="continue-label" htmlFor="continue-on-error" className="text-sm font-normal">Continue on error</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Info" className="h-6 w-6"><Info className="h-3 w-3" /></Button>
+                </TooltipTrigger>
+                <TooltipContent>Proceed even if a guardrail fails</TooltipContent>
+              </Tooltip>
+            </div>
+            <div className="flex items-center h-[34px]">
+              <Switch
+                aria-labelledby="continue-label"
+                id="continue-on-error"
+                checked={!!currentCfg?.guardrails?.continueOnError}
+                onCheckedChange={(checked) => {
+                  const next = set(selectedNode.id, { guardrails: { ...(currentCfg?.guardrails || {}), continueOnError: checked } })
+                  onUpdate(selectedNode.id, { guardrails: next.guardrails } as Partial<BaseExecutor>)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+        )}
+
         {/* Model Parameters Section */}
         <div className="space-y-3 pt-2 border-t border-border">
           <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Model parameters</h3>
@@ -289,6 +459,24 @@ export function PropertiesPanel({ selectedNode, onUpdate, onDelete, onDuplicate,
                   <SelectItem value="high">High</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <Label htmlFor="temperature" className="text-sm font-normal">Temperature</Label>
+                <Input id="temperature" type="number" step="0.05" defaultValue={currentCfg?.model?.temperature ?? 0.7} onChange={(e) => {
+                  const v = Number(e.target.value)
+                  const next = set(selectedNode.id, { model: { ...(currentCfg?.model || {}), temperature: v } })
+                  onUpdate(selectedNode.id, { temperature: next.model?.temperature } as Partial<BaseExecutor>)
+                }} />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="maxTokens" className="text-sm font-normal">Max tokens</Label>
+                <Input id="maxTokens" type="number" defaultValue={currentCfg?.model?.maxTokens ?? 1024} onChange={(e) => {
+                  const v = Number(e.target.value)
+                  const next = set(selectedNode.id, { model: { ...(currentCfg?.model || {}), maxTokens: v } })
+                  onUpdate(selectedNode.id, { maxTokens: next.model?.maxTokens } as Partial<BaseExecutor>)
+                }} />
+              </div>
             </div>
             <div className="flex items-center justify-between h-[34px]">
               <Label htmlFor="summary-select" className="text-sm font-normal">

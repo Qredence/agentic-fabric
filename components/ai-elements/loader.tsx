@@ -87,10 +87,36 @@ export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
   <div
     className={cn(
       "inline-flex animate-spin items-center justify-center",
+      "transition-all duration-300 ease-out",
       className
     )}
     {...props}
   >
     <LoaderIcon size={size} />
+  </div>
+);
+
+export const SkeletonLoader = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "animate-shimmer-enhanced bg-gradient-to-r from-transparent via-foreground/10 to-transparent",
+      "rounded-lg",
+      className
+    )}
+    {...props}
+  />
+);
+
+export const NodeSkeleton = () => (
+  <div data-testid="node-skeleton" className="w-[352px] h-[200px] rounded-xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-4">
+    <div className="flex items-center gap-3 mb-4">
+      <SkeletonLoader className="w-3 h-3 rounded-full" />
+      <SkeletonLoader className="h-6 w-32 rounded" />
+    </div>
+    <div className="space-y-3">
+      <SkeletonLoader className="h-4 w-full rounded" />
+      <SkeletonLoader className="h-4 w-4/5 rounded" />
+      <SkeletonLoader className="h-4 w-3/5 rounded" />
+    </div>
   </div>
 );

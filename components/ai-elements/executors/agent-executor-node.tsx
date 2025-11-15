@@ -4,7 +4,7 @@ import React, { memo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { motion, AnimatePresence } from "motion/react";
 import { Info, ChevronDown, ChevronUp, Settings, User, Zap, MessageSquare } from "lucide-react";
-import type { AgentExecutor, ToolReference } from "@/lib/workflow/executors";
+import type { AgentExecutor, ToolReference, MagenticAgentExecutor } from "@/lib/workflow/executors";
 import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
 
 /**
@@ -16,7 +16,7 @@ export interface AgentExecutorNodeData {
     target: boolean;
     source: boolean;
   };
-  executor: AgentExecutor;
+  executor: AgentExecutor | MagenticAgentExecutor;
   label?: string;
   description?: string;
   status?: "idle" | "running" | "completed" | "error";
@@ -25,7 +25,11 @@ export interface AgentExecutorNodeData {
 /**
  * Props for AgentExecutorNode component
  */
-export type AgentExecutorNodeProps = any;
+export interface AgentExecutorNodeProps {
+  id: string;
+  data: AgentExecutorNodeData;
+  selected?: boolean;
+}
 
 const springTransition = {
   type: "spring" as const,
@@ -34,11 +38,18 @@ const springTransition = {
   mass: 0.8,
 };
 
+const statusColors = {
+  idle: "bg-gray-500",
+  running: "bg-blue-500 animate-pulse",
+  completed: "bg-green-500",
+  error: "bg-red-500",
+};
+
 /**
  * Agent executor node component
  */
 export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNodeProps) => {
-  const { handles, executor, label } = data;
+  const { handles, executor, label, status = "idle" } = data;
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [internalHovered, setInternalHovered] = useState(false);
 
@@ -53,11 +64,11 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   const magenticMeta = (metadata.magentic as Record<string, any> | undefined) ?? {};
   const agentRole = typedExecutor.agentRole || magenticMeta.agentRole;
 
-  const displayLabel = label || executor.label || agentRole || executor.agentId || executor.id;
+  const displayLabel = label || executor.label || agentRole || (executor as AgentExecutor).agentId || executor.id;
   const executorTypeName = "agent-executor";
   
   // Get model from executor or default
-  const model = executor.model || metadata.model || "GPT-5";
+  const model = (executor as AgentExecutor).model || metadata.model || "GPT-5";
 
   const hovered = internalHovered;
 
@@ -66,7 +77,7 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   };
 
   // Get current values for suggestions
-  const currentModel = executor.model || metadata.model || "gpt-5";
+  const currentModel = (executor as AgentExecutor).model || metadata.model || "gpt-5";
   const currentReasoningEffort = metadata.reasoningEffort || "low";
   const toolsCount = Array.isArray(typedExecutor.tools) ? typedExecutor.tools.length : 0;
   const currentTools = toolsCount > 0 ? `${toolsCount} tool(s)` : "No tools";
@@ -138,25 +149,27 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
           }}
           transition={springTransition}
           className={`
-            w-full px-4 py-3 rounded-2xl
-            bg-[rgba(32,32,32,0.9)] backdrop-blur-2xl
-            border transition-all duration-200
+            w-full px-4 py-3 rounded-xl
+            bg-gradient-to-br from-card to-card/80 backdrop-blur-2xl
+            border transition-all duration-300 ease-out
+            shadow-lg hover:shadow-xl
             ${
               selected
-                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                ? "border-primary/50 ring-2 ring-primary/20"
                 : hovered
-                ? "border-white/10"
-                : "border-white/5"
+                ? "border-primary/20"
+                : "border-border/50"
             }
-            hover:border-white/15 active:scale-98
-            flex items-center justify-between
+            hover:border-primary/30 hover:-translate-y-0.5 active:scale-98
+            flex items-center justify-between group
           `}
         >
           <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-2 h-2 rounded-full ${statusColors[status]} transition-all duration-300`} />
             <motion.div
               layoutId={`node-title-${id}`}
               transition={springTransition}
-              className="text-base text-gray-300 truncate"
+              className="text-base font-medium text-foreground truncate"
             >
               {displayLabel}
             </motion.div>
@@ -173,7 +186,7 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
                 ...springTransition,
                 delay: 0.1,
               }}
-              className="text-xs text-gray-600"
+              className="text-xs text-muted-foreground"
             >
               {model}
             </motion.div>
@@ -188,8 +201,9 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
               opacity: 1,
             }}
             transition={springTransition}
+            className="text-muted-foreground group-hover:text-foreground transition-colors"
           >
-            <ChevronDown className="h-4 w-4 text-gray-500 shrink-0" />
+            <ChevronDown className="h-4 w-4 shrink-0" />
           </motion.div>
         </motion.button>
       ) : (
@@ -207,17 +221,20 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
             transition={springTransition}
             className="mb-2 px-0"
           >
-            <div className="grid grid-cols-[1fr_auto] items-center gap-3">
-              <div className="min-w-0">
-                <motion.div
-                  layoutId={`node-title-${id}`}
-                  transition={springTransition}
-                  className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
-                    hovered ? "text-gray-300" : "text-gray-400"
-                  }`}
-                >
-                  {displayLabel}
-                </motion.div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={`w-3 h-3 rounded-full ${statusColors[status]} transition-all duration-300 shadow-lg`} />
+                <div className="min-w-0">
+                  <motion.div
+                    layoutId={`node-title-${id}`}
+                    transition={springTransition}
+                    className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
+                      hovered ? "text-foreground" : "text-foreground/80"
+                    }`}
+                  >
+                    {displayLabel}
+                  </motion.div>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <motion.div
@@ -233,7 +250,7 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
                     ...springTransition,
                     delay: 0.05,
                   }}
-                  className="text-sm text-gray-600 truncate max-w-[120px]"
+                  className="text-sm text-muted-foreground truncate max-w-[120px]"
                 >
                   {model}
                 </motion.div>
@@ -247,9 +264,9 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
                     scale: 0.95,
                   }}
                   transition={springTransition}
-                  className="p-1 rounded hover:bg-white/5 transition-colors"
+                  className="p-1 rounded hover:bg-accent/50 transition-colors text-muted-foreground hover:text-foreground"
                 >
-                  <ChevronUp className="h-4 w-4 text-gray-500" />
+                  <ChevronUp className="h-4 w-4" />
                 </motion.button>
               </div>
             </div>
@@ -289,16 +306,18 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
               }}
               transition={springTransition}
               className={`
-                relative h-[352px] w-[352px] rounded-2xl
-                bg-[rgba(32,32,32,0.9)] backdrop-blur-2xl
-                border transition-all duration-200
+                relative h-[352px] w-[352px] rounded-xl
+                bg-gradient-to-br from-card to-card/80 backdrop-blur-2xl
+                border transition-all duration-300 ease-out
+                shadow-lg hover:shadow-xl
                 ${
                   selected
-                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    ? "border-primary/50 ring-2 ring-primary/20"
                     : hovered
-                    ? "border-white/10"
-                    : "border-white/5"
+                    ? "border-primary/20"
+                    : "border-border/50"
                 }
+                hover:border-primary/30 hover:-translate-y-0.5
               `}
             >
               <div className="flex flex-col h-full rounded-2xl overflow-hidden">
@@ -348,23 +367,6 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
                       {/* Suggestions */}
                       <div className="flex items-start h-[260px]">
                         <div className="flex-1 flex flex-col gap-4 px-6 pt-4">
-                          <motion.span
-                            initial={{
-                              opacity: 0,
-                              x: -10,
-                            }}
-                            animate={{
-                              opacity: 1,
-                              x: 0,
-                            }}
-                            transition={{
-                              ...springTransition,
-                              delay: 0.15,
-                            }}
-                            className="text-gray-600 text-xs leading-[16.5px] -tracking-[0.16px]"
-                          >
-                            Try to...
-                          </motion.span>
                           <div className="flex flex-col gap-3">
                             {suggestions.map((suggestion, index) => {
                               const Icon = suggestion.icon;
@@ -390,9 +392,9 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
                                   whileTap={{
                                     scale: 0.98,
                                   }}
-                                  className="flex items-center gap-1 p-0.5 rounded text-gray-400 hover:text-gray-300 hover:bg-white/5 transition-all duration-200"
+                                  className="flex items-center gap-2 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200 group/suggestion"
                                 >
-                                  <Icon className="h-3 w-3" />
+                                  <Icon className="h-3 w-3 group-hover/suggestion:scale-110 transition-transform" />
                                   <span className="text-xs leading-[16.5px] -tracking-[0.16px]">
                                     {suggestion.label}
                                   </span>

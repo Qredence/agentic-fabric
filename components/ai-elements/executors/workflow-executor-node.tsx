@@ -20,6 +20,7 @@ export interface WorkflowExecutorNodeData {
   label?: string;
   description?: string;
   status?: "idle" | "running" | "completed" | "error";
+  childCount?: number;
 }
 
 /**
@@ -38,7 +39,7 @@ const springTransition = {
  * Workflow executor node component - represents a nested workflow
  */
 export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecutorNodeProps) => {
-  const { handles, executor, label } = data;
+  const { handles, executor, label, childCount } = data;
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [internalHovered, setInternalHovered] = useState(false);
 
@@ -191,6 +192,9 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
                 </motion.div>
               </div>
               <div className="flex items-center gap-2">
+                <div className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                  Nested {childCount ?? 0}
+                </div>
                 <motion.div
                   initial={{
                     opacity: 0,
@@ -275,6 +279,7 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
               <div className="flex flex-col h-full rounded-2xl overflow-hidden">
                 {/* Content Area */}
                 <div className="relative flex-1 flex flex-col overflow-hidden">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/5" />
                   {/* Empty State with Suggestions */}
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -319,23 +324,6 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
                       {/* Suggestions */}
                       <div className="flex items-start h-[260px]">
                         <div className="flex-1 flex flex-col gap-4 px-6 pt-4">
-                          <motion.span
-                            initial={{
-                              opacity: 0,
-                              x: -10,
-                            }}
-                            animate={{
-                              opacity: 1,
-                              x: 0,
-                            }}
-                            transition={{
-                              ...springTransition,
-                              delay: 0.15,
-                            }}
-                            className="text-gray-600 text-xs leading-[16.5px] -tracking-[0.16px]"
-                          >
-                            Try to...
-                          </motion.span>
                           <div className="flex flex-col gap-3">
                             {suggestions.map((suggestion, index) => {
                               const Icon = suggestion.icon;

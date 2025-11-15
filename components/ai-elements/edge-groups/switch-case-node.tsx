@@ -30,6 +30,8 @@ export interface SwitchCaseNodeData {
   group: SwitchCaseEdgeGroup;
   label?: string;
   description?: string;
+  status?: "idle" | "routing" | "completed" | "error";
+  error?: string;
 }
 
 /**
@@ -41,7 +43,7 @@ export type SwitchCaseNodeProps = any;
  * Switch-case edge group node - conditional routing based on expression value
  */
 export const SwitchCaseNode = memo(({ id, data, selected }: SwitchCaseNodeProps) => {
-  const { handles, group, label, description } = data;
+  const { handles, group, label, description, status, error } = data;
 
   const displayLabel = label || `Switch/Case (${group.cases.length} cases)`;
   const displayDescription = description || `Routes based on: ${group.switchExpression}`;
@@ -56,6 +58,12 @@ export const SwitchCaseNode = memo(({ id, data, selected }: SwitchCaseNodeProps)
             <NodeDescription className="text-xs truncate">
               {displayDescription}
             </NodeDescription>
+          </div>
+          <div className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground">
+            {status === "routing" && "Routing"}
+            {status === "completed" && "Completed"}
+            {status === "idle" && "Idle"}
+            {status === "error" && "Error"}
           </div>
         </div>
       </NodeHeader>
@@ -82,6 +90,11 @@ export const SwitchCaseNode = memo(({ id, data, selected }: SwitchCaseNodeProps)
                   Case {idx + 1}: {String(caseItem.value)} → {caseItem.target}
                 </div>
               ))}
+            </div>
+          )}
+          {error && (
+            <div className="text-xs text-red-500">
+              Handoff error: <span className="font-mono">{error}</span>
             </div>
           )}
         </div>

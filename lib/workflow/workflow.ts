@@ -39,6 +39,7 @@ export interface WorkflowMetadata {
   updatedAt?: string;
   tags?: string[];
   custom?: Record<string, unknown>;
+  nodePositions?: Record<string, { x: number; y: number }>;
 }
 
 /**

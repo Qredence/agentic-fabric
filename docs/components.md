@@ -590,6 +590,23 @@ import { cn } from "@/lib/utils";
 - Use state variants: `hover:`, `focus:`, `disabled:`
 - Use group/peer selectors: `group-hover:`, `peer-focus:`
 
+## Color System
+
+The application uses semantic CSS variables mapped to Tailwind tokens to provide accessible theming across light and dark modes. Key variables are defined in `app/globals.css` and include `--background`, `--foreground`, `--primary`, `--muted`, `--muted-foreground`, `--accent`, and `--border` for both `:root` (light) and `.dark` selectors.
+
+- Contrast targets:
+  - Normal text ≥ 4.5:1 against `background`
+  - Large text ≥ 3:1 against `background`
+  - Interactive focus rings and outlines are visible against both modes
+- Compliance:
+  - `foreground` vs `background` satisfies ≥ 4.5:1 in both modes
+  - `muted-foreground` has been adjusted to meet ≥ 4.5:1 for normal text in light and dark modes
+- Theming:
+  - Mode switching is driven by `next-themes` with `attribute="class"` and Tailwind v4’s CSS variables
+  - Components should use semantic tokens (e.g., `text-foreground`, `text-muted-foreground`, `bg-background`, `bg-muted`) rather than hard-coded colors
+
+Verification is covered by automated tests in `app/__tests__/color-contrast.test.ts`, ensuring contrast thresholds in both modes.
+
 ## Component Development Guidelines
 
 ### Creating New Components

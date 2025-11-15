@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Undo2, Redo2, Frame, Lock } from "lucide-react";
+import { ExpandableTabs } from "@/components/ui/expandable-tabs";
+import { Undo2, Redo2, Frame, Lock, Unlock, Sun, Moon, Play, CheckCircle2 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
 type ToolType = "pointer" | "pan";
@@ -15,6 +17,8 @@ interface BottomControlsProps {
   onFitView?: () => void;
   locked?: boolean;
   onToggleLock?: () => void;
+  onEvaluate?: () => void;
+  onValidate?: () => void;
 }
 
 export function BottomControls({
@@ -25,60 +29,79 @@ export function BottomControls({
   onFitView,
   locked = false,
   onToggleLock,
+  onEvaluate,
+  onValidate,
 }: BottomControlsProps) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  // Use a default theme during SSR to prevent hydration mismatch
+  const isDark = mounted ? resolvedTheme === "dark" : false;
   return (
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-      <div className="flex items-center gap-2 rounded-full border bg-background/95 backdrop-blur-sm shadow-lg p-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "h-8 w-8 rounded-full",
-            !canUndo && "opacity-50 cursor-not-allowed"
-          )}
-          onClick={onUndo}
-          disabled={!canUndo}
-          title="Undo (Ctrl+Z)"
-          aria-label="Undo"
-        >
-          <Undo2 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "h-8 w-8 rounded-full",
-            !canRedo && "opacity-50 cursor-not-allowed"
-          )}
-          onClick={onRedo}
-          disabled={!canRedo}
-          title="Redo (Ctrl+Shift+Z)"
-          aria-label="Redo"
-        >
-          <Redo2 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-full"
-          onClick={onFitView}
-          title="Auto-fit view"
-          aria-label="Auto-fit view"
-        >
-          <Frame className="h-4 w-4" />
-        </Button>
-        <Button
-          variant={locked ? "secondary" : "ghost"}
-          size="icon"
-          className={cn("h-8 w-8 rounded-full", locked && "bg-primary/10")}
-          onClick={onToggleLock}
-          title={locked ? "Unlock node edits" : "Lock node edits"}
-          aria-label={locked ? "Unlock node edits" : "Lock node edits"}
-          aria-pressed={locked}
-        >
-          <Lock className="h-4 w-4" />
-        </Button>
-      </div>
+      <ExpandableTabs
+        tabs={[
+          { title: "Undo", icon: Undo2, disabled: !canUndo },
+          { title: "Redo", icon: Redo2, disabled: !canRedo },
+          { type: "separator" },
+          { title: "Evaluate", icon: Play, ariaLabel: "Evaluate workflow" },
+          { title: "Validation", icon: CheckCircle2, ariaLabel: "Validate workflow" },
+          { type: "separator" },
+          { title: "Auto-fit view", icon: Frame },
+          {
+            title: locked ? "Unlock node edits" : "Lock node edits",
+            icon: locked ? Unlock : Lock,
+            active: locked,
+            ariaLabel: locked ? "Unlock node edits" : "Lock node edits",
+          },
+          { type: "separator" },
+          {
+            title: "Toggle theme",
+            icon: isDark ? Moon : Sun,
+            active: isDark,
+            ariaLabel: isDark ? "Activate light mode" : "Activate dark mode",
+          },
+        ]}
+        className={cn("rounded-full border bg-background/95 backdrop-blur-sm shadow-lg p-1.5")}
+        showLabelsOnSelect={false}
+        onClickBehavior="momentary"
+        onChange={(index) => {
+          if (index === null) return;
+          if (index === 0) {
+            if (canUndo) onUndo?.();
+            return;
+          }
+          if (index === 1) {
+            if (canRedo) onRedo?.();
+            return;
+          }
+          if (index === 3) {
+            onEvaluate?.();
+            return;
+          }
+          if (index === 4) {
+            onValidate?.();
+            return;
+          }
+          if (index === 6) {
+            onFitView?.();
+            return;
+          }
+          if (index === 7) {
+            onToggleLock?.();
+            return;
+          }
+          if (index === 9) {
+            setTheme(isDark ? "light" : "dark");
+            return;
+          }
+        }}
+      />
     </div>
   );
 }

@@ -30,6 +30,8 @@ export interface FanOutNodeData {
   group: FanOutEdgeGroup;
   label?: string;
   description?: string;
+  status?: "idle" | "broadcast" | "completed" | "error";
+  syncTargetId?: string;
 }
 
 /**
@@ -41,7 +43,7 @@ export type FanOutNodeProps = any;
  * Fan-out edge group node - one source broadcasts to multiple targets
  */
 export const FanOutNode = memo(({ id, data, selected }: FanOutNodeProps) => {
-  const { handles, group, label, description } = data;
+  const { handles, group, label, description, status, syncTargetId } = data;
 
   const displayLabel = label || `Fan-Out (${group.targets.length} targets)`;
   const displayDescription = description || `Broadcasts from ${group.source} to ${group.targets.length} targets`;
@@ -57,6 +59,12 @@ export const FanOutNode = memo(({ id, data, selected }: FanOutNodeProps) => {
               {displayDescription}
             </NodeDescription>
           </div>
+          <div className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground">
+            {status === "broadcast" && "Broadcasting"}
+            {status === "completed" && "Completed"}
+            {status === "idle" && "Idle"}
+            {status === "error" && "Error"}
+          </div>
         </div>
       </NodeHeader>
       <NodeContent>
@@ -70,6 +78,11 @@ export const FanOutNode = memo(({ id, data, selected }: FanOutNodeProps) => {
           {group.broadcastMode && (
             <div className="text-xs text-muted-foreground">
               Mode: <span className="capitalize">{group.broadcastMode}</span>
+            </div>
+          )}
+          {syncTargetId && (
+            <div className="text-xs text-muted-foreground">
+              Sync at: <span className="font-mono">{syncTargetId}</span>
             </div>
           )}
         </div>
