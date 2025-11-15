@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef } from "react"
 import { Panel } from "@/components/ai-elements/panel"
 import { Label } from "@/components/ui/label"
 import { useAgentConfigStore } from "@/components/providers/config-provider"
