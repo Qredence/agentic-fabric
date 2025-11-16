@@ -53,7 +53,7 @@ export function TopNavigation({
     >
       {/* Left side: Project name/status */}
       <div className="flex items-center gap-2">
-        <img src={logoDarkmode.src} alt="Logo" className="size-8 hidden dark:block w-6" />{' '}
+        <img src={logoDarkmode.src} alt="Logo" className="size-8 hidden dark:block" />{' '}
         <img src={logoLightmode.src} alt="Logo" className="size-8 dark:hidden" />{' '}
         <h1 className="text-lg font-semibold text-gray-200">{displayName}</h1>
       </div>
