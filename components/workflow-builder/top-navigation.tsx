@@ -53,75 +53,11 @@ export function TopNavigation({
     >
       {/* Left side: Project name/status */}
       <div className="flex items-center gap-2">
-        <img src={logoDarkmode.src} alt="Logo" className="size-8 hidden dark:block" />{' '}
+        <img src={logoDarkmode.src} alt="Logo" className="size-8 hidden dark:block w-6" />{' '}
         <img src={logoLightmode.src} alt="Logo" className="size-8 dark:hidden" />{' '}
         <h1 className="text-lg font-semibold text-gray-200">{displayName}</h1>
       </div>
-
       {/* Right side: Action buttons */}
-      <div className="flex items-center gap-2 mt-6 p-[8px] bg-white/8 rounded-full">
-        {validation && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onValidate}
-            className="text-gray-300 hover:text-white hover:bg-white/10"
-            title={
-              hasErrors
-                ? 'Workflow has errors'
-                : hasWarnings
-                  ? 'Workflow has warnings'
-                  : 'Workflow is valid'
-            }
-          >
-            {hasErrors ? (
-              <AlertCircle className="size-4 text-red-500" />
-            ) : hasWarnings ? (
-              <AlertCircle className="size-4 text-yellow-500" />
-            ) : (
-              <CheckCircle2 className="size-4 text-green-500" />
-            )}
-            <span className="ml-1">Validation</span>
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onEvaluate}
-          className="text-gray-300 hover:text-white hover:bg-white/10"
-        >
-          <Play className="size-4" />
-          Evaluate
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCode}
-          className="text-gray-300 hover:text-white hover:bg-white/10"
-        >
-          <Code className="size-4" />
-          Code
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onPreview}
-          className="text-gray-300 hover:text-white hover:bg-white/10"
-        >
-          <Eye className="size-4" />
-          Preview
-        </Button>
-        <Button
-          variant="default"
-          size="sm"
-          onClick={onPublish}
-          className="bg-black/64 dark:bg-white/64 hover:bg-black/80 dark:hover:bg-white/80 text-white dark:text-black rounded-full"
-        >
-          <Upload className="size-4" />
-          Publish
-        </Button>
-        <ThemeToggle />
-      </div>
     </div>
   );
 }

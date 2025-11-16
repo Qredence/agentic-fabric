@@ -56,3 +56,10 @@ node_modules
 .figma/image/screenshot_4417_1401.png
 .figma/image/screenshot_4553_426.png
 .eslintcache
+
+
+# Tempo
+
+node_modules/
+**/tempobook/dynamic/
+**/tempobook/storyboards/

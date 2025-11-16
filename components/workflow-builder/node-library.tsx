@@ -247,7 +247,7 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
       className={cn(
         'm-0 ml-6 mt-8 w-[224px] space-y-4 p-3',
         'bottom-6 overflow-y-auto',
-        'bg-gray-262626 rounded-32 backdrop-blur-sm',
+        'bg-gray-262626 backdrop-blur-sm rounded-br-2xl py-4',
       )}
       style={{ height: 'calc(100vh - 8.5rem)' }}
     >
@@ -255,7 +255,6 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
         <h3 className="text-sm font-semibold mb-1">Node Library</h3>
         <p className="text-xs text-muted-foreground">Drag onto canvas or click to add</p>
       </div>
-
       {(
         ['agents', 'functions', 'orchestration', 'human', 'connections'] as NodeLibraryCategory[]
       ).map(renderCategory)}

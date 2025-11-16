@@ -1050,6 +1050,7 @@ const WorkflowCanvas = () => {
             onAddNode={handleAddNode}
             onDragStart={handleDragStart}
             onAddMagenticScaffold={handleAddMagenticScaffold}
+            className="py-5"
           />
           {edgeDropdownState && (
             <EdgeNodeDropdown
