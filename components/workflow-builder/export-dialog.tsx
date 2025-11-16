@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,20 +8,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Download, Copy, Check } from "lucide-react";
-import type { Workflow } from "@/lib/workflow/workflow";
-import { serializeTopology } from "@/lib/workflow/export/topology";
-import { serializeToJSON, serializeToYAML, downloadWorkflow } from "@/lib/workflow/export/serializers";
-import { validateWorkflowExtended } from "@/lib/workflow/export/validator";
+} from '@/components/ui/select';
+import { Download, Copy, Check } from 'lucide-react';
+import type { Workflow } from '@/lib/workflow/workflow';
+import { serializeTopology } from '@/lib/workflow/export/topology';
+import {
+  serializeToJSON,
+  serializeToYAML,
+  downloadWorkflow,
+} from '@/lib/workflow/export/serializers';
+import { validateWorkflowExtended } from '@/lib/workflow/export/validator';
 
 interface ExportDialogProps {
   open: boolean;
@@ -30,7 +34,7 @@ interface ExportDialogProps {
 }
 
 export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps) {
-  const [format, setFormat] = useState<"json" | "yaml">("json");
+  const [format, setFormat] = useState<'json' | 'yaml'>('json');
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,7 +48,7 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
 
   const serialized = useMemo(() => {
     if (!workflow) return null;
-    return format === "json" ? serializeToJSON(workflow, true) : serializeToYAML(workflow);
+    return format === 'json' ? serializeToJSON(workflow, true) : serializeToYAML(workflow);
   }, [workflow, format]);
 
   const validation = useMemo(() => {
@@ -61,12 +65,12 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
     if (!serialized) return;
     await navigator.clipboard.writeText(serialized);
     setCopied(true);
-    
+
     // Clear any existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     timeoutRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
@@ -85,7 +89,8 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
   }
 
   const hasErrors = validation && (validation.valid === false || validation.typeErrors.length > 0);
-  const hasWarnings = validation && (validation.warnings.length > 0 || validation.connectivityWarnings.length > 0);
+  const hasWarnings =
+    validation && (validation.warnings.length > 0 || validation.connectivityWarnings.length > 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -101,7 +106,7 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
           {/* Format selector */}
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium">Format:</label>
-            <Select value={format} onValueChange={(value) => setFormat(value as "json" | "yaml")}>
+            <Select value={format} onValueChange={(value) => setFormat(value as 'json' | 'yaml')}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -160,7 +165,7 @@ export function ExportDialog({ open, onOpenChange, workflow }: ExportDialogProps
             <label className="text-sm font-medium mb-2">Preview:</label>
             <div className="flex-1 overflow-auto bg-muted rounded-md p-4">
               <pre className="text-xs font-mono whitespace-pre-wrap break-words">
-                {serialized || "No workflow to export"}
+                {serialized || 'No workflow to export'}
               </pre>
             </div>
           </div>

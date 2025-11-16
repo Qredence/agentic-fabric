@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import React, { memo, useState } from "react";
-import { Handle, Position } from "@xyflow/react";
-import { motion, AnimatePresence } from "motion/react";
-import { Info, ChevronDown, ChevronUp, Square, ArrowRightLeft, List } from "lucide-react";
-import type { WorkflowExecutor } from "@/lib/workflow/executors";
-import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
+import React, { memo, useState } from 'react';
+import { Handle, Position } from '@xyflow/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Info, ChevronDown, ChevronUp, Square, ArrowRightLeft, List } from 'lucide-react';
+import type { WorkflowExecutor } from '@/lib/workflow/executors';
+import { ConnectionHandle } from '@/components/ai-elements/connection-handle';
 
 /**
  * Workflow executor node data
  */
 export interface WorkflowExecutorNodeData {
-  variant: "workflow-executor";
+  variant: 'workflow-executor';
   handles: {
     target: boolean;
     source: boolean;
@@ -19,7 +19,7 @@ export interface WorkflowExecutorNodeData {
   executor: WorkflowExecutor;
   label?: string;
   description?: string;
-  status?: "idle" | "running" | "completed" | "error";
+  status?: 'idle' | 'running' | 'completed' | 'error';
   childCount?: number;
 }
 
@@ -29,7 +29,7 @@ export interface WorkflowExecutorNodeData {
 export type WorkflowExecutorNodeProps = any;
 
 const springTransition = {
-  type: "spring" as const,
+  type: 'spring' as const,
   stiffness: 300,
   damping: 30,
   mass: 0.8,
@@ -44,11 +44,11 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.workflowId || executor.id;
-  const executorTypeName = "workflow-executor";
-  
+  const executorTypeName = 'workflow-executor';
+
   // Get model from metadata or default
   const metadata = (executor.metadata as Record<string, any> | undefined) ?? {};
-  const model = metadata.model || "GPT-5";
+  const model = metadata.model || 'GPT-5';
 
   const hovered = internalHovered;
 
@@ -57,11 +57,14 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
   };
 
   // Get current values for suggestions
-  const currentWorkflowId = executor.workflowId || "—";
+  const currentWorkflowId = executor.workflowId || '—';
   const inputMappingsCount = executor.inputMapping ? Object.keys(executor.inputMapping).length : 0;
-  const currentInputMappings = inputMappingsCount > 0 ? `${inputMappingsCount} mapping(s)` : "None";
-  const outputMappingsCount = executor.outputMapping ? Object.keys(executor.outputMapping).length : 0;
-  const currentOutputMappings = outputMappingsCount > 0 ? `${outputMappingsCount} mapping(s)` : "None";
+  const currentInputMappings = inputMappingsCount > 0 ? `${inputMappingsCount} mapping(s)` : 'None';
+  const outputMappingsCount = executor.outputMapping
+    ? Object.keys(executor.outputMapping).length
+    : 0;
+  const currentOutputMappings =
+    outputMappingsCount > 0 ? `${outputMappingsCount} mapping(s)` : 'None';
 
   // Suggestions for Workflow Executor - matching main parameters exactly as shown in properties panel
   const suggestions = [
@@ -115,10 +118,10 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
             border transition-all duration-200
             ${
               selected
-                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                 : hovered
-                ? "border-white/10"
-                : "border-white/5"
+                  ? 'border-white/10'
+                  : 'border-white/5'
             }
             hover:border-white/15 active:scale-98
             flex items-center justify-between
@@ -185,7 +188,7 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
                   layoutId={`node-title-${id}`}
                   transition={springTransition}
                   className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
-                    hovered ? "text-gray-300" : "text-gray-400"
+                    hovered ? 'text-gray-300' : 'text-gray-400'
                   }`}
                 >
                   {displayLabel}
@@ -269,10 +272,10 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
                 border transition-all duration-200
                 ${
                   selected
-                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                     : hovered
-                    ? "border-white/10"
-                    : "border-white/5"
+                      ? 'border-white/10'
+                      : 'border-white/5'
                 }
               `}
             >
@@ -367,19 +370,11 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
               </div>
             </motion.div>
             {/* ReactFlow Handles */}
-            {handles.target && (
-              <Handle position={Position.Left} type="target" />
-            )}
-            {handles.source && (
-              <Handle position={Position.Right} type="source" />
-            )}
+            {handles.target && <Handle position={Position.Left} type="target" />}
+            {handles.source && <Handle position={Position.Right} type="source" />}
             {/* Connection Handles */}
-            {handles.target && (
-              <ConnectionHandle position="left" visible={hovered} />
-            )}
-            {handles.source && (
-              <ConnectionHandle position="right" visible={hovered} />
-            )}
+            {handles.target && <ConnectionHandle position="left" visible={hovered} />}
+            {handles.source && <ConnectionHandle position="right" visible={hovered} />}
           </motion.div>
         </>
       )}
@@ -387,4 +382,4 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
   );
 });
 
-WorkflowExecutorNode.displayName = "WorkflowExecutorNode";
+WorkflowExecutorNode.displayName = 'WorkflowExecutorNode';

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,24 +8,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
-import type { Workflow } from "@/lib/workflow/workflow";
-import {
-  deserializeFromJSON,
-  deserializeFromYAML,
-} from "@/lib/workflow/export/serializers";
-import { validateWorkflowSchema } from "@/lib/workflow/export/validator";
-import { workflowToReactFlow } from "@/lib/workflow/conversion";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Upload, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
+import type { Workflow } from '@/lib/workflow/workflow';
+import { deserializeFromJSON, deserializeFromYAML } from '@/lib/workflow/export/serializers';
+import { validateWorkflowSchema } from '@/lib/workflow/export/validator';
+import { workflowToReactFlow } from '@/lib/workflow/conversion';
 
 interface ImportDialogProps {
   open: boolean;
@@ -33,13 +30,9 @@ interface ImportDialogProps {
   onImport: (nodes: any[], edges: any[]) => void;
 }
 
-export function ImportDialog({
-  open,
-  onOpenChange,
-  onImport,
-}: ImportDialogProps) {
-  const [format, setFormat] = useState<"json" | "yaml">("json");
-  const [importText, setImportText] = useState("");
+export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps) {
+  const [format, setFormat] = useState<'json' | 'yaml'>('json');
+  const [importText, setImportText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +54,7 @@ export function ImportDialog({
     try {
       let workflow: Workflow;
 
-      if (format === "json") {
+      if (format === 'json') {
         workflow = deserializeFromJSON(text);
       } else {
         workflow = deserializeFromYAML(text);
@@ -72,11 +65,11 @@ export function ImportDialog({
         setError(null);
         setIsValid(true);
       } else {
-        setError(validation.errors.join("\n"));
+        setError(validation.errors.join('\n'));
         setIsValid(false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid workflow format");
+      setError(err instanceof Error ? err.message : 'Invalid workflow format');
       setIsValid(false);
     }
   };
@@ -87,7 +80,7 @@ export function ImportDialog({
     try {
       let workflow: Workflow;
 
-      if (format === "json") {
+      if (format === 'json') {
         workflow = deserializeFromJSON(importText);
       } else {
         workflow = deserializeFromYAML(importText);
@@ -96,11 +89,11 @@ export function ImportDialog({
       const { nodes, edges } = workflowToReactFlow(workflow);
       onImport(nodes, edges);
       onOpenChange(false);
-      setImportText("");
+      setImportText('');
       setError(null);
       setIsValid(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to import workflow");
+      setError(err instanceof Error ? err.message : 'Failed to import workflow');
     }
   };
 
@@ -119,9 +112,7 @@ export function ImportDialog({
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Import Workflow</DialogTitle>
-          <DialogDescription>
-            Import a workflow from JSON or YAML format
-          </DialogDescription>
+          <DialogDescription>Import a workflow from JSON or YAML format</DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col gap-4">
@@ -131,7 +122,7 @@ export function ImportDialog({
             <Select
               value={format}
               onValueChange={(value) => {
-                setFormat(value as "json" | "yaml");
+                setFormat(value as 'json' | 'yaml');
                 if (importText) {
                   validateImport(importText);
                 }
@@ -161,7 +152,7 @@ export function ImportDialog({
             <input
               ref={fileInputRef}
               type="file"
-              accept={format === "json" ? ".json" : ".yaml,.yml"}
+              accept={format === 'json' ? '.json' : '.yaml,.yml'}
               onChange={handleFileUpload}
               className="hidden"
             />
@@ -203,9 +194,9 @@ export function ImportDialog({
                 value={importText}
                 onChange={(e) => handleTextChange(e.target.value)}
                 placeholder={
-                  format === "json"
+                  format === 'json'
                     ? '{"id": "workflow-1", "executors": [...], "edges": [...]}'
-                    : "id: workflow-1\nexecutors:\n  - id: executor-1\n    type: executor\nedges:\n  - id: edge-1\n    source: executor-1\n    target: executor-2"
+                    : 'id: workflow-1\nexecutors:\n  - id: executor-1\n    type: executor\nedges:\n  - id: edge-1\n    source: executor-1\n    target: executor-2'
                 }
                 className="font-mono text-xs min-h-full border-0 bg-transparent resize-none"
               />

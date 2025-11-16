@@ -93,6 +93,7 @@ New to Agentic Fabric? Start here:
 ### Type Definitions
 
 Key interfaces and types are defined in:
+
 - `lib/workflow/workflow.ts` - Workflow, WorkflowState, WorkflowMetadata
 - `lib/workflow/executors.ts` - BaseExecutor and executor types
 - `lib/workflow/agent.ts` - AgentProtocol, BaseAgent

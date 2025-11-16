@@ -9,6 +9,7 @@ This document provides comprehensive documentation for the workflow system in Ag
 ### What is a Workflow?
 
 A workflow in Agentic Fabric is a directed graph where:
+
 - **Nodes** represent executors (processing units that perform work)
 - **Edges** represent data flow connections between executors
 - **Edge Groups** provide advanced routing logic (fan-in, fan-out, switch-case)
@@ -56,7 +57,7 @@ Executes JavaScript/TypeScript functions.
 
 ```typescript
 interface FunctionExecutor extends BaseExecutor {
-  type: "function";
+  type: 'function';
   function: {
     code: string;
     parameters: FunctionParameter[];
@@ -66,18 +67,20 @@ interface FunctionExecutor extends BaseExecutor {
 ```
 
 **Use Cases:**
+
 - Data transformation
 - Custom business logic
 - API calls
 - Data validation
 
 **Example:**
+
 ```javascript
 // Function code
 function processData(input) {
   return {
     processed: input.data.toUpperCase(),
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }
 ```
@@ -88,7 +91,7 @@ Runs AI agents with custom configurations.
 
 ```typescript
 interface AgentExecutor extends BaseExecutor {
-  type: "agent";
+  type: 'agent';
   agentId?: string;
   model?: string;
   systemPrompt?: string;
@@ -100,12 +103,14 @@ interface AgentExecutor extends BaseExecutor {
 ```
 
 **Use Cases:**
+
 - Natural language processing
 - Content generation
 - Decision making
 - Data analysis
 
 **Example Configuration:**
+
 ```json
 {
   "type": "agent",
@@ -113,9 +118,7 @@ interface AgentExecutor extends BaseExecutor {
   "systemPrompt": "You are a helpful assistant that analyzes data.",
   "temperature": 0.7,
   "maxTokens": 1000,
-  "tools": [
-    { "toolId": "web-search", "enabled": true }
-  ]
+  "tools": [{ "toolId": "web-search", "enabled": true }]
 }
 ```
 
@@ -125,7 +128,7 @@ Embeds sub-workflows as reusable components.
 
 ```typescript
 interface WorkflowExecutor extends BaseExecutor {
-  type: "workflow";
+  type: 'workflow';
   workflowId: string;
   inputMapping?: Record<string, string>;
   outputMapping?: Record<string, string>;
@@ -133,6 +136,7 @@ interface WorkflowExecutor extends BaseExecutor {
 ```
 
 **Use Cases:**
+
 - Modular workflow design
 - Reusable workflow components
 - Complex nested workflows
@@ -143,7 +147,7 @@ Gathers user input during workflow execution.
 
 ```typescript
 interface RequestInfoExecutor extends BaseExecutor {
-  type: "request-info";
+  type: 'request-info';
   prompt: string;
   fields: InputField[];
   validation?: ValidationRule[];
@@ -151,6 +155,7 @@ interface RequestInfoExecutor extends BaseExecutor {
 ```
 
 **Use Cases:**
+
 - Human-in-the-loop workflows
 - Form-based data collection
 - Interactive decision points
@@ -161,7 +166,7 @@ Specialized agents from the Magentic framework.
 
 ```typescript
 interface MagenticAgentExecutor extends BaseExecutor {
-  type: "magentic-agent";
+  type: 'magentic-agent';
   agentRole: string;
   capabilities: string[];
   systemPrompt: string;
@@ -170,12 +175,13 @@ interface MagenticAgentExecutor extends BaseExecutor {
     magentic: {
       presetKey: MagenticAgentPresetKey;
     };
-    source: "agent-framework";
+    source: 'agent-framework';
   };
 }
 ```
 
 **Preset Types:**
+
 - **Planner**: Creates task plans and assigns work
 - **Web Surfer**: Gathers information from the web
 - **File Surfer**: Reads and processes documents
@@ -184,6 +190,7 @@ interface MagenticAgentExecutor extends BaseExecutor {
 - **Critic**: Reviews and validates work
 
 **Example - Planner Agent:**
+
 ```json
 {
   "type": "magentic-agent",
@@ -203,7 +210,7 @@ Coordinates multiple Magentic agents.
 
 ```typescript
 interface MagenticOrchestratorExecutor extends BaseExecutor {
-  type: "magentic-orchestrator";
+  type: 'magentic-orchestrator';
   planningStrategy?: string;
   enableProgressTracking?: boolean;
   humanInLoop?: boolean;
@@ -212,6 +219,7 @@ interface MagenticOrchestratorExecutor extends BaseExecutor {
 ```
 
 **Use Cases:**
+
 - Multi-agent collaboration
 - Complex task delegation
 - Team-based problem solving
@@ -241,9 +249,9 @@ Edges can have conditions that determine if data flows:
 
 ```typescript
 interface EdgeCondition {
-  type: "expression" | "function";
-  expression?: string;  // e.g., "output.status === 'success'"
-  function?: string;    // JavaScript function
+  type: 'expression' | 'function';
+  expression?: string; // e.g., "output.status === 'success'"
+  function?: string; // JavaScript function
 }
 ```
 
@@ -253,7 +261,7 @@ Transform data as it flows between executors:
 
 ```typescript
 interface EdgeTransform {
-  type: "map" | "filter" | "function";
+  type: 'map' | 'filter' | 'function';
   mapping?: Record<string, string>;
   function?: string;
 }
@@ -269,19 +277,21 @@ Merges multiple inputs into a single output.
 
 ```typescript
 interface FanInEdgeGroup {
-  type: "fan-in";
+  type: 'fan-in';
   sources: ExecutorId[];
   target: ExecutorId;
-  mergeStrategy?: "all" | "any" | "first";
+  mergeStrategy?: 'all' | 'any' | 'first';
 }
 ```
 
 **Merge Strategies:**
+
 - `all`: Wait for all sources to complete
 - `any`: Proceed when any source completes
 - `first`: Use only the first completed source
 
 **Use Cases:**
+
 - Gathering results from parallel tasks
 - Combining data from multiple sources
 - Synchronization points
@@ -292,18 +302,20 @@ Broadcasts input to multiple outputs.
 
 ```typescript
 interface FanOutEdgeGroup {
-  type: "fan-out";
+  type: 'fan-out';
   source: ExecutorId;
   targets: ExecutorId[];
-  broadcastMode: "parallel" | "sequential";
+  broadcastMode: 'parallel' | 'sequential';
 }
 ```
 
 **Broadcast Modes:**
+
 - `parallel`: Execute all targets simultaneously
 - `sequential`: Execute targets one after another
 
 **Use Cases:**
+
 - Parallel processing
 - Broadcasting notifications
 - Running multiple analyses
@@ -314,7 +326,7 @@ Routes based on conditional logic.
 
 ```typescript
 interface SwitchCaseEdgeGroup {
-  type: "switch-case";
+  type: 'switch-case';
   source: ExecutorId;
   switchExpression: string;
   cases: CaseRoute[];
@@ -329,11 +341,13 @@ interface CaseRoute {
 ```
 
 **Use Cases:**
+
 - Conditional routing
 - Business logic branching
 - Error handling paths
 
 **Example:**
+
 ```json
 {
   "switchExpression": "output.type",
@@ -358,11 +372,12 @@ interface SharedState {
 }
 
 // Accessing shared state in executors
-context.sharedState.get("key");
-context.sharedState.set("key", value);
+context.sharedState.get('key');
+context.sharedState.set('key', value);
 ```
 
 **Use Cases:**
+
 - Passing data between non-connected executors
 - Global configuration
 - Accumulating results
@@ -370,12 +385,7 @@ context.sharedState.set("key", value);
 ### Workflow Status
 
 ```typescript
-type WorkflowStatus = 
-  | "pending"
-  | "running"
-  | "completed"
-  | "failed"
-  | "cancelled";
+type WorkflowStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 ```
 
 ### Execution State
@@ -401,6 +411,7 @@ interface WorkflowState {
 The system converts between two representations:
 
 1. **React Flow Representation** (UI Layer)
+
    - Nodes with position data
    - Visual styling information
    - UI-specific metadata
@@ -421,11 +432,12 @@ function reactFlowToWorkflow(
   nodes: ReactFlowNode[],
   edges: Edge[],
   workflowId: string,
-  workflowName?: string
-): Workflow
+  workflowName?: string,
+): Workflow;
 ```
 
 **Process:**
+
 1. Extract executor data from nodes
 2. Convert edges to runtime format
 3. Group edges into edge groups
@@ -437,12 +449,11 @@ function reactFlowToWorkflow(
 Converts workflow to React Flow state:
 
 ```typescript
-function workflowToReactFlow(
-  workflow: Workflow
-): { nodes: ReactFlowNode[], edges: Edge[] }
+function workflowToReactFlow(workflow: Workflow): { nodes: ReactFlowNode[]; edges: Edge[] };
 ```
 
 **Process:**
+
 1. Create nodes from executors
 2. Apply layout (if positions not saved)
 3. Create edges from workflow edges
@@ -464,11 +475,13 @@ Important metadata is preserved during round-trip conversion:
 ### Execution Model
 
 1. **Initialization**
+
    - Create workflow state
    - Initialize shared state
    - Prepare executors
 
 2. **Execution Loop**
+
    - Identify ready executors (all inputs satisfied)
    - Execute ready executors
    - Update shared state
@@ -509,6 +522,7 @@ interface WorkflowEvent {
 ```
 
 **Event Types:**
+
 - `workflow.started`
 - `workflow.completed`
 - `workflow.failed`
@@ -642,6 +656,7 @@ Workflows export to JSON with this structure:
 ### Import Validation
 
 Imported workflows are validated for:
+
 - Valid executor types
 - Valid edge references
 - No circular dependencies (in certain contexts)
@@ -660,6 +675,7 @@ Imported workflows are validated for:
 ### Dynamic Workflows
 
 Future: Generate workflows programmatically based on:
+
 - User requirements
 - Template expansion
 - AI-generated workflows
@@ -667,6 +683,7 @@ Future: Generate workflows programmatically based on:
 ### Workflow Optimization
 
 Future: Optimize workflows for:
+
 - Execution time
 - Resource usage
 - Cost efficiency
@@ -675,6 +692,7 @@ Future: Optimize workflows for:
 ### Workflow Templates
 
 Future: Create and share workflow templates:
+
 - Industry-specific templates
 - Common pattern libraries
 - Template marketplace
@@ -682,6 +700,7 @@ Future: Create and share workflow templates:
 ### Distributed Execution
 
 Future: Execute workflows across:
+
 - Multiple servers
 - Edge devices
 - Cloud functions

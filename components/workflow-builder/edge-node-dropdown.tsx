@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,12 +9,12 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
-import { Plus, Bot, Square, ArrowLeftRight, Network, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { MAGENTIC_AGENT_PRESETS } from "@/lib/workflow/magentic-presets";
-import { getExecutorTypeLabel } from "@/lib/workflow/executors";
-import type { XYPosition } from "@xyflow/react";
+} from '@/components/ui/dropdown-menu';
+import { Plus, Bot, Square, ArrowLeftRight, Network, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { MAGENTIC_AGENT_PRESETS } from '@/lib/workflow/magentic-presets';
+import { getExecutorTypeLabel } from '@/lib/workflow/executors';
+import type { XYPosition } from '@xyflow/react';
 
 interface EdgeNodeDropdownProps {
   edgeId: string;
@@ -25,16 +25,36 @@ interface EdgeNodeDropdownProps {
 }
 
 const nodeLibraryItems = [
-  { id: "agent-executor", label: getExecutorTypeLabel("agent-executor"), icon: Bot, color: "#3B82F6" },
-  { id: "workflow-executor", label: "End", icon: Square, color: "#10B981" },
-  { id: "function-executor", label: getExecutorTypeLabel("function-executor"), icon: ArrowLeftRight, color: "#A855F7" },
-  { id: "request-info-executor", label: getExecutorTypeLabel("request-info-executor"), icon: Network, color: "#3B82F6" },
-  { id: "magentic-orchestrator-executor", label: getExecutorTypeLabel("magentic-orchestrator-executor"), icon: Network, color: "#8B5CF6" },
+  {
+    id: 'agent-executor',
+    label: getExecutorTypeLabel('agent-executor'),
+    icon: Bot,
+    color: '#3B82F6',
+  },
+  { id: 'workflow-executor', label: 'End', icon: Square, color: '#10B981' },
+  {
+    id: 'function-executor',
+    label: getExecutorTypeLabel('function-executor'),
+    icon: ArrowLeftRight,
+    color: '#A855F7',
+  },
+  {
+    id: 'request-info-executor',
+    label: getExecutorTypeLabel('request-info-executor'),
+    icon: Network,
+    color: '#3B82F6',
+  },
+  {
+    id: 'magentic-orchestrator-executor',
+    label: getExecutorTypeLabel('magentic-orchestrator-executor'),
+    icon: Network,
+    color: '#8B5CF6',
+  },
   ...MAGENTIC_AGENT_PRESETS.map((preset) => ({
     id: `magentic-agent-executor:${preset.key}`,
     label: preset.label,
     icon: Sparkles,
-    color: "#8B5CF6",
+    color: '#8B5CF6',
   })),
 ];
 
@@ -58,7 +78,7 @@ export function EdgeNodeDropdown({
       setOpen(false);
       onClose?.();
     },
-    [onSelectNode, onClose]
+    [onSelectNode, onClose],
   );
 
   // Close on click outside
@@ -71,8 +91,8 @@ export function EdgeNodeDropdown({
     };
 
     if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [open, onClose]);
 
@@ -86,18 +106,21 @@ export function EdgeNodeDropdown({
       style={{
         left: `${displayPosition.x}px`,
         top: `${displayPosition.y}px`,
-        transform: "translate(-50%, -50%)",
+        transform: 'translate(-50%, -50%)',
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <DropdownMenu open={open} onOpenChange={(newOpen) => {
-        if (!newOpen) {
-          setOpen(false);
-          onClose?.();
-        } else {
-          setOpen(true);
-        }
-      }}>
+      <DropdownMenu
+        open={open}
+        onOpenChange={(newOpen) => {
+          if (!newOpen) {
+            setOpen(false);
+            onClose?.();
+          } else {
+            setOpen(true);
+          }
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             size="sm"

@@ -10,7 +10,7 @@ export interface BaseContent {
  * Text content - plain text in chat
  */
 export interface TextContent extends BaseContent {
-  type: "text";
+  type: 'text';
   text: string;
 }
 
@@ -18,7 +18,7 @@ export interface TextContent extends BaseContent {
  * Text reasoning content - distinct reasoning text
  */
 export interface TextReasoningContent extends BaseContent {
-  type: "text-reasoning";
+  type: 'text-reasoning';
   text: string;
 }
 
@@ -26,7 +26,7 @@ export interface TextReasoningContent extends BaseContent {
  * Data content - binary data with MIME type (data URIs)
  */
 export interface DataContent extends BaseContent {
-  type: "data";
+  type: 'data';
   data: string; // Base64 or data URI
   mimeType: string;
 }
@@ -35,7 +35,7 @@ export interface DataContent extends BaseContent {
  * URI content - content identified by URI (images, files)
  */
 export interface UriContent extends BaseContent {
-  type: "uri";
+  type: 'uri';
   uri: string;
   mimeType?: string;
 }
@@ -44,7 +44,7 @@ export interface UriContent extends BaseContent {
  * Error content - error representations
  */
 export interface ErrorContent extends BaseContent {
-  type: "error";
+  type: 'error';
   code: string;
   message: string;
   details?: unknown;
@@ -54,7 +54,7 @@ export interface ErrorContent extends BaseContent {
  * Function call content - function call requests
  */
 export interface FunctionCallContent extends BaseContent {
-  type: "function-call";
+  type: 'function-call';
   functionName: string;
   arguments: Record<string, unknown>;
   callId: string;
@@ -64,7 +64,7 @@ export interface FunctionCallContent extends BaseContent {
  * Function result content - function call results
  */
 export interface FunctionResultContent extends BaseContent {
-  type: "function-result";
+  type: 'function-result';
   callId: string;
   result: unknown;
   isError?: boolean;
@@ -74,7 +74,7 @@ export interface FunctionResultContent extends BaseContent {
  * Function approval request content - user approval request
  */
 export interface FunctionApprovalRequestContent extends BaseContent {
-  type: "function-approval-request";
+  type: 'function-approval-request';
   callId: string;
   functionName: string;
   arguments: Record<string, unknown>;
@@ -84,7 +84,7 @@ export interface FunctionApprovalRequestContent extends BaseContent {
  * Function approval response content - user approval response
  */
 export interface FunctionApprovalResponseContent extends BaseContent {
-  type: "function-approval-response";
+  type: 'function-approval-response';
   callId: string;
   approved: boolean;
   reason?: string;
@@ -94,7 +94,7 @@ export interface FunctionApprovalResponseContent extends BaseContent {
  * Hosted file content - hosted file references
  */
 export interface HostedFileContent extends BaseContent {
-  type: "hosted-file";
+  type: 'hosted-file';
   fileId: string;
   fileName: string;
   mimeType?: string;
@@ -104,7 +104,7 @@ export interface HostedFileContent extends BaseContent {
  * Hosted vector store content - hosted vector store references
  */
 export interface HostedVectorStoreContent extends BaseContent {
-  type: "hosted-vector-store";
+  type: 'hosted-vector-store';
   storeId: string;
   query?: string;
 }
@@ -113,7 +113,7 @@ export interface HostedVectorStoreContent extends BaseContent {
  * Usage content - usage information for requests/responses
  */
 export interface UsageContent extends BaseContent {
-  type: "usage";
+  type: 'usage';
   promptTokens?: number;
   completionTokens?: number;
   totalTokens?: number;
@@ -140,15 +140,13 @@ export type WorkflowContent =
  * Type guard helpers
  */
 export function isTextContent(content: BaseContent): content is TextContent {
-  return content.type === "text";
+  return content.type === 'text';
 }
 
-export function isFunctionCallContent(
-  content: BaseContent
-): content is FunctionCallContent {
-  return content.type === "function-call";
+export function isFunctionCallContent(content: BaseContent): content is FunctionCallContent {
+  return content.type === 'function-call';
 }
 
 export function isErrorContent(content: BaseContent): content is ErrorContent {
-  return content.type === "error";
+  return content.type === 'error';
 }

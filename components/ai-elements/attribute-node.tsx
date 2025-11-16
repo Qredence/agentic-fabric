@@ -1,34 +1,30 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Handle, Position } from "@xyflow/react";
-import { Settings, Check, ChevronDown, ChevronUp, Plus } from "lucide-react";
-import type {
-  AttributeDefinition,
-  AttributeNodeData,
-  AttributeType,
-} from "@/lib/workflow/types";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Handle, Position } from '@xyflow/react';
+import { Settings, Check, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import type { AttributeDefinition, AttributeNodeData, AttributeType } from '@/lib/workflow/types';
 
-type AttributeNodeProps = Omit<AttributeNodeData, "variant" | "handles"> & {
+type AttributeNodeProps = Omit<AttributeNodeData, 'variant' | 'handles'> & {
   isSelected?: boolean;
   isHovered?: boolean;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   onAttributeChange?: (id: string, value: any) => void;
-  "data-id"?: string;
+  'data-id'?: string;
 };
 
 export const AttributeNode: React.FC<AttributeNodeProps> = ({
-  title = "Attributes",
-  model = "GPT-5",
+  title = 'Attributes',
+  model = 'GPT-5',
   attributes = [],
   isSelected = false,
   isHovered = false,
   collapsed = false,
   onToggleCollapse,
   onAttributeChange,
-  "data-id": dataId,
+  'data-id': dataId,
 }) => {
   const [internalHovered, setInternalHovered] = useState(false);
   const [internalCollapsed, setInternalCollapsed] = useState(collapsed);
@@ -50,8 +46,7 @@ export const AttributeNode: React.FC<AttributeNodeProps> = ({
 
       attributes.forEach((attr) => {
         const previousValue = prev[attr.id];
-        next[attr.id] =
-          attr.value ?? previousValue ?? getDefaultValue(attr.type);
+        next[attr.id] = attr.value ?? previousValue ?? getDefaultValue(attr.type);
       });
 
       return next;
@@ -78,7 +73,7 @@ export const AttributeNode: React.FC<AttributeNodeProps> = ({
   };
 
   const springTransition = {
-    type: "spring" as const,
+    type: 'spring' as const,
     stiffness: 300,
     damping: 30,
     mass: 0.8,
@@ -118,10 +113,10 @@ export const AttributeNode: React.FC<AttributeNodeProps> = ({
             border transition-all duration-200
             ${
               isSelected
-                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                 : hovered
-                ? "border-white/10"
-                : "border-white/5"
+                  ? 'border-white/10'
+                  : 'border-white/5'
             }
             hover:border-white/15 active:scale-98
             flex items-center justify-between
@@ -201,7 +196,7 @@ export const AttributeNode: React.FC<AttributeNodeProps> = ({
                   layoutId={`attr-title-${dataId || title}`}
                   transition={springTransition}
                   className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
-                    hovered ? "text-gray-300" : "text-gray-400"
+                    hovered ? 'text-gray-300' : 'text-gray-400'
                   }`}
                 >
                   {title}
@@ -282,10 +277,10 @@ export const AttributeNode: React.FC<AttributeNodeProps> = ({
                 border transition-all duration-200
                 ${
                   isSelected
-                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                     : hovered
-                    ? "border-white/10"
-                    : "border-white/5"
+                      ? 'border-white/10'
+                      : 'border-white/5'
                 }
               `}
             >
@@ -308,9 +303,7 @@ export const AttributeNode: React.FC<AttributeNodeProps> = ({
                   className="flex items-center gap-3 px-4 py-3 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors duration-200"
                 >
                   <Settings className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-400">
-                    Configure Parameters
-                  </span>
+                  <span className="text-sm text-gray-400">Configure Parameters</span>
                 </motion.div>
                 {/* Attributes List */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -327,9 +320,7 @@ export const AttributeNode: React.FC<AttributeNodeProps> = ({
                       transition={springTransition}
                       className="flex items-center justify-center h-full"
                     >
-                      <p className="text-gray-600 text-sm">
-                        No attributes configured
-                      </p>
+                      <p className="text-gray-600 text-sm">No attributes configured</p>
                     </motion.div>
                   ) : (
                     attributes.map((attr, index) => (
@@ -375,11 +366,7 @@ interface AttributeControlProps {
   onChange: (value: any) => void;
 }
 
-const AttributeControl: React.FC<AttributeControlProps> = ({
-  attribute,
-  value,
-  onChange,
-}) => {
+const AttributeControl: React.FC<AttributeControlProps> = ({ attribute, value, onChange }) => {
   const [isFocused, setIsFocused] = useState(false);
 
   const stopNodeDrag = {
@@ -390,11 +377,11 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
 
   const renderControl = () => {
     switch (attribute.type) {
-      case "input":
+      case 'input':
         return (
           <input
             type="text"
-            value={value || ""}
+            value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -403,13 +390,13 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
               w-full px-3 py-2 rounded-lg
               bg-black/20 border transition-all duration-200
               text-white text-sm outline-none
-              ${isFocused ? "border-white/20 bg-black/30" : "border-white/10"}
+              ${isFocused ? 'border-white/20 bg-black/30' : 'border-white/10'}
               hover:border-white/15
             `}
             placeholder={`Enter ${attribute.label.toLowerCase()}`}
           />
         );
-      case "progress":
+      case 'progress':
         return (
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-gray-500">
@@ -436,7 +423,7 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
             />
           </div>
         );
-      case "checkbox":
+      case 'checkbox':
         return (
           <button
             onClick={() => onChange(!value)}
@@ -444,11 +431,7 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
             className={`
               flex items-center gap-3 w-full p-3 rounded-lg
               border transition-all duration-200
-              ${
-                value
-                  ? "bg-blue-500/10 border-blue-500/30"
-                  : "bg-black/20 border-white/10"
-              }
+              ${value ? 'bg-blue-500/10 border-blue-500/30' : 'bg-black/20 border-white/10'}
               hover:border-white/20 active:scale-98
             `}
           >
@@ -456,20 +439,18 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
               className={`
               w-5 h-5 rounded border-2 flex items-center justify-center
               transition-all duration-200
-              ${value ? "bg-blue-500 border-blue-500" : "border-gray-600"}
+              ${value ? 'bg-blue-500 border-blue-500' : 'border-gray-600'}
             `}
             >
               {value && <Check className="h-3 w-3 text-white" />}
             </div>
-            <span className="text-sm text-gray-300">
-              Enable {attribute.label}
-            </span>
+            <span className="text-sm text-gray-300">Enable {attribute.label}</span>
           </button>
         );
-      case "select":
+      case 'select':
         return (
           <select
-            value={value || ""}
+            value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -478,7 +459,7 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
               w-full px-3 py-2 rounded-lg
               bg-black/20 border transition-all duration-200
               text-white text-sm outline-none cursor-pointer
-              ${isFocused ? "border-white/20 bg-black/30" : "border-white/10"}
+              ${isFocused ? 'border-white/20 bg-black/30' : 'border-white/10'}
               hover:border-white/15
             `}
           >
@@ -490,7 +471,7 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
             ))}
           </select>
         );
-      case "slider":
+      case 'slider':
         return (
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-gray-500">
@@ -524,9 +505,7 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs text-gray-500 uppercase tracking-wider">
-        {attribute.label}
-      </label>
+      <label className="text-xs text-gray-500 uppercase tracking-wider">{attribute.label}</label>
       {renderControl()}
     </div>
   );
@@ -534,15 +513,15 @@ const AttributeControl: React.FC<AttributeControlProps> = ({
 
 const getDefaultValue = (type: AttributeType): any => {
   switch (type) {
-    case "input":
-      return "";
-    case "progress":
+    case 'input':
+      return '';
+    case 'progress':
       return 0;
-    case "checkbox":
+    case 'checkbox':
       return false;
-    case "select":
-      return "";
-    case "slider":
+    case 'select':
+      return '';
+    case 'slider':
       return 0;
     default:
       return null;
@@ -550,14 +529,11 @@ const getDefaultValue = (type: AttributeType): any => {
 };
 
 interface ConnectionHandleProps {
-  position: "left" | "right";
+  position: 'left' | 'right';
   visible?: boolean;
 }
 
-const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
-  position,
-  visible = false,
-}) => {
+const ConnectionHandle: React.FC<ConnectionHandleProps> = ({ position, visible = false }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -568,8 +544,8 @@ const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
           flex h-24 w-px items-center
           bg-gradient-to-b from-transparent via-white to-transparent
           transition-opacity duration-300
-          ${visible ? "opacity-100" : "opacity-0"}
-          ${position === "right" ? "-right-px" : "-left-px"}
+          ${visible ? 'opacity-100' : 'opacity-0'}
+          ${position === 'right' ? '-right-px' : '-left-px'}
         `}
       />
       <div
@@ -577,19 +553,19 @@ const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
           absolute top-44 -translate-y-12 z-0
           flex h-24 items-center cursor-pointer
           transition-opacity duration-300
-          ${visible || isHovered ? "opacity-100" : "opacity-0"}
-          ${position === "right" ? "-right-8 left-80" : "-left-8 right-80"}
+          ${visible || isHovered ? 'opacity-100' : 'opacity-0'}
+          ${position === 'right' ? '-right-8 left-80' : '-left-8 right-80'}
         `}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div
           className={`p-5 rounded-full transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] 
-          ${isHovered ? "scale-110 bg-white/5" : "scale-100"}`}
+          ${isHovered ? 'scale-110 bg-white/5' : 'scale-100'}`}
         >
           <Plus
             className={`h-6 w-6 transition-colors duration-200 ${
-              isHovered ? "text-white" : "text-gray-400"
+              isHovered ? 'text-white' : 'text-gray-400'
             }`}
           />
         </div>

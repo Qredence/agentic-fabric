@@ -1,27 +1,24 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import type { AgentExecutor } from "@/lib/workflow/executors";
+} from '@/components/ui/select';
+import type { AgentExecutor } from '@/lib/workflow/executors';
 
 interface AgentExecutorEditorProps {
   executor: AgentExecutor;
   onChange: (updates: Partial<AgentExecutor>) => void;
 }
 
-export function AgentExecutorEditor({
-  executor,
-  onChange,
-}: AgentExecutorEditorProps) {
+export function AgentExecutorEditor({ executor, onChange }: AgentExecutorEditorProps) {
   return (
     <div className="space-y-4 pt-2 border-t">
       <h4 className="text-sm font-medium">Agent Configuration</h4>
@@ -30,7 +27,7 @@ export function AgentExecutorEditor({
         <Label htmlFor="agent-id">Agent ID</Label>
         <Input
           id="agent-id"
-          value={executor.agentId || ""}
+          value={executor.agentId || ''}
           onChange={(e) => onChange({ agentId: e.target.value })}
           placeholder="my-agent"
         />
@@ -39,8 +36,10 @@ export function AgentExecutorEditor({
       <div className="space-y-2">
         <Label htmlFor="agent-type">Agent Type</Label>
         <Select
-          value={executor.agentType || "chat"}
-          onValueChange={(value) => onChange({ agentType: value as "chat" | "workflow" | "magentic" })}
+          value={executor.agentType || 'chat'}
+          onValueChange={(value) =>
+            onChange({ agentType: value as 'chat' | 'workflow' | 'magentic' })
+          }
         >
           <SelectTrigger id="agent-type">
             <SelectValue />
@@ -57,7 +56,7 @@ export function AgentExecutorEditor({
         <Label htmlFor="model">Model</Label>
         <Input
           id="model"
-          value={executor.model || ""}
+          value={executor.model || ''}
           onChange={(e) => onChange({ model: e.target.value || undefined })}
           placeholder="gpt-4"
         />
@@ -67,7 +66,7 @@ export function AgentExecutorEditor({
         <Label htmlFor="system-prompt">System Prompt</Label>
         <Textarea
           id="system-prompt"
-          value={executor.systemPrompt || ""}
+          value={executor.systemPrompt || ''}
           onChange={(e) => onChange({ systemPrompt: e.target.value || undefined })}
           placeholder="You are a helpful assistant..."
           rows={4}
@@ -83,7 +82,7 @@ export function AgentExecutorEditor({
             min="0"
             max="2"
             step="0.1"
-            value={executor.temperature ?? ""}
+            value={executor.temperature ?? ''}
             onChange={(e) =>
               onChange({
                 temperature: e.target.value ? Number.parseFloat(e.target.value) : undefined,
@@ -99,7 +98,7 @@ export function AgentExecutorEditor({
             id="max-tokens"
             type="number"
             min="1"
-            value={executor.maxTokens ?? ""}
+            value={executor.maxTokens ?? ''}
             onChange={(e) =>
               onChange({
                 maxTokens: e.target.value ? Number.parseInt(e.target.value, 10) : undefined,
@@ -113,10 +112,8 @@ export function AgentExecutorEditor({
       <div className="space-y-2">
         <Label htmlFor="tool-mode">Tool Mode</Label>
         <Select
-          value={executor.toolMode || "auto"}
-          onValueChange={(value) =>
-            onChange({ toolMode: value as "auto" | "required" | "none" })
-          }
+          value={executor.toolMode || 'auto'}
+          onValueChange={(value) => onChange({ toolMode: value as 'auto' | 'required' | 'none' })}
         >
           <SelectTrigger id="tool-mode">
             <SelectValue />
@@ -136,7 +133,9 @@ export function AgentExecutorEditor({
             {executor.tools.map((tool, idx) => (
               <div key={idx} className="py-1">
                 {tool.toolId}
-                {tool.enabled === false && <span className="ml-2 text-muted-foreground">(disabled)</span>}
+                {tool.enabled === false && (
+                  <span className="ml-2 text-muted-foreground">(disabled)</span>
+                )}
               </div>
             ))}
           </div>

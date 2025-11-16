@@ -23,11 +23,13 @@ components/
 Wrapper component for React Flow canvas with custom styling and configuration.
 
 **Props:**
+
 - Extends all React Flow `ReactFlowProps`
 - Pre-configured with custom styling classes
 - Supports dark/light theme via Tailwind classes
 
 **Usage:**
+
 ```tsx
 <Canvas
   nodes={nodes}
@@ -47,6 +49,7 @@ Wrapper component for React Flow canvas with custom styling and configuration.
 Generic node wrapper component with connection handles and customizable styling.
 
 **Props:**
+
 - `handles`: Configuration for target/source handles
   - `target`: boolean (show input handle)
   - `source`: boolean (show output handle)
@@ -55,6 +58,7 @@ Generic node wrapper component with connection handles and customizable styling.
 - `className`: Additional CSS classes
 
 **Sub-components:**
+
 - `NodeHeader`: Title and description area
 - `NodeTitle`: Node title text
 - `NodeDescription`: Node description text
@@ -62,6 +66,7 @@ Generic node wrapper component with connection handles and customizable styling.
 - `NodeFooter`: Footer area for metadata
 
 **Usage:**
+
 ```tsx
 <Node handles={{ target: true, source: true }}>
   <NodeHeader>
@@ -82,15 +87,18 @@ Generic node wrapper component with connection handles and customizable styling.
 Custom edge components with animations and styling.
 
 **Components:**
+
 - `AnimatedEdge`: Animated edge with flowing particles
 - `TemporaryEdge`: Dashed edge for temporary connections
 - `Edge`: Base edge component
 
 **Props:**
+
 - Standard React Flow edge props
 - `onHover`: Callback for hover events (position and screen position)
 
 **Usage:**
+
 ```tsx
 const edgeTypes = {
   animated: AnimatedEdge,
@@ -103,6 +111,7 @@ const edgeTypes = {
 Connection line component shown while dragging to create edges.
 
 **Features:**
+
 - Animated connection preview
 - Matches theme styling
 - Shows valid/invalid connection states
@@ -112,6 +121,7 @@ Connection line component shown while dragging to create edges.
 Specialized 352×352px morphing node for text editing with suggestions.
 
 **Props:**
+
 - `title`: Card title
 - `placeholder`: Textarea placeholder
 - `showSuggestions`: Show/hide suggestions panel
@@ -121,6 +131,7 @@ Specialized 352×352px morphing node for text editing with suggestions.
 - `isHovered`: Hover state
 
 **Features:**
+
 - Dual textarea setup (main + bottom input)
 - Shimmer placeholder animation
 - Spring-based collapse/expand morphing
@@ -128,6 +139,7 @@ Specialized 352×352px morphing node for text editing with suggestions.
 - Fixed 352×352px dimensions
 
 **Usage:**
+
 ```tsx
 <TextBlockCard
   title="Creative Brief"
@@ -142,6 +154,7 @@ Specialized 352×352px morphing node for text editing with suggestions.
 Specialized 352×352px morphing node for configurable parameters.
 
 **Props:**
+
 - `title`: Node title
 - `attributes`: Array of attribute configurations
 - `collapsed`: Collapse state
@@ -150,6 +163,7 @@ Specialized 352×352px morphing node for configurable parameters.
 - `isSelected`: Selection state
 
 **Attribute Types:**
+
 - `input`: Text input field
 - `slider`: Range slider
 - `checkbox`: Checkbox toggle
@@ -157,12 +171,13 @@ Specialized 352×352px morphing node for configurable parameters.
 - `progress`: Progress indicator
 
 **Usage:**
+
 ```tsx
 <AttributeNode
   title="Settings"
   attributes={[
-    { id: "temp", type: "slider", label: "Temperature", min: 0, max: 1, value: 0.7 },
-    { id: "tone", type: "select", label: "Tone", options: ["Formal", "Casual"], value: "Formal" }
+    { id: 'temp', type: 'slider', label: 'Temperature', min: 0, max: 1, value: 0.7 },
+    { id: 'tone', type: 'select', label: 'Tone', options: ['Formal', 'Casual'], value: 'Formal' },
   ]}
   onAttributeChange={(id, value) => console.log(id, value)}
 />
@@ -173,6 +188,7 @@ Specialized 352×352px morphing node for configurable parameters.
 Floating panel component for sidebars and overlays.
 
 **Props:**
+
 - `position`: "left" | "right" | "top" | "bottom"
 - `children`: Panel content
 - `className`: Additional styles
@@ -182,10 +198,12 @@ Floating panel component for sidebars and overlays.
 Node toolbar component that appears on hover/selection.
 
 **Sub-components:**
+
 - `Actions`: Container for action buttons
 - `Action`: Individual action button
 
 **Usage:**
+
 ```tsx
 <Toolbar>
   <Actions>
@@ -208,6 +226,7 @@ Located in `components/ai-elements/executors/`.
 Generic executor node for base executors.
 
 **Props:**
+
 - `id`: Node ID
 - `data`: Executor data including:
   - `executor`: BaseExecutor object
@@ -220,6 +239,7 @@ Generic executor node for base executors.
 Specialized node for agent executors.
 
 **Features:**
+
 - Shows agent capabilities
 - Displays model information
 - Tool configurations
@@ -230,6 +250,7 @@ Specialized node for agent executors.
 Node for function executors.
 
 **Features:**
+
 - Function code preview
 - Parameter display
 - Return type information
@@ -239,6 +260,7 @@ Node for function executors.
 Node for sub-workflow executors.
 
 **Features:**
+
 - Embedded workflow reference
 - Input/output mapping
 - Nested workflow indicator
@@ -248,6 +270,7 @@ Node for sub-workflow executors.
 Node for request info executors.
 
 **Features:**
+
 - Input field configuration
 - Prompt template preview
 - Required field indicators
@@ -261,10 +284,12 @@ Located in `components/ai-elements/edge-groups/`.
 Merges multiple inputs into single output.
 
 **Props:**
+
 - `data.group`: FanInEdgeGroup configuration
 - `data.handles`: Handle configuration with `sourceCount`
 
 **Features:**
+
 - Multiple target handles (one per source)
 - Single source handle
 - Automatic handle positioning
@@ -274,11 +299,13 @@ Merges multiple inputs into single output.
 Broadcasts single input to multiple outputs.
 
 **Props:**
+
 - `data.group`: FanOutEdgeGroup configuration
   - `broadcastMode`: "parallel" | "sequential"
 - `data.handles`: Handle configuration with `targetCount`
 
 **Features:**
+
 - Single target handle
 - Multiple source handles (one per target)
 - Mode indicator (parallel/sequential)
@@ -288,12 +315,14 @@ Broadcasts single input to multiple outputs.
 Routes based on conditional logic.
 
 **Props:**
+
 - `data.group`: SwitchCaseEdgeGroup configuration
   - `switchExpression`: Expression to evaluate
   - `cases`: Array of case conditions
 - `data.handles`: Handle configuration with `caseCount`
 
 **Features:**
+
 - Single target handle
 - Multiple source handles (one per case + default)
 - Case expression editor
@@ -308,17 +337,20 @@ Located in `components/workflow-builder/`.
 Draggable palette of available nodes.
 
 **Props:**
+
 - `onAddNode`: Callback to add node to canvas
 - `onDragStart`: Drag start handler
 - `onAddMagenticScaffold`: Add full Magentic team
 
 **Features:**
+
 - Categorized node sections
 - Drag-to-canvas support
 - Magentic scaffold quick-add
 - Search/filter (future)
 
 **Node Categories:**
+
 - Executors (Function, Agent, Workflow, Request Info)
 - Magentic Agents (Planner, Web, Coder, Critic, etc.)
 - Edge Groups (Fan-in, Fan-out, Switch-case)
@@ -329,6 +361,7 @@ Draggable palette of available nodes.
 Right sidebar for configuring selected nodes.
 
 **Props:**
+
 - `selectedNode`: Currently selected node
 - `onUpdate`: Update callback
 - `onDelete`: Delete callback
@@ -336,6 +369,7 @@ Right sidebar for configuring selected nodes.
 - `onEvaluate`: Evaluate callback (future)
 
 **Features:**
+
 - Dynamic editor based on node type
 - Executor-specific editors
 - Common actions (delete, duplicate)
@@ -346,6 +380,7 @@ Right sidebar for configuring selected nodes.
 Top toolbar with workflow actions.
 
 **Props:**
+
 - `projectName`: Current workflow name
 - `projectStatus`: Workflow status badge
 - `workflow`: Full workflow object
@@ -353,6 +388,7 @@ Top toolbar with workflow actions.
   - `onEvaluate`, `onCode`, `onPreview`, `onPublish`, `onValidate`
 
 **Features:**
+
 - Project name display
 - Status badge
 - Action buttons (Evaluate, Code, Preview, Publish)
@@ -364,12 +400,14 @@ Top toolbar with workflow actions.
 Bottom toolbar with canvas controls.
 
 **Props:**
+
 - `currentTool`: "pointer" | "pan"
 - `onToolChange`: Tool change callback
 - `onUndo`, `onRedo`: History callbacks
 - `canUndo`, `canRedo`: History state
 
 **Features:**
+
 - Tool selector (pointer/pan)
 - Undo/redo buttons with state
 - Zoom controls
@@ -380,11 +418,13 @@ Bottom toolbar with canvas controls.
 Dialog for exporting workflows.
 
 **Props:**
+
 - `open`: Dialog open state
 - `onOpenChange`: Open state change callback
 - `workflow`: Workflow to export
 
 **Features:**
+
 - JSON export with formatting
 - Copy to clipboard
 - Download as file
@@ -395,11 +435,13 @@ Dialog for exporting workflows.
 Dialog for importing workflows.
 
 **Props:**
+
 - `open`: Dialog open state
 - `onOpenChange`: Open state change callback
 - `onImport`: Import callback with nodes and edges
 
 **Features:**
+
 - File upload
 - Paste from clipboard
 - JSON validation
@@ -410,6 +452,7 @@ Dialog for importing workflows.
 Dropdown menu for inserting nodes on edges.
 
 **Props:**
+
 - `edgeId`: Target edge ID
 - `position`: Flow position for new node
 - `screenPosition`: Screen position for dropdown
@@ -417,6 +460,7 @@ Dropdown menu for inserting nodes on edges.
 - `onClose`: Close callback
 
 **Features:**
+
 - Appears on edge hover
 - Lists available node types
 - Creates node and splits edge
@@ -430,6 +474,7 @@ Located in `components/workflow-builder/executor-editors/`.
 Editor for agent executors.
 
 **Fields:**
+
 - Label, description
 - Model selection
 - System prompt
@@ -442,6 +487,7 @@ Editor for agent executors.
 Editor for Magentic agent executors.
 
 **Additional Fields:**
+
 - Preset selection (planner, web, coder, etc.)
 - Agent role
 - Preset-specific capabilities
@@ -452,6 +498,7 @@ Editor for Magentic agent executors.
 Editor for Magentic orchestrator executors.
 
 **Fields:**
+
 - Planning strategy
 - Progress tracking toggle
 - Human-in-the-loop toggle
@@ -462,6 +509,7 @@ Editor for Magentic orchestrator executors.
 Editor for function executors.
 
 **Fields:**
+
 - Function name
 - Code editor with syntax highlighting
 - Parameter definitions
@@ -472,6 +520,7 @@ Editor for function executors.
 Editor for workflow executors.
 
 **Fields:**
+
 - Workflow selection/reference
 - Input mapping
 - Output mapping
@@ -481,6 +530,7 @@ Editor for workflow executors.
 Editor for request info executors.
 
 **Fields:**
+
 - Prompt template
 - Input fields configuration
 - Validation rules
@@ -495,14 +545,19 @@ Located in `components/ui/`. These are based on Radix UI with custom Tailwind st
 Styled button component with variants.
 
 **Variants:**
+
 - `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`
 
 **Sizes:**
+
 - `default`, `sm`, `lg`, `icon`
 
 **Usage:**
+
 ```tsx
-<Button variant="default" size="lg">Click me</Button>
+<Button variant="default" size="lg">
+  Click me
+</Button>
 ```
 
 ### Dialog (`dialog.tsx`)
@@ -510,6 +565,7 @@ Styled button component with variants.
 Modal dialog component.
 
 **Sub-components:**
+
 - `Dialog`: Root component
 - `DialogTrigger`: Trigger button
 - `DialogContent`: Dialog content area
@@ -521,6 +577,7 @@ Modal dialog component.
 Dropdown select component.
 
 **Sub-components:**
+
 - `Select`: Root
 - `SelectTrigger`: Trigger button
 - `SelectContent`: Dropdown content
@@ -531,6 +588,7 @@ Dropdown select component.
 Range slider component.
 
 **Props:**
+
 - `min`, `max`, `step`: Range configuration
 - `value`: Current value
 - `onValueChange`: Change callback
@@ -552,25 +610,22 @@ Range slider component.
 Components use CVA for variant-driven styling:
 
 ```typescript
-const buttonVariants = cva(
-  "base-classes",
-  {
-    variants: {
-      variant: {
-        default: "default-classes",
-        destructive: "destructive-classes",
-      },
-      size: {
-        default: "default-size",
-        sm: "small-size",
-      },
+const buttonVariants = cva('base-classes', {
+  variants: {
+    variant: {
+      default: 'default-classes',
+      destructive: 'destructive-classes',
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
+    size: {
+      default: 'default-size',
+      sm: 'small-size',
     },
-  }
-);
+  },
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+});
 ```
 
 ### cn() Utility

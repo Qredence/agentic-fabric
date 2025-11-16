@@ -1,6 +1,6 @@
-import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
-import type { BaseExecutor, BaseEdge, ExecutorId, EdgeId, EdgeCondition } from "./types";
-import type { Workflow } from "./workflow";
+import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from '@xyflow/react';
+import type { BaseExecutor, BaseEdge, ExecutorId, EdgeId, EdgeCondition } from './types';
+import type { Workflow } from './workflow';
 import type {
   FunctionExecutor,
   AgentExecutor,
@@ -10,31 +10,27 @@ import type {
   MagenticAgentExecutor,
   MagenticOrchestratorExecutor,
   ToolReference,
-} from "./executors";
+} from './executors';
 import type {
   SingleEdgeGroup,
   FanInEdgeGroup,
   FanOutEdgeGroup,
   SwitchCaseEdgeGroup,
   EdgeGroup,
-} from "./edges";
-import type { ExecutorNodeData } from "@/components/ai-elements/executors/executor-node";
-import type { FunctionExecutorNodeData } from "@/components/ai-elements/executors/function-executor-node";
-import type { AgentExecutorNodeData } from "@/components/ai-elements/executors/agent-executor-node";
-import type { WorkflowExecutorNodeData } from "@/components/ai-elements/executors/workflow-executor-node";
-import type { RequestInfoExecutorNodeData } from "@/components/ai-elements/executors/request-info-executor-node";
-import type { FanInNodeData } from "@/components/ai-elements/edge-groups/fan-in-node";
-import type { FanOutNodeData } from "@/components/ai-elements/edge-groups/fan-out-node";
-import type { SwitchCaseNodeData } from "@/components/ai-elements/edge-groups/switch-case-node";
+} from './edges';
+import type { ExecutorNodeData } from '@/components/ai-elements/executors/executor-node';
+import type { FunctionExecutorNodeData } from '@/components/ai-elements/executors/function-executor-node';
+import type { AgentExecutorNodeData } from '@/components/ai-elements/executors/agent-executor-node';
+import type { WorkflowExecutorNodeData } from '@/components/ai-elements/executors/workflow-executor-node';
+import type { RequestInfoExecutorNodeData } from '@/components/ai-elements/executors/request-info-executor-node';
+import type { FanInNodeData } from '@/components/ai-elements/edge-groups/fan-in-node';
+import type { FanOutNodeData } from '@/components/ai-elements/edge-groups/fan-out-node';
+import type { SwitchCaseNodeData } from '@/components/ai-elements/edge-groups/switch-case-node';
 
 // Import legacy node data types
-import type {
-  WorkflowStepNodeData,
-  TextBlockNodeData,
-  AttributeNodeData,
-} from "./types";
-import { MAGENTIC_AGENT_PRESET_MAP } from "./magentic-presets";
-import type { MagenticAgentPresetKey } from "./magentic-presets";
+import type { WorkflowStepNodeData, TextBlockNodeData, AttributeNodeData } from './types';
+import { MAGENTIC_AGENT_PRESET_MAP } from './magentic-presets';
+import type { MagenticAgentPresetKey } from './magentic-presets';
 
 /**
  * Extended React Flow node data that can contain executor or edge group data
@@ -73,8 +69,8 @@ export type WorkflowReactFlowEdge = ReactFlowEdge;
 export function reactFlowToWorkflow(
   nodes: WorkflowReactFlowNode[],
   edges: WorkflowReactFlowEdge[],
-  workflowId: string = "workflow-1",
-  workflowName?: string
+  workflowId: string = 'workflow-1',
+  workflowName?: string,
 ): Workflow {
   // Extract executors from nodes
   const executors: BaseExecutor[] = [];
@@ -103,16 +99,16 @@ export function reactFlowToWorkflow(
   const workflowEdges: BaseEdge[] = edges.map((edge) => {
     const condition = edge.data?.condition as EdgeCondition | undefined;
     let edgeCondition: EdgeCondition | undefined = undefined;
-    
+
     if (condition) {
-      if (condition.type === "predicate") {
+      if (condition.type === 'predicate') {
         edgeCondition = {
-          type: "predicate" as const,
+          type: 'predicate' as const,
           expression: condition.expression,
         };
-      } else if (condition.type === "case") {
+      } else if (condition.type === 'case') {
         edgeCondition = {
-          type: "case" as const,
+          type: 'case' as const,
           caseValue: condition.caseValue,
         };
       }
@@ -148,7 +144,7 @@ export function reactFlowToWorkflow(
     edges: workflowEdges,
     edgeGroups: edgeGroups.length > 0 ? edgeGroups : undefined,
     metadata: (() => {
-      const metadata: Workflow["metadata"] = {
+      const metadata: Workflow['metadata'] = {
         createdAt: new Date().toISOString(),
         custom: {},
       };
@@ -180,11 +176,13 @@ export function workflowToReactFlow(workflow: Workflow): {
   // Convert executors to nodes
   for (const executor of workflow.executors) {
     const nodePositions =
-      (workflow.metadata?.custom?.nodePositions as Record<string, { x: number; y: number }> | undefined) ??
-      ((workflow.metadata as Record<string, unknown> | undefined)?.nodePositions as Record<string, { x: number; y: number }> | undefined);
-    const position =
-      nodePositions?.[executor.id] ||
-      ({ x: 0, y: 0 } as { x: number; y: number });
+      (workflow.metadata?.custom?.nodePositions as
+        | Record<string, { x: number; y: number }>
+        | undefined) ??
+      ((workflow.metadata as Record<string, unknown> | undefined)?.nodePositions as
+        | Record<string, { x: number; y: number }>
+        | undefined);
+    const position = nodePositions?.[executor.id] || ({ x: 0, y: 0 } as { x: number; y: number });
 
     const nodeData = executorToNodeData(executor);
     if (nodeData) {
@@ -220,7 +218,7 @@ export function workflowToReactFlow(workflow: Workflow): {
       id: edge.id,
       source: edge.source,
       target: edge.target,
-      type: "animated",
+      type: 'animated',
       data: {
         condition: edge.condition,
         ...edge.metadata,
@@ -235,7 +233,7 @@ export function workflowToReactFlow(workflow: Workflow): {
  * Check if node data is executor data
  */
 function isExecutorNodeData(
-  data: WorkflowNodeData
+  data: WorkflowNodeData,
 ): data is
   | ExecutorNodeData
   | FunctionExecutorNodeData
@@ -243,11 +241,11 @@ function isExecutorNodeData(
   | WorkflowExecutorNodeData
   | RequestInfoExecutorNodeData {
   return (
-    data.variant === "executor" ||
-    data.variant === "function-executor" ||
-    data.variant === "agent-executor" ||
-    data.variant === "workflow-executor" ||
-    data.variant === "request-info-executor"
+    data.variant === 'executor' ||
+    data.variant === 'function-executor' ||
+    data.variant === 'agent-executor' ||
+    data.variant === 'workflow-executor' ||
+    data.variant === 'request-info-executor'
   );
 }
 
@@ -255,13 +253,9 @@ function isExecutorNodeData(
  * Check if node data is edge group data
  */
 function isEdgeGroupNode(
-  data: WorkflowNodeData
+  data: WorkflowNodeData,
 ): data is FanInNodeData | FanOutNodeData | SwitchCaseNodeData {
-  return (
-    data.variant === "fan-in" ||
-    data.variant === "fan-out" ||
-    data.variant === "switch-case"
-  );
+  return data.variant === 'fan-in' || data.variant === 'fan-out' || data.variant === 'switch-case';
 }
 
 /**
@@ -280,7 +274,7 @@ function nodeToExecutor(node: WorkflowReactFlowNode): BaseExecutor | null {
   // Fallback: create basic executor from node
   return {
     id: node.id,
-    type: (data.executorType as string) || "executor",
+    type: (data.executorType as string) || 'executor',
     label: data.label,
     description: data.description,
   };
@@ -289,100 +283,98 @@ function nodeToExecutor(node: WorkflowReactFlowNode): BaseExecutor | null {
 /**
  * Convert executor to React Flow node data
  */
-function executorToNodeData(
-  executor: BaseExecutor
-): WorkflowNodeData | null {
+function executorToNodeData(executor: BaseExecutor): WorkflowNodeData | null {
   const executorType = executor.type as ExecutorType;
 
   switch (executorType) {
-    case "function-executor": {
+    case 'function-executor': {
       const funcExec = executor as FunctionExecutor;
       return {
-        variant: "function-executor",
+        variant: 'function-executor',
         handles: { target: true, source: true },
         executor: funcExec,
         label: funcExec.label,
         description: funcExec.description,
       } as FunctionExecutorNodeData;
     }
-    case "agent-executor": {
+    case 'agent-executor': {
       const agentExec = executor as AgentExecutor;
       return {
-        variant: "agent-executor",
+        variant: 'agent-executor',
         handles: { target: true, source: true },
         executor: agentExec,
         label: agentExec.label,
         description: agentExec.description,
       } as AgentExecutorNodeData;
     }
-    case "magentic-agent-executor": {
+    case 'magentic-agent-executor': {
       const magenticAgent = executor as MagenticAgentExecutor;
       return {
-        variant: "agent-executor",
+        variant: 'agent-executor',
         handles: { target: true, source: true },
         executor: magenticAgent as unknown as AgentExecutor,
         label: magenticAgent.label,
         description: magenticAgent.description,
       } as AgentExecutorNodeData;
     }
-    case "workflow-executor": {
+    case 'workflow-executor': {
       const workflowExec = executor as WorkflowExecutor;
       return {
-        variant: "workflow-executor",
+        variant: 'workflow-executor',
         handles: { target: true, source: true },
         executor: workflowExec,
         label: workflowExec.label,
         description: workflowExec.description,
       } as WorkflowExecutorNodeData;
     }
-    case "request-info-executor": {
+    case 'request-info-executor': {
       const reqExec = executor as RequestInfoExecutor;
       return {
-        variant: "request-info-executor",
+        variant: 'request-info-executor',
         handles: { target: true, source: true },
         executor: reqExec,
         label: reqExec.label,
         description: reqExec.description,
       } as RequestInfoExecutorNodeData;
     }
-    case "magentic-orchestrator-executor": {
+    case 'magentic-orchestrator-executor': {
       const magenticOrchestrator = executor as MagenticOrchestratorExecutor;
       return {
-        variant: "executor",
+        variant: 'executor',
         handles: { target: true, source: true },
         executor: magenticOrchestrator as unknown as BaseExecutor,
-        executorType: "magentic-orchestrator-executor",
+        executorType: 'magentic-orchestrator-executor',
         label: magenticOrchestrator.label,
         description: magenticOrchestrator.description,
       } as ExecutorNodeData;
     }
     default: {
-      if ((executor as BaseExecutor).type === "magentic-agent-executor") {
+      if ((executor as BaseExecutor).type === 'magentic-agent-executor') {
         const magAgent = executor as MagenticAgentExecutor;
         return {
-          variant: "agent-executor",
+          variant: 'agent-executor',
           handles: { target: true, source: true },
           executor: magAgent as unknown as AgentExecutor,
           label: magAgent.label,
           description: magAgent.description,
         } as AgentExecutorNodeData;
       }
-      if ((executor as BaseExecutor).type === "magentic-orchestrator-executor") {
+      if ((executor as BaseExecutor).type === 'magentic-orchestrator-executor') {
         const magOrchestrator = executor as MagenticOrchestratorExecutor;
         return {
-          variant: "executor",
+          variant: 'executor',
           handles: { target: true, source: true },
           executor: magOrchestrator as unknown as BaseExecutor,
-          executorType: "magentic-orchestrator-executor",
+          executorType: 'magentic-orchestrator-executor',
           label: magOrchestrator.label,
           description: magOrchestrator.description,
         } as ExecutorNodeData;
       }
       return {
-        variant: "executor",
+        variant: 'executor',
         handles: { target: true, source: true },
         executor,
-        executorType: executorType || "executor",
+        executorType: executorType || 'executor',
         label: executor.label,
         description: executor.description,
       } as ExecutorNodeData;
@@ -396,36 +388,34 @@ function executorToNodeData(
 function getNodeTypeFromExecutor(executor: BaseExecutor): string {
   const executorType = executor.type as ExecutorType;
   switch (executorType) {
-    case "function-executor":
-      return "function-executor";
-    case "agent-executor":
-      return "agent-executor";
-    case "magentic-agent-executor":
-      return "magentic-agent-executor";
-    case "workflow-executor":
-      return "workflow-executor";
-    case "request-info-executor":
-      return "request-info-executor";
-    case "magentic-orchestrator-executor":
-      return "magentic-orchestrator-executor";
+    case 'function-executor':
+      return 'function-executor';
+    case 'agent-executor':
+      return 'agent-executor';
+    case 'magentic-agent-executor':
+      return 'magentic-agent-executor';
+    case 'workflow-executor':
+      return 'workflow-executor';
+    case 'request-info-executor':
+      return 'request-info-executor';
+    case 'magentic-orchestrator-executor':
+      return 'magentic-orchestrator-executor';
     default:
-      return "executor";
+      return 'executor';
   }
 }
 
 /**
  * Convert node data to edge group
  */
-function nodeDataToEdgeGroup(
-  data: WorkflowNodeData
-): EdgeGroup | null {
-  if (data.variant === "fan-in" && "group" in data) {
+function nodeDataToEdgeGroup(data: WorkflowNodeData): EdgeGroup | null {
+  if (data.variant === 'fan-in' && 'group' in data) {
     return (data as FanInNodeData).group;
   }
-  if (data.variant === "fan-out" && "group" in data) {
+  if (data.variant === 'fan-out' && 'group' in data) {
     return (data as FanOutNodeData).group;
   }
-  if (data.variant === "switch-case" && "group" in data) {
+  if (data.variant === 'switch-case' && 'group' in data) {
     return (data as SwitchCaseNodeData).group;
   }
   return null;
@@ -436,10 +426,10 @@ function nodeDataToEdgeGroup(
  */
 function edgeGroupToNodeData(group: EdgeGroup): WorkflowNodeData | null {
   switch (group.type) {
-    case "fan-in": {
+    case 'fan-in': {
       const fanIn = group as FanInEdgeGroup;
       return {
-        variant: "fan-in",
+        variant: 'fan-in',
         handles: {
           target: true,
           source: true,
@@ -448,10 +438,10 @@ function edgeGroupToNodeData(group: EdgeGroup): WorkflowNodeData | null {
         group: fanIn,
       } as FanInNodeData;
     }
-    case "fan-out": {
+    case 'fan-out': {
       const fanOut = group as FanOutEdgeGroup;
       return {
-        variant: "fan-out",
+        variant: 'fan-out',
         handles: {
           target: true,
           source: true,
@@ -460,10 +450,10 @@ function edgeGroupToNodeData(group: EdgeGroup): WorkflowNodeData | null {
         group: fanOut,
       } as FanOutNodeData;
     }
-    case "switch-case": {
+    case 'switch-case': {
       const switchCase = group as SwitchCaseEdgeGroup;
       return {
-        variant: "switch-case",
+        variant: 'switch-case',
         handles: {
           target: true,
           source: true,
@@ -482,14 +472,14 @@ function edgeGroupToNodeData(group: EdgeGroup): WorkflowNodeData | null {
  */
 function getNodeTypeFromEdgeGroup(group: EdgeGroup): string {
   switch (group.type) {
-    case "fan-in":
-      return "fan-in";
-    case "fan-out":
-      return "fan-out";
-    case "switch-case":
-      return "switch-case";
+    case 'fan-in':
+      return 'fan-in';
+    case 'fan-out':
+      return 'fan-out';
+    case 'switch-case':
+      return 'switch-case';
     default:
-      return "executor";
+      return 'executor';
   }
 }
 
@@ -505,60 +495,60 @@ export function createExecutorFromNodeType(
   nodeType: string,
   id: string,
   label?: string,
-  options?: CreateExecutorOptions
+  options?: CreateExecutorOptions,
 ): BaseExecutor {
   switch (nodeType) {
-    case "function-executor":
+    case 'function-executor':
       return {
         id,
-        type: "function-executor",
-        label: label || "Function Executor",
-        description: "Execute a function as a workflow node",
+        type: 'function-executor',
+        label: label || 'Function Executor',
+        description: 'Execute a function as a workflow node',
       } as FunctionExecutor;
-    case "agent-executor":
+    case 'agent-executor':
       return {
         id,
-        type: "agent-executor",
-        label: label || "Agent Executor",
-        description: "Use an AI agent to process messages",
+        type: 'agent-executor',
+        label: label || 'Agent Executor',
+        description: 'Use an AI agent to process messages',
       } as AgentExecutor;
-    case "workflow-executor":
+    case 'workflow-executor':
       return {
         id,
-        type: "workflow-executor",
-        label: label || "Workflow Executor",
-        description: "Nest another workflow as an executor",
-        workflowId: "",
+        type: 'workflow-executor',
+        label: label || 'Workflow Executor',
+        description: 'Nest another workflow as an executor',
+        workflowId: '',
       } as WorkflowExecutor;
-    case "request-info-executor":
+    case 'request-info-executor':
       return {
         id,
-        type: "request-info-executor",
-        label: label || "Request Info Executor",
-        description: "Gateway for external information requests",
-        requestType: "",
+        type: 'request-info-executor',
+        label: label || 'Request Info Executor',
+        description: 'Gateway for external information requests',
+        requestType: '',
       } as RequestInfoExecutor;
-    case "magentic-orchestrator-executor": {
+    case 'magentic-orchestrator-executor': {
       return {
         id,
-        type: "magentic-orchestrator-executor",
-        label: label || "Magentic Orchestrator",
-        description: "Coordinates Magentic agents, planning and routing messages",
-        planningStrategy: "adaptive",
+        type: 'magentic-orchestrator-executor',
+        label: label || 'Magentic Orchestrator',
+        description: 'Coordinates Magentic agents, planning and routing messages',
+        planningStrategy: 'adaptive',
         progressTracking: true,
         humanInTheLoop: false,
         metadata: {
-          source: "agent-framework",
+          source: 'agent-framework',
           magentic: {
-            presetKey: "orchestrator",
-            planningStrategy: "adaptive",
+            presetKey: 'orchestrator',
+            planningStrategy: 'adaptive',
             progressTracking: true,
             humanInTheLoop: false,
           },
         },
       } as MagenticOrchestratorExecutor;
     }
-    case "magentic-agent-executor": {
+    case 'magentic-agent-executor': {
       const preset =
         options?.presetKey && MAGENTIC_AGENT_PRESET_MAP[options.presetKey as MagenticAgentPresetKey]
           ? MAGENTIC_AGENT_PRESET_MAP[options.presetKey as MagenticAgentPresetKey]
@@ -566,19 +556,20 @@ export function createExecutorFromNodeType(
 
       return {
         id,
-        type: "magentic-agent-executor",
-        label: label || preset?.label || "Magentic Agent",
+        type: 'magentic-agent-executor',
+        label: label || preset?.label || 'Magentic Agent',
         description:
-          preset?.description || "Specialised Magentic agent that collaborates under the orchestrator",
-        agentRole: preset?.agentRole || "generalist",
+          preset?.description ||
+          'Specialised Magentic agent that collaborates under the orchestrator',
+        agentRole: preset?.agentRole || 'generalist',
         capabilities: preset?.capabilities,
         systemPrompt: preset?.systemPrompt,
-        tools: preset?.toolIds?.map((toolId) => ({ toolId, enabled: true } as ToolReference)),
+        tools: preset?.toolIds?.map((toolId) => ({ toolId, enabled: true }) as ToolReference),
         metadata: {
-          source: "agent-framework",
+          source: 'agent-framework',
           magentic: {
             presetKey: preset?.key ?? null,
-            agentRole: preset?.agentRole || "generalist",
+            agentRole: preset?.agentRole || 'generalist',
             capabilities: preset?.capabilities ?? [],
             toolIds: preset?.toolIds ?? [],
           },
@@ -588,9 +579,9 @@ export function createExecutorFromNodeType(
     default:
       return {
         id,
-        type: "executor",
-        label: label || "Executor",
-        description: "Base executor for processing messages",
+        type: 'executor',
+        label: label || 'Executor',
+        description: 'Base executor for processing messages',
       };
   }
 }
@@ -600,52 +591,52 @@ export function createExecutorFromNodeType(
  */
 export function createNodeDataFromExecutorType(
   executorType: ExecutorType,
-  executor: BaseExecutor
+  executor: BaseExecutor,
 ): WorkflowNodeData {
   switch (executorType) {
-    case "function-executor":
+    case 'function-executor':
       return {
-        variant: "function-executor",
+        variant: 'function-executor',
         handles: { target: true, source: true },
         executor: executor as FunctionExecutor,
       } as FunctionExecutorNodeData;
-    case "agent-executor":
+    case 'agent-executor':
       return {
-        variant: "agent-executor",
+        variant: 'agent-executor',
         handles: { target: true, source: true },
         executor: executor as AgentExecutor,
       } as AgentExecutorNodeData;
-    case "magentic-agent-executor":
+    case 'magentic-agent-executor':
       return {
-        variant: "agent-executor",
+        variant: 'agent-executor',
         handles: { target: true, source: true },
         executor: executor as MagenticAgentExecutor,
       } as AgentExecutorNodeData;
-    case "workflow-executor":
+    case 'workflow-executor':
       return {
-        variant: "workflow-executor",
+        variant: 'workflow-executor',
         handles: { target: true, source: true },
         executor: executor as WorkflowExecutor,
       } as WorkflowExecutorNodeData;
-    case "request-info-executor":
+    case 'request-info-executor':
       return {
-        variant: "request-info-executor",
+        variant: 'request-info-executor',
         handles: { target: true, source: true },
         executor: executor as RequestInfoExecutor,
       } as RequestInfoExecutorNodeData;
-    case "magentic-orchestrator-executor":
+    case 'magentic-orchestrator-executor':
       return {
-        variant: "executor",
+        variant: 'executor',
         handles: { target: true, source: true },
         executor: executor as MagenticOrchestratorExecutor,
-        executorType: "magentic-orchestrator-executor",
+        executorType: 'magentic-orchestrator-executor',
       } as ExecutorNodeData;
     default:
       return {
-        variant: "executor",
+        variant: 'executor',
         handles: { target: true, source: true },
         executor,
-        executorType: "executor",
+        executorType: 'executor',
       } as ExecutorNodeData;
   }
 }

@@ -14,7 +14,7 @@ export interface ToolProtocol {
  */
 export interface ToolParameter {
   name: string;
-  type: "string" | "number" | "boolean" | "object" | "array";
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   description?: string;
   required?: boolean;
   enum?: (string | number)[];
@@ -36,7 +36,7 @@ export interface AIFunction<TArgs = Record<string, unknown>, TReturn = unknown> 
  * JSON Schema for function parameters
  */
 export interface JSONSchema {
-  type: "object";
+  type: 'object';
   properties: Record<string, JSONSchemaProperty>;
   required?: string[];
 }
@@ -45,7 +45,7 @@ export interface JSONSchema {
  * JSON Schema property
  */
 export interface JSONSchemaProperty {
-  type: "string" | "number" | "boolean" | "object" | "array";
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   description?: string;
   enum?: (string | number)[];
   items?: JSONSchemaProperty; // For array types
@@ -62,7 +62,7 @@ export interface JSONSchemaProperty {
  */
 export interface HostedCodeInterpreterTool {
   id: string;
-  type: "hosted-code-interpreter";
+  type: 'hosted-code-interpreter';
   name: string;
   description: string;
   language?: string;
@@ -75,7 +75,7 @@ export interface HostedCodeInterpreterTool {
  */
 export interface HostedFileSearchTool {
   id: string;
-  type: "hosted-file-search";
+  type: 'hosted-file-search';
   name: string;
   description: string;
   searchOptions?: {
@@ -89,12 +89,12 @@ export interface HostedFileSearchTool {
  */
 export interface HostedWebSearchTool {
   id: string;
-  type: "hosted-web-search";
+  type: 'hosted-web-search';
   name: string;
   description: string;
   searchOptions?: {
     maxResults?: number;
-    timeRange?: "day" | "week" | "month" | "year" | "all";
+    timeRange?: 'day' | 'week' | 'month' | 'year' | 'all';
   };
 }
 
@@ -103,7 +103,7 @@ export interface HostedWebSearchTool {
  */
 export interface HostedMCPTool {
   id: string;
-  type: "hosted-mcp-tool";
+  type: 'hosted-mcp-tool';
   name: string;
   description: string;
   mcpServerId: string;
@@ -120,7 +120,7 @@ export interface HostedMCPTool {
  */
 export interface MCPStdioTool {
   id: string;
-  type: "mcp-stdio";
+  type: 'mcp-stdio';
   name: string;
   description: string;
   command: string;
@@ -134,7 +134,7 @@ export interface MCPStdioTool {
  */
 export interface MCPStreamableHTTPTool {
   id: string;
-  type: "mcp-streamable-http";
+  type: 'mcp-streamable-http';
   name: string;
   description: string;
   url: string;
@@ -148,7 +148,7 @@ export interface MCPStreamableHTTPTool {
  */
 export interface MCPWebsocketTool {
   id: string;
-  type: "mcp-websocket";
+  type: 'mcp-websocket';
   name: string;
   description: string;
   url: string;
@@ -175,47 +175,43 @@ export type WorkflowTool =
  * Tool type discriminator
  */
 export type ToolType =
-  | "protocol"
-  | "ai-function"
-  | "hosted-code-interpreter"
-  | "hosted-file-search"
-  | "hosted-web-search"
-  | "hosted-mcp-tool"
-  | "mcp-stdio"
-  | "mcp-streamable-http"
-  | "mcp-websocket";
+  | 'protocol'
+  | 'ai-function'
+  | 'hosted-code-interpreter'
+  | 'hosted-file-search'
+  | 'hosted-web-search'
+  | 'hosted-mcp-tool'
+  | 'mcp-stdio'
+  | 'mcp-streamable-http'
+  | 'mcp-websocket';
 
 /**
  * Type guard helpers
  */
 export function isAIFunction(tool: WorkflowTool): tool is AIFunction {
-  return "schema" in tool && "execute" in tool;
+  return 'schema' in tool && 'execute' in tool;
 }
 
 export function isHostedTool(
-  tool: WorkflowTool
-): tool is
-  | HostedCodeInterpreterTool
-  | HostedFileSearchTool
-  | HostedWebSearchTool
-  | HostedMCPTool {
+  tool: WorkflowTool,
+): tool is HostedCodeInterpreterTool | HostedFileSearchTool | HostedWebSearchTool | HostedMCPTool {
   return (
-    "type" in tool &&
-    (tool.type === "hosted-code-interpreter" ||
-      tool.type === "hosted-file-search" ||
-      tool.type === "hosted-web-search" ||
-      tool.type === "hosted-mcp-tool")
+    'type' in tool &&
+    (tool.type === 'hosted-code-interpreter' ||
+      tool.type === 'hosted-file-search' ||
+      tool.type === 'hosted-web-search' ||
+      tool.type === 'hosted-mcp-tool')
   );
 }
 
 export function isMCPTool(
-  tool: WorkflowTool
+  tool: WorkflowTool,
 ): tool is MCPStdioTool | MCPStreamableHTTPTool | MCPWebsocketTool {
   return (
-    "type" in tool &&
-    (tool.type === "mcp-stdio" ||
-      tool.type === "mcp-streamable-http" ||
-      tool.type === "mcp-websocket")
+    'type' in tool &&
+    (tool.type === 'mcp-stdio' ||
+      tool.type === 'mcp-streamable-http' ||
+      tool.type === 'mcp-websocket')
   );
 }
 
@@ -223,20 +219,20 @@ export function isMCPTool(
  * Get tool type label
  */
 export function getToolTypeLabel(tool: WorkflowTool): string {
-  if ("type" in tool) {
+  if ('type' in tool) {
     const labels: Record<string, string> = {
-      "hosted-code-interpreter": "Code Interpreter",
-      "hosted-file-search": "File Search",
-      "hosted-web-search": "Web Search",
-      "hosted-mcp-tool": "MCP Tool (Hosted)",
-      "mcp-stdio": "MCP Tool (Stdio)",
-      "mcp-streamable-http": "MCP Tool (HTTP)",
-      "mcp-websocket": "MCP Tool (WebSocket)",
+      'hosted-code-interpreter': 'Code Interpreter',
+      'hosted-file-search': 'File Search',
+      'hosted-web-search': 'Web Search',
+      'hosted-mcp-tool': 'MCP Tool (Hosted)',
+      'mcp-stdio': 'MCP Tool (Stdio)',
+      'mcp-streamable-http': 'MCP Tool (HTTP)',
+      'mcp-websocket': 'MCP Tool (WebSocket)',
     };
     return labels[tool.type] || tool.type;
   }
   if (isAIFunction(tool)) {
-    return "AI Function";
+    return 'AI Function';
   }
-  return "Tool Protocol";
+  return 'Tool Protocol';
 }

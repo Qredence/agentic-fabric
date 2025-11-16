@@ -1,11 +1,11 @@
-import type { BaseEdge, EdgeId, ExecutorId, EdgeGroupType } from "./types";
+import type { BaseEdge, EdgeId, ExecutorId, EdgeGroupType } from './types';
 
 /**
  * Single Edge Group - convenience wrapper for a one-to-one edge connection
  */
 export interface SingleEdgeGroup {
   id: string;
-  type: "single";
+  type: 'single';
   edge: BaseEdge;
 }
 
@@ -14,11 +14,11 @@ export interface SingleEdgeGroup {
  */
 export interface FanInEdgeGroup {
   id: string;
-  type: "fan-in";
+  type: 'fan-in';
   sources: ExecutorId[];
   target: ExecutorId;
   edges: BaseEdge[];
-  aggregationStrategy?: "merge" | "first" | "all" | "custom";
+  aggregationStrategy?: 'merge' | 'first' | 'all' | 'custom';
   customAggregator?: string;
 }
 
@@ -27,11 +27,11 @@ export interface FanInEdgeGroup {
  */
 export interface FanOutEdgeGroup {
   id: string;
-  type: "fan-out";
+  type: 'fan-out';
   source: ExecutorId;
   targets: ExecutorId[];
   edges: BaseEdge[];
-  broadcastMode?: "parallel" | "sequential" | "condition-based";
+  broadcastMode?: 'parallel' | 'sequential' | 'condition-based';
 }
 
 /**
@@ -39,7 +39,7 @@ export interface FanOutEdgeGroup {
  */
 export interface SwitchCaseEdgeGroup {
   id: string;
-  type: "switch-case";
+  type: 'switch-case';
   source: ExecutorId;
   cases: Case[];
   default?: DefaultCase;
@@ -87,10 +87,10 @@ export interface EdgeConfiguration {
  * Edge condition for conditional routing
  */
 export interface EdgeCondition {
-  type: "predicate" | "case" | "always";
+  type: 'predicate' | 'case' | 'always';
   expression?: string; // For predicate-based conditions (e.g., "message.type === 'error'")
   caseValue?: string; // For switch-case conditions
-  operator?: "equals" | "not-equals" | "contains" | "greater-than" | "less-than";
+  operator?: 'equals' | 'not-equals' | 'contains' | 'greater-than' | 'less-than';
   value?: unknown;
 }
 
@@ -113,21 +113,19 @@ export interface EdgeStyle {
  * Type guard helpers
  */
 export function isSingleEdgeGroup(group: EdgeGroup): group is SingleEdgeGroup {
-  return group.type === "single";
+  return group.type === 'single';
 }
 
 export function isFanInEdgeGroup(group: EdgeGroup): group is FanInEdgeGroup {
-  return group.type === "fan-in";
+  return group.type === 'fan-in';
 }
 
 export function isFanOutEdgeGroup(group: EdgeGroup): group is FanOutEdgeGroup {
-  return group.type === "fan-out";
+  return group.type === 'fan-out';
 }
 
-export function isSwitchCaseEdgeGroup(
-  group: EdgeGroup
-): group is SwitchCaseEdgeGroup {
-  return group.type === "switch-case";
+export function isSwitchCaseEdgeGroup(group: EdgeGroup): group is SwitchCaseEdgeGroup {
+  return group.type === 'switch-case';
 }
 
 /**
@@ -135,10 +133,10 @@ export function isSwitchCaseEdgeGroup(
  */
 export function getEdgeGroupTypeLabel(type: EdgeGroupType): string {
   const labels: Record<EdgeGroupType, string> = {
-    single: "Single Edge",
-    "fan-in": "Fan-In (Multiple Sources)",
-    "fan-out": "Fan-Out (Multiple Targets)",
-    "switch-case": "Switch/Case Routing",
+    single: 'Single Edge',
+    'fan-in': 'Fan-In (Multiple Sources)',
+    'fan-out': 'Fan-Out (Multiple Targets)',
+    'switch-case': 'Switch/Case Routing',
   };
   return labels[type] || type;
 }
@@ -148,12 +146,12 @@ export function getEdgeGroupTypeLabel(type: EdgeGroupType): string {
  */
 export function getEdgeGroupTypeDescription(type: EdgeGroupType): string {
   const descriptions: Record<EdgeGroupType, string> = {
-    single: "One-to-one connection between executors",
-    "fan-in": "Multiple sources converge into one target",
-    "fan-out": "One source broadcasts to multiple targets",
-    "switch-case": "Conditional routing based on expression value",
+    single: 'One-to-one connection between executors',
+    'fan-in': 'Multiple sources converge into one target',
+    'fan-out': 'One source broadcasts to multiple targets',
+    'switch-case': 'Conditional routing based on expression value',
   };
-  return descriptions[type] || "";
+  return descriptions[type] || '';
 }
 
 /**
@@ -162,7 +160,7 @@ export function getEdgeGroupTypeDescription(type: EdgeGroupType): string {
 export function createSingleEdgeGroup(edge: BaseEdge): SingleEdgeGroup {
   return {
     id: `edge-group-${edge.id}`,
-    type: "single",
+    type: 'single',
     edge,
   };
 }
@@ -174,11 +172,11 @@ export function createFanInEdgeGroup(
   sources: ExecutorId[],
   target: ExecutorId,
   edges: BaseEdge[],
-  aggregationStrategy: "merge" | "first" | "all" = "merge"
+  aggregationStrategy: 'merge' | 'first' | 'all' = 'merge',
 ): FanInEdgeGroup {
   return {
     id: `fan-in-${Date.now()}`,
-    type: "fan-in",
+    type: 'fan-in',
     sources,
     target,
     edges,
@@ -193,11 +191,11 @@ export function createFanOutEdgeGroup(
   source: ExecutorId,
   targets: ExecutorId[],
   edges: BaseEdge[],
-  broadcastMode: "parallel" | "sequential" = "parallel"
+  broadcastMode: 'parallel' | 'sequential' = 'parallel',
 ): FanOutEdgeGroup {
   return {
     id: `fan-out-${Date.now()}`,
-    type: "fan-out",
+    type: 'fan-out',
     source,
     targets,
     edges,
@@ -212,11 +210,11 @@ export function createSwitchCaseEdgeGroup(
   source: ExecutorId,
   switchExpression: string,
   cases: Case[],
-  defaultCase?: DefaultCase
+  defaultCase?: DefaultCase,
 ): SwitchCaseEdgeGroup {
   return {
     id: `switch-case-${Date.now()}`,
-    type: "switch-case",
+    type: 'switch-case',
     source,
     switchExpression,
     cases,

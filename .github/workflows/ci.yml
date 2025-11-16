@@ -3,9 +3,9 @@ permissions:
   contents: read
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,12 +13,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
         with:
-          version: 10.20.0
+          version: 10.22.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Format check
+        run: pnpm format:check
       - name: Env check
         run: pnpm env:check
         env:

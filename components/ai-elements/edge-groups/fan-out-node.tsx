@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { memo } from "react";
-import { Handle, Position, type NodeProps as ReactFlowNodeProps } from "@xyflow/react";
+import React, { memo } from 'react';
+import { Handle, Position, type NodeProps as ReactFlowNodeProps } from '@xyflow/react';
 import {
   Node,
   NodeContent,
@@ -9,18 +9,18 @@ import {
   NodeFooter,
   NodeHeader,
   NodeTitle,
-} from "@/components/ai-elements/node";
-import { Toolbar } from "@/components/ai-elements/toolbar";
-import { Actions, Action } from "@/components/ai-elements/actions";
-import { ArrowUpFromLine, Pencil, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { FanOutEdgeGroup } from "@/lib/workflow/edges";
+} from '@/components/ai-elements/node';
+import { Toolbar } from '@/components/ai-elements/toolbar';
+import { Actions, Action } from '@/components/ai-elements/actions';
+import { ArrowUpFromLine, Pencil, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { FanOutEdgeGroup } from '@/lib/workflow/edges';
 
 /**
  * Fan-out node data
  */
 export interface FanOutNodeData {
-  variant: "fan-out";
+  variant: 'fan-out';
   handles: {
     target: boolean;
     source: boolean;
@@ -30,7 +30,7 @@ export interface FanOutNodeData {
   group: FanOutEdgeGroup;
   label?: string;
   description?: string;
-  status?: "idle" | "broadcast" | "completed" | "error";
+  status?: 'idle' | 'broadcast' | 'completed' | 'error';
   syncTargetId?: string;
 }
 
@@ -46,24 +46,23 @@ export const FanOutNode = memo(({ id, data, selected }: FanOutNodeProps) => {
   const { handles, group, label, description, status, syncTargetId } = data;
 
   const displayLabel = label || `Fan-Out (${group.targets.length} targets)`;
-  const displayDescription = description || `Broadcasts from ${group.source} to ${group.targets.length} targets`;
+  const displayDescription =
+    description || `Broadcasts from ${group.source} to ${group.targets.length} targets`;
 
   return (
-    <Node handles={handles} className={cn(selected && "ring-2 ring-primary")}>
+    <Node handles={handles} className={cn(selected && 'ring-2 ring-primary')}>
       <NodeHeader>
         <div className="flex items-center gap-2">
           <ArrowUpFromLine className="size-4 text-primary" />
           <div className="flex-1 min-w-0">
             <NodeTitle className="text-sm truncate">{displayLabel}</NodeTitle>
-            <NodeDescription className="text-xs truncate">
-              {displayDescription}
-            </NodeDescription>
+            <NodeDescription className="text-xs truncate">{displayDescription}</NodeDescription>
           </div>
           <div className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground">
-            {status === "broadcast" && "Broadcasting"}
-            {status === "completed" && "Completed"}
-            {status === "idle" && "Idle"}
-            {status === "error" && "Error"}
+            {status === 'broadcast' && 'Broadcasting'}
+            {status === 'completed' && 'Completed'}
+            {status === 'idle' && 'Idle'}
+            {status === 'error' && 'Error'}
           </div>
         </div>
       </NodeHeader>
@@ -72,9 +71,7 @@ export const FanOutNode = memo(({ id, data, selected }: FanOutNodeProps) => {
           <div className="text-xs text-muted-foreground">
             Source: <span className="font-mono">{group.source}</span>
           </div>
-          <div className="text-xs text-muted-foreground">
-            Targets: {group.targets.length}
-          </div>
+          <div className="text-xs text-muted-foreground">Targets: {group.targets.length}</div>
           {group.broadcastMode && (
             <div className="text-xs text-muted-foreground">
               Mode: <span className="capitalize">{group.broadcastMode}</span>
@@ -106,4 +103,4 @@ export const FanOutNode = memo(({ id, data, selected }: FanOutNodeProps) => {
   );
 });
 
-FanOutNode.displayName = "FanOutNode";
+FanOutNode.displayName = 'FanOutNode';

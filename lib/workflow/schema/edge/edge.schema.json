@@ -19,14 +19,20 @@
           "properties": {
             "type": { "const": "predicate" },
             "expression": { "type": "string" },
-            "operator": { "type": "string", "enum": ["equals", "not-equals", "contains", "greater-than", "less-than"] },
+            "operator": {
+              "type": "string",
+              "enum": ["equals", "not-equals", "contains", "greater-than", "less-than"]
+            },
             "value": {}
           },
           "required": ["type", "expression"]
         },
         {
           "type": "object",
-          "properties": { "type": { "const": "case" }, "caseValue": { "type": ["string", "number", "boolean"] } },
+          "properties": {
+            "type": { "const": "case" },
+            "caseValue": { "type": ["string", "number", "boolean"] }
+          },
           "required": ["type", "caseValue"]
         }
       ]

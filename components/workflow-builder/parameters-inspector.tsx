@@ -1,23 +1,23 @@
-"use client"
+'use client';
 
-import { Panel } from "@/components/ai-elements/panel"
-import { cn } from "@/lib/utils"
-import type { Workflow } from "@/lib/workflow/workflow"
-import { extractWorkflowParameters } from "@/lib/workflow/parameters"
+import { Panel } from '@/components/ai-elements/panel';
+import { cn } from '@/lib/utils';
+import type { Workflow } from '@/lib/workflow/workflow';
+import { extractWorkflowParameters } from '@/lib/workflow/parameters';
 
 type Props = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  workflow: Workflow
-}
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  workflow: Workflow;
+};
 
 export function ParametersInspector({ open, onOpenChange, workflow }: Props) {
-  if (!open) return null
-  const sections = extractWorkflowParameters(workflow)
+  if (!open) return null;
+  const sections = extractWorkflowParameters(workflow);
   return (
     <Panel
       position="bottom-right"
-      className={cn("m-0 mr-6 mb-6 w-[min(100%,480px)] p-3", "max-h-[40vh] overflow-y-auto")}
+      className={cn('m-0 mr-6 mb-6 w-[min(100%,480px)] p-3', 'max-h-[40vh] overflow-y-auto')}
       role="region"
       aria-label="Parameters Inspector"
     >
@@ -62,8 +62,10 @@ export function ParametersInspector({ open, onOpenChange, workflow }: Props) {
             )}
           </div>
         ))}
-        <button className="text-xs text-muted-foreground" onClick={() => onOpenChange(false)}>Close</button>
+        <button className="text-xs text-muted-foreground" onClick={() => onOpenChange(false)}>
+          Close
+        </button>
       </div>
     </Panel>
-  )
+  );
 }

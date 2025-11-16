@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 import {
   BaseEdge,
   type EdgeProps,
@@ -10,8 +10,8 @@ import {
   Position,
   useInternalNode,
   useReactFlow,
-} from "@xyflow/react";
-import { cn } from "@/lib/utils";
+} from '@xyflow/react';
+import { cn } from '@/lib/utils';
 
 /**
  * Enhanced edge types with improved handle position calculation
@@ -24,10 +24,10 @@ import { cn } from "@/lib/utils";
 const getHandleCoordsByPosition = (
   node: InternalNode<Node>,
   handlePosition: Position,
-  handleType: "source" | "target" = handlePosition === Position.Left ? "target" : "source"
+  handleType: 'source' | 'target' = handlePosition === Position.Left ? 'target' : 'source',
 ): [number, number] => {
   const handle = node.internals.handleBounds?.[handleType]?.find(
-    (h) => h.position === handlePosition
+    (h) => h.position === handlePosition,
   );
 
   if (!handle) {
@@ -72,17 +72,14 @@ const getHandleCoordsByPosition = (
 /**
  * Get optimal edge parameters with automatic handle position detection
  */
-const getEdgeParams = (
-  source: InternalNode<Node>,
-  target: InternalNode<Node>
-) => {
+const getEdgeParams = (source: InternalNode<Node>, target: InternalNode<Node>) => {
   // Automatically determine best handle positions
   // Default: source from right, target from left
   const sourcePos = Position.Right;
   const targetPos = Position.Left;
 
-  const [sx, sy] = getHandleCoordsByPosition(source, sourcePos, "source");
-  const [tx, ty] = getHandleCoordsByPosition(target, targetPos, "target");
+  const [sx, sy] = getHandleCoordsByPosition(source, sourcePos, 'source');
+  const [tx, ty] = getHandleCoordsByPosition(target, targetPos, 'target');
 
   return {
     sx,
@@ -119,10 +116,7 @@ export const TemporaryEdge = ({
   const edgePath = useMemo(() => {
     // Use calculated positions if nodes are available
     if (sourceNode && targetNode) {
-      const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(
-        sourceNode,
-        targetNode
-      );
+      const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(sourceNode, targetNode);
       const [path] = getBezierPath({
         sourceX: sx,
         sourceY: sy,
@@ -144,16 +138,7 @@ export const TemporaryEdge = ({
       targetPosition: targetPosition || Position.Left,
     });
     return path;
-  }, [
-    sourceNode,
-    targetNode,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-  ]);
+  }, [sourceNode, targetNode, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition]);
 
   return (
     <BaseEdge
@@ -161,11 +146,17 @@ export const TemporaryEdge = ({
       path={edgePath}
       style={{
         strokeWidth: 2,
-        stroke: (getComputedStyle(document.documentElement).getPropertyValue("--edge-color-secondary") || "#7a7a7a").trim(),
-        opacity: Number(getComputedStyle(document.documentElement).getPropertyValue("--edge-opacity-secondary") || 0.5),
-        strokeDasharray: "8, 4",
-        strokeLinecap: "round",
-        filter: "drop-shadow(0 0 2px rgba(0,0,0,0.2))",
+        stroke: (
+          getComputedStyle(document.documentElement).getPropertyValue('--edge-color-secondary') ||
+          '#7a7a7a'
+        ).trim(),
+        opacity: Number(
+          getComputedStyle(document.documentElement).getPropertyValue('--edge-opacity-secondary') ||
+            0.5,
+        ),
+        strokeDasharray: '8, 4',
+        strokeLinecap: 'round',
+        filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.2))',
         ...style,
       }}
     />
@@ -200,60 +191,52 @@ export const AnimatedEdge = ({
   const targetNode = target ? useInternalNode(target) : null;
   const [isHovered, setIsHovered] = React.useState(false);
   const reactFlow = useReactFlow();
-  const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const { edgePath, midPoint } =
-    useMemo(() => {
-      if (sourceNode && targetNode) {
-        const params = getEdgeParams(sourceNode, targetNode);
-        const [path] = getBezierPath({
-          sourceX: params.sx,
-          sourceY: params.sy,
-          sourcePosition: params.sourcePos,
-          targetX: params.tx,
-          targetY: params.ty,
-          targetPosition: params.targetPos,
-        });
-        
-        // Calculate midpoint
-        const midX = (params.sx + params.tx) / 2;
-        const midY = (params.sy + params.ty) / 2;
-        
-        return {
-          edgePath: path,
-          midPoint: { x: midX, y: midY },
-        };
-      }
-
-      // Fallback to provided coordinates
+  const { edgePath, midPoint } = useMemo(() => {
+    if (sourceNode && targetNode) {
+      const params = getEdgeParams(sourceNode, targetNode);
       const [path] = getBezierPath({
-        sourceX,
-        sourceY,
-        sourcePosition: sourcePosition || Position.Right,
-        targetX,
-        targetY,
-        targetPosition: targetPosition || Position.Left,
+        sourceX: params.sx,
+        sourceY: params.sy,
+        sourcePosition: params.sourcePos,
+        targetX: params.tx,
+        targetY: params.ty,
+        targetPosition: params.targetPos,
       });
-      
+
       // Calculate midpoint
-      const midX = (sourceX + targetX) / 2;
-      const midY = (sourceY + targetY) / 2;
-      
+      const midX = (params.sx + params.tx) / 2;
+      const midY = (params.sy + params.ty) / 2;
+
       return {
         edgePath: path,
         midPoint: { x: midX, y: midY },
       };
-    }, [
-      sourceNode,
-      targetNode,
+    }
+
+    // Fallback to provided coordinates
+    const [path] = getBezierPath({
       sourceX,
       sourceY,
+      sourcePosition: sourcePosition || Position.Right,
       targetX,
       targetY,
-      sourcePosition,
-      targetPosition,
-    ]);
+      targetPosition: targetPosition || Position.Left,
+    });
 
+    // Calculate midpoint
+    const midX = (sourceX + targetX) / 2;
+    const midY = (sourceY + targetY) / 2;
+
+    return {
+      edgePath: path,
+      midPoint: { x: midX, y: midY },
+    };
+  }, [sourceNode, targetNode, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition]);
 
   if (!edgePath) {
     return null;
@@ -267,64 +250,64 @@ export const AnimatedEdge = ({
         path={edgePath}
         style={{
           strokeWidth: isHovered ? 3 : 2,
-          stroke: (getComputedStyle(document.documentElement).getPropertyValue("--edge-color-primary") || "#6b6b6b").trim(),
+          stroke: (
+            getComputedStyle(document.documentElement).getPropertyValue('--edge-color-primary') ||
+            '#6b6b6b'
+          ).trim(),
           opacity: isHovered
             ? Math.min(
-                Number(getComputedStyle(document.documentElement).getPropertyValue("--edge-opacity-primary") || 0.8) + 0.1,
-                1
+                Number(
+                  getComputedStyle(document.documentElement).getPropertyValue(
+                    '--edge-opacity-primary',
+                  ) || 0.8,
+                ) + 0.1,
+                1,
               )
-            : Number(getComputedStyle(document.documentElement).getPropertyValue("--edge-opacity-primary") || 0.8),
-          transition: "all 0.2s ease-out",
+            : Number(
+                getComputedStyle(document.documentElement).getPropertyValue(
+                  '--edge-opacity-primary',
+                ) || 0.8,
+              ),
+          transition: 'all 0.2s ease-out',
           ...style,
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={cn(
-          "cursor-pointer",
-          isHovered && "drop-shadow-lg"
-        )}
+        className={cn('cursor-pointer', isHovered && 'drop-shadow-lg')}
       />
       {!prefersReducedMotion && (
         <>
-          <circle 
-            r="6" 
-            fill="hsl(var(--primary))" 
-            className="animate-pulse" 
+          <circle
+            r="6"
+            fill="hsl(var(--primary))"
+            className="animate-pulse"
             opacity={isHovered ? 0.9 : 0.7}
           >
-            <animateMotion 
-              dur="3s" 
-              repeatCount="indefinite" 
-              path={edgePath} 
-              keyPoints="0;1" 
-              keyTimes="0;1" 
+            <animateMotion
+              dur="3s"
+              repeatCount="indefinite"
+              path={edgePath}
+              keyPoints="0;1"
+              keyTimes="0;1"
             />
           </circle>
-          <circle 
-            r="4" 
-            fill="hsl(var(--primary))" 
-            opacity={isHovered ? 0.6 : 0.4}
-          >
-            <animateMotion 
-              dur="3s" 
-              repeatCount="indefinite" 
-              path={edgePath} 
-              keyPoints="0.3;1.3" 
-              keyTimes="0;1" 
+          <circle r="4" fill="hsl(var(--primary))" opacity={isHovered ? 0.6 : 0.4}>
+            <animateMotion
+              dur="3s"
+              repeatCount="indefinite"
+              path={edgePath}
+              keyPoints="0.3;1.3"
+              keyTimes="0;1"
               begin="0.5s"
             />
           </circle>
-          <circle 
-            r="2" 
-            fill="hsl(var(--primary))" 
-            opacity={isHovered ? 0.4 : 0.2}
-          >
-            <animateMotion 
-              dur="3s" 
-              repeatCount="indefinite" 
-              path={edgePath} 
-              keyPoints="0.6;1.6" 
-              keyTimes="0;1" 
+          <circle r="2" fill="hsl(var(--primary))" opacity={isHovered ? 0.4 : 0.2}>
+            <animateMotion
+              dur="3s"
+              repeatCount="indefinite"
+              path={edgePath}
+              keyPoints="0.6;1.6"
+              keyTimes="0;1"
               begin="1s"
             />
           </circle>
@@ -345,13 +328,7 @@ export const AnimatedEdge = ({
           }}
         >
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background border-2 border-primary shadow-lg cursor-pointer hover:bg-primary/10 transition-colors">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              className="text-primary"
-            >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-primary">
               <path
                 d="M8 3V13M3 8H13"
                 stroke="currentColor"

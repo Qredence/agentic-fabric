@@ -79,9 +79,7 @@ Add a new attachment action:
 
 ```tsx
 // Inside prompt-input.tsx
-export const PromptInputActionAddAudio = (
-  props: ComponentProps<typeof DropdownMenuItem>
-) => {
+export const PromptInputActionAddAudio = (props: ComponentProps<typeof DropdownMenuItem>) => {
   const attachments = usePromptInputAttachments();
   return (
     <DropdownMenuItem

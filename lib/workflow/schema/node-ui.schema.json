@@ -25,7 +25,15 @@
         "showSuggestions": { "type": "boolean" },
         "collapsed": { "type": "boolean" }
       },
-      "required": ["variant", "handles", "title", "model", "placeholder", "showSuggestions", "collapsed"]
+      "required": [
+        "variant",
+        "handles",
+        "title",
+        "model",
+        "placeholder",
+        "showSuggestions",
+        "collapsed"
+      ]
     },
     {
       "type": "object",
@@ -42,7 +50,10 @@
             "properties": {
               "id": { "type": "string" },
               "label": { "type": "string" },
-              "type": { "type": "string", "enum": ["input", "progress", "checkbox", "select", "slider"] },
+              "type": {
+                "type": "string",
+                "enum": ["input", "progress", "checkbox", "select", "slider"]
+              },
               "value": {},
               "options": { "type": "array", "items": { "type": "string" } },
               "min": { "type": "number" },

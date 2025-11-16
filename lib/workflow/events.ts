@@ -1,4 +1,4 @@
-import type { ExecutorId } from "./types";
+import type { ExecutorId } from './types';
 
 /**
  * Base event interface - all workflow events extend this
@@ -18,7 +18,7 @@ export interface BaseEvent {
  * Workflow started event - emitted when workflow run begins
  */
 export interface WorkflowStartedEvent extends BaseEvent {
-  type: "workflow-started";
+  type: 'workflow-started';
   workflowId: string;
   runId: string;
 }
@@ -27,7 +27,7 @@ export interface WorkflowStartedEvent extends BaseEvent {
  * Workflow failed event - emitted when workflow terminates with error
  */
 export interface WorkflowFailedEvent extends BaseEvent {
-  type: "workflow-failed";
+  type: 'workflow-failed';
   workflowId: string;
   runId: string;
   error: {
@@ -41,7 +41,7 @@ export interface WorkflowFailedEvent extends BaseEvent {
  * Workflow output event - emitted when workflow yields output
  */
 export interface WorkflowOutputEvent extends BaseEvent {
-  type: "workflow-output";
+  type: 'workflow-output';
   workflowId: string;
   runId: string;
   output: unknown;
@@ -51,7 +51,7 @@ export interface WorkflowOutputEvent extends BaseEvent {
  * Request info event - emitted when executor requests external information
  */
 export interface RequestInfoEvent extends BaseEvent {
-  type: "request-info";
+  type: 'request-info';
   executorId: ExecutorId;
   requestType: string;
   requestData: unknown;
@@ -75,7 +75,7 @@ export interface BaseExecutorEvent extends BaseEvent {
  * Executor invoked event - emitted when executor handler is invoked
  */
 export interface ExecutorInvokedEvent extends BaseExecutorEvent {
-  type: "executor-invoked";
+  type: 'executor-invoked';
   inputMessages: unknown[];
 }
 
@@ -83,7 +83,7 @@ export interface ExecutorInvokedEvent extends BaseExecutorEvent {
  * Executor completed event - emitted when executor handler completes
  */
 export interface ExecutorCompletedEvent extends BaseExecutorEvent {
-  type: "executor-completed";
+  type: 'executor-completed';
   outputMessages: unknown[];
   duration?: number;
 }
@@ -92,7 +92,7 @@ export interface ExecutorCompletedEvent extends BaseExecutorEvent {
  * Executor failed event - emitted when executor handler raises error
  */
 export interface ExecutorFailedEvent extends BaseExecutorEvent {
-  type: "executor-failed";
+  type: 'executor-failed';
   error: {
     code: string;
     message: string;
@@ -108,7 +108,7 @@ export interface ExecutorFailedEvent extends BaseExecutorEvent {
  * Agent run event - emitted when agent run completes
  */
 export interface AgentRunEvent extends BaseEvent {
-  type: "agent-run";
+  type: 'agent-run';
   agentId: string;
   runId: string;
   messages: unknown[];
@@ -123,7 +123,7 @@ export interface AgentRunEvent extends BaseEvent {
  * Agent run update event - emitted during agent streaming
  */
 export interface AgentRunUpdateEvent extends BaseEvent {
-  type: "agent-run-update";
+  type: 'agent-run-update';
   agentId: string;
   runId: string;
   delta: unknown;
@@ -134,7 +134,7 @@ export interface AgentRunUpdateEvent extends BaseEvent {
  * Magentic agent message event - message from Magentic agent
  */
 export interface MagenticAgentMessageEvent extends BaseEvent {
-  type: "magentic-agent-message";
+  type: 'magentic-agent-message';
   agentId: string;
   workflowId: string;
   message: unknown;
@@ -144,7 +144,7 @@ export interface MagenticAgentMessageEvent extends BaseEvent {
  * Magentic agent delta event - incremental agent output during streaming
  */
 export interface MagenticAgentDeltaEvent extends BaseEvent {
-  type: "magentic-agent-delta";
+  type: 'magentic-agent-delta';
   agentId: string;
   workflowId: string;
   delta: unknown;
@@ -154,7 +154,7 @@ export interface MagenticAgentDeltaEvent extends BaseEvent {
  * Magentic orchestrator message event - message from orchestrator
  */
 export interface MagenticOrchestratorMessageEvent extends BaseEvent {
-  type: "magentic-orchestrator-message";
+  type: 'magentic-orchestrator-message';
   workflowId: string;
   message: unknown;
 }
@@ -163,7 +163,7 @@ export interface MagenticOrchestratorMessageEvent extends BaseEvent {
  * Magentic final result event - final result of Magentic workflow
  */
 export interface MagenticFinalResultEvent extends BaseEvent {
-  type: "magentic-final-result";
+  type: 'magentic-final-result';
   workflowId: string;
   result: unknown;
 }
@@ -189,18 +189,22 @@ export type WorkflowEvent =
 /**
  * Type guard helpers
  */
-export function isWorkflowEvent(event: BaseEvent): event is WorkflowStartedEvent | WorkflowFailedEvent | WorkflowOutputEvent {
-  return event.type.startsWith("workflow-");
+export function isWorkflowEvent(
+  event: BaseEvent,
+): event is WorkflowStartedEvent | WorkflowFailedEvent | WorkflowOutputEvent {
+  return event.type.startsWith('workflow-');
 }
 
-export function isExecutorEvent(event: BaseEvent): event is ExecutorInvokedEvent | ExecutorCompletedEvent | ExecutorFailedEvent {
-  return event.type.startsWith("executor-");
+export function isExecutorEvent(
+  event: BaseEvent,
+): event is ExecutorInvokedEvent | ExecutorCompletedEvent | ExecutorFailedEvent {
+  return event.type.startsWith('executor-');
 }
 
 export function isAgentEvent(event: BaseEvent): event is AgentRunEvent | AgentRunUpdateEvent {
-  return event.type.startsWith("agent-run");
+  return event.type.startsWith('agent-run');
 }
 
 export function isMagenticEvent(event: BaseEvent): boolean {
-  return event.type.startsWith("magentic-");
+  return event.type.startsWith('magentic-');
 }

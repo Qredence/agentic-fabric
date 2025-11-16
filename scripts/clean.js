@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const { spawn } = require("child_process");
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
 
 function log(msg) {
   process.stdout.write(`${msg}\n`);
@@ -18,16 +18,16 @@ async function removeDsStore(dir) {
   for (const e of entries) {
     const full = path.join(dir, e.name);
     if (e.isDirectory()) await removeDsStore(full);
-    else if (e.isFile() && e.name === ".DS_Store") fs.rmSync(full, { force: true });
+    else if (e.isFile() && e.name === '.DS_Store') fs.rmSync(full, { force: true });
   }
 }
 
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: "inherit" });
-    child.on("exit", (code) => {
+    const child = spawn(cmd, args, { stdio: 'inherit' });
+    child.on('exit', (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`${cmd} ${args.join(" ")} exited with code ${code}`));
+      else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}`));
     });
   });
 }
@@ -35,16 +35,16 @@ function run(cmd, args) {
 async function main() {
   try {
     const root = process.cwd();
-    const targets = [".next", "out", "build", "coverage", "logs"];
+    const targets = ['.next', 'out', 'build', 'coverage', 'logs'];
     for (const t of targets) {
       await rmrf(path.join(root, t));
       log(`Removed ${t}`);
     }
     await removeDsStore(root);
-    log("Removed .DS_Store files");
+    log('Removed .DS_Store files');
     try {
-      await run("pnpm", ["store", "prune"]);
-      log("Pruned pnpm store");
+      await run('pnpm', ['store', 'prune']);
+      log('Pruned pnpm store');
     } catch (e) {
       log(`pnpm store prune skipped: ${e.message}`);
     }

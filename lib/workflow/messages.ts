@@ -1,10 +1,10 @@
-import type { BaseMessage, MessageRole } from "./types";
+import type { BaseMessage, MessageRole } from './types';
 
 /**
  * Chat message - standard conversation message
  */
 export interface ChatMessage extends BaseMessage {
-  type: "chat";
+  type: 'chat';
   role: MessageRole;
   content: string | ChatContent[];
 }
@@ -13,7 +13,7 @@ export interface ChatMessage extends BaseMessage {
  * Chat content items (can be text, images, etc.)
  */
 export type ChatContent = {
-  type: "text" | "image" | "file";
+  type: 'text' | 'image' | 'file';
   value: string;
   metadata?: Record<string, unknown>;
 };
@@ -22,7 +22,7 @@ export type ChatContent = {
  * Request info message - base for request/response pattern
  */
 export interface RequestInfoMessage extends BaseMessage {
-  type: "request-info";
+  type: 'request-info';
   requestType: string;
   requestData: unknown;
   correlationId?: string;
@@ -52,7 +52,7 @@ export interface ErrorResponse {
  * Magentic request message - for Magentic One workflows
  */
 export interface MagenticRequestMessage extends BaseMessage {
-  type: "magentic-request";
+  type: 'magentic-request';
   action: string;
   parameters: Record<string, unknown>;
   workflowId?: string;
@@ -62,7 +62,7 @@ export interface MagenticRequestMessage extends BaseMessage {
  * Magentic response message - response in Magentic workflows
  */
 export interface MagenticResponseMessage extends BaseMessage {
-  type: "magentic-response";
+  type: 'magentic-response';
   result: unknown;
   workflowId?: string;
   correlationId?: string;
@@ -72,7 +72,7 @@ export interface MagenticResponseMessage extends BaseMessage {
  * Magentic start message - initiates a Magentic workflow
  */
 export interface MagenticStartMessage extends BaseMessage {
-  type: "magentic-start";
+  type: 'magentic-start';
   workflowType: string;
   initialData: unknown;
   parameters?: Record<string, unknown>;
@@ -93,27 +93,25 @@ export type WorkflowMessage =
  * Type guard for chat messages
  */
 export function isChatMessage(message: BaseMessage): message is ChatMessage {
-  return message.type === "chat";
+  return message.type === 'chat';
 }
 
 /**
  * Type guard for request info messages
  */
-export function isRequestInfoMessage(
-  message: BaseMessage
-): message is RequestInfoMessage {
-  return message.type === "request-info";
+export function isRequestInfoMessage(message: BaseMessage): message is RequestInfoMessage {
+  return message.type === 'request-info';
 }
 
 /**
  * Type guard for Magentic messages
  */
 export function isMagenticMessage(
-  message: BaseMessage
+  message: BaseMessage,
 ): message is MagenticRequestMessage | MagenticResponseMessage | MagenticStartMessage {
   return (
-    message.type === "magentic-request" ||
-    message.type === "magentic-response" ||
-    message.type === "magentic-start"
+    message.type === 'magentic-request' ||
+    message.type === 'magentic-response' ||
+    message.type === 'magentic-start'
   );
 }

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Handle, Position } from "@xyflow/react";
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Handle, Position } from '@xyflow/react';
 import {
   Info,
   ClipboardCopy,
@@ -12,21 +12,21 @@ import {
   Video,
   ChevronDown,
   ChevronUp,
-} from "lucide-react";
+} from 'lucide-react';
 
-import type { TextBlockNodeData } from "@/lib/workflow/types";
+import type { TextBlockNodeData } from '@/lib/workflow/types';
 
-type TextBlockCardProps = Omit<TextBlockNodeData, "variant" | "handles"> & {
+type TextBlockCardProps = Omit<TextBlockNodeData, 'variant' | 'handles'> & {
   onTextChange?: (text: string) => void;
   isSelected?: boolean;
   isHovered?: boolean;
   onToggleCollapse?: () => void;
-  "data-id"?: string;
+  'data-id'?: string;
 };
 
 export const TextBlockCard: React.FC<TextBlockCardProps> = ({
-  title = "Text",
-  model = "GPT-5",
+  title = 'Text',
+  model = 'GPT-5',
   placeholder = 'Try "A script excerpt of a romantic meeting in Paris"',
   onTextChange,
   showSuggestions = true,
@@ -34,9 +34,9 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
   isHovered = false,
   collapsed = false,
   onToggleCollapse,
-  "data-id": dataId,
+  'data-id': dataId,
 }) => {
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [internalHovered, setInternalHovered] = useState(false);
   const [internalCollapsed, setInternalCollapsed] = useState(collapsed);
@@ -51,23 +51,23 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
   const suggestions = [
     {
       icon: ClipboardCopy,
-      label: "Write or paste text",
+      label: 'Write or paste text',
     },
     {
       icon: Merge,
-      label: "Combine ideas",
+      label: 'Combine ideas',
     },
     {
       icon: Plus,
-      label: "Elaborate",
+      label: 'Elaborate',
     },
     {
       icon: Image,
-      label: "Ask a question about an image",
+      label: 'Ask a question about an image',
     },
     {
       icon: Video,
-      label: "Turn text into a video",
+      label: 'Turn text into a video',
     },
   ];
 
@@ -86,7 +86,7 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
   };
 
   const springTransition = {
-    type: "spring" as const,
+    type: 'spring' as const,
     stiffness: 300,
     damping: 30,
     mass: 0.8,
@@ -126,10 +126,10 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
             border transition-all duration-200
             ${
               isSelected
-                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                 : hovered
-                ? "border-white/10"
-                : "border-white/5"
+                  ? 'border-white/10'
+                  : 'border-white/5'
             }
             hover:border-white/15 active:scale-98
             flex items-center justify-between
@@ -196,7 +196,7 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
                   layoutId={`node-title-${dataId || title}`}
                   transition={springTransition}
                   className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
-                    hovered ? "text-gray-300" : "text-gray-400"
+                    hovered ? 'text-gray-300' : 'text-gray-400'
                   }`}
                 >
                   {title}
@@ -277,12 +277,12 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
                 border transition-all duration-200
                 ${
                   isSelected
-                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                     : hovered
-                    ? "border-white/10"
-                    : "border-white/5"
+                      ? 'border-white/10'
+                      : 'border-white/5'
                 }
-                ${isFocused ? "ring-1 ring-white/10" : ""}
+                ${isFocused ? 'ring-1 ring-white/10' : ''}
               `}
             >
               <div className="flex flex-col h-full rounded-2xl overflow-hidden">
@@ -428,7 +428,7 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
                             rows={1}
                             className="h-auto w-full overflow-hidden align-bottom resize-none min-h-0 bg-transparent text-white text-sm leading-4 -tracking-[0.32px] outline-none border-none p-0 m-0"
                             style={{
-                              gridArea: "1 / 1 / auto / auto",
+                              gridArea: '1 / 1 / auto / auto',
                             }}
                           />
                         </div>
@@ -452,14 +452,11 @@ export const TextBlockCard: React.FC<TextBlockCardProps> = ({
 };
 
 interface ConnectionHandleProps {
-  position: "left" | "right";
+  position: 'left' | 'right';
   visible?: boolean;
 }
 
-const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
-  position,
-  visible = false,
-}) => {
+const ConnectionHandle: React.FC<ConnectionHandleProps> = ({ position, visible = false }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -475,7 +472,7 @@ const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
           opacity: visible ? 1 : 0,
         }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 400,
           damping: 25,
         }}
@@ -483,7 +480,7 @@ const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
           pointer-events-none absolute top-44 -translate-y-12 z-0
           flex h-24 w-px items-center origin-center
           bg-gradient-to-b from-transparent via-white to-transparent
-          ${position === "right" ? "-right-px" : "-left-px"}
+          ${position === 'right' ? '-right-px' : '-left-px'}
         `}
       />
       {/* Handle Button */}
@@ -497,14 +494,14 @@ const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
           opacity: visible || isHovered ? 1 : 0,
         }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 400,
           damping: 20,
         }}
         className={`
           absolute top-44 -translate-y-12 z-0
           flex h-24 items-center cursor-pointer
-          ${position === "right" ? "-right-8 left-80" : "-left-8 right-80"}
+          ${position === 'right' ? '-right-8 left-80' : '-left-8 right-80'}
         `}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -518,17 +515,17 @@ const ConnectionHandle: React.FC<ConnectionHandleProps> = ({
             scale: 0.95,
           }}
           transition={{
-            type: "spring",
+            type: 'spring',
             stiffness: 400,
             damping: 15,
           }}
           className={`p-5 rounded-full transition-colors duration-200 ${
-            isHovered ? "bg-white/5" : ""
+            isHovered ? 'bg-white/5' : ''
           }`}
         >
           <Plus
             className={`h-6 w-6 transition-colors duration-200 ${
-              isHovered ? "text-white" : "text-gray-400"
+              isHovered ? 'text-white' : 'text-gray-400'
             }`}
           />
         </motion.div>

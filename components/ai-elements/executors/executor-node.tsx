@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import React, { memo, useState } from "react";
-import { Handle, Position } from "@xyflow/react";
-import { motion, AnimatePresence } from "motion/react";
-import { Info, ChevronDown, ChevronUp, Settings, Activity, UserCheck } from "lucide-react";
-import type { BaseExecutor } from "@/lib/workflow/types";
-import type { ExecutorType } from "@/lib/workflow/executors";
-import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
+import React, { memo, useState } from 'react';
+import { Handle, Position } from '@xyflow/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Info, ChevronDown, ChevronUp, Settings, Activity, UserCheck } from 'lucide-react';
+import type { BaseExecutor } from '@/lib/workflow/types';
+import type { ExecutorType } from '@/lib/workflow/executors';
+import { ConnectionHandle } from '@/components/ai-elements/connection-handle';
 
 /**
  * Executor node data for React Flow
  */
 export interface ExecutorNodeData {
-  variant: "executor";
+  variant: 'executor';
   handles: {
     target: boolean;
     source: boolean;
@@ -21,7 +21,7 @@ export interface ExecutorNodeData {
   executorType: ExecutorType;
   label?: string;
   description?: string;
-  status?: "idle" | "running" | "completed" | "error";
+  status?: 'idle' | 'running' | 'completed' | 'error';
   error?: string;
 }
 
@@ -31,7 +31,7 @@ export interface ExecutorNodeData {
 export type ExecutorNodeProps = any;
 
 const springTransition = {
-  type: "spring" as const,
+  type: 'spring' as const,
   stiffness: 300,
   damping: 30,
   mass: 0.8,
@@ -47,11 +47,11 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
 
   const displayLabel = label || executor.label || executor.id;
   const executorTypeName = executorType;
-  
+
   // Get model from executor (for agent executors) or default
   const metadata = (executor.metadata as Record<string, any> | undefined) ?? {};
   const magenticMeta = (metadata.magentic as Record<string, any> | undefined) ?? {};
-  const model = (executor as any).model || metadata.model || "GPT-5";
+  const model = (executor as any).model || metadata.model || 'GPT-5';
 
   const hovered = internalHovered;
 
@@ -60,11 +60,12 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
   };
 
   // Get current values for suggestions (Magentic Orchestrator)
-  const planningStrategy = (executor as any).planningStrategy || magenticMeta.planningStrategy || "adaptive";
+  const planningStrategy =
+    (executor as any).planningStrategy || magenticMeta.planningStrategy || 'adaptive';
   const progressTracking = (executor as any).progressTracking !== false;
   const humanInTheLoop = (executor as any).humanInTheLoop === true;
-  const currentProgressTracking = progressTracking ? "Enabled" : "Disabled";
-  const currentHumanInLoop = humanInTheLoop ? "Enabled" : "Disabled";
+  const currentProgressTracking = progressTracking ? 'Enabled' : 'Disabled';
+  const currentHumanInLoop = humanInTheLoop ? 'Enabled' : 'Disabled';
 
   // Suggestions for Magentic Orchestrator - matching main parameters exactly as shown in properties panel
   const suggestions = [
@@ -118,10 +119,10 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
             border transition-all duration-200
             ${
               selected
-                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                 : hovered
-                ? "border-white/10"
-                : "border-white/5"
+                  ? 'border-white/10'
+                  : 'border-white/5'
             }
             hover:border-white/15 active:scale-98
             flex items-center justify-between
@@ -188,7 +189,7 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
                   layoutId={`node-title-${id}`}
                   transition={springTransition}
                   className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
-                    hovered ? "text-gray-300" : "text-gray-400"
+                    hovered ? 'text-gray-300' : 'text-gray-400'
                   }`}
                 >
                   {displayLabel}
@@ -269,10 +270,10 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
                 border transition-all duration-200
                 ${
                   selected
-                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                     : hovered
-                    ? "border-white/10"
-                    : "border-white/5"
+                      ? 'border-white/10'
+                      : 'border-white/5'
                 }
               `}
             >
@@ -366,19 +367,11 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
               </div>
             </motion.div>
             {/* ReactFlow Handles */}
-            {handles.target && (
-              <Handle position={Position.Left} type="target" />
-            )}
-            {handles.source && (
-              <Handle position={Position.Right} type="source" />
-            )}
+            {handles.target && <Handle position={Position.Left} type="target" />}
+            {handles.source && <Handle position={Position.Right} type="source" />}
             {/* Connection Handles */}
-            {handles.target && (
-              <ConnectionHandle position="left" visible={hovered} />
-            )}
-            {handles.source && (
-              <ConnectionHandle position="right" visible={hovered} />
-            )}
+            {handles.target && <ConnectionHandle position="left" visible={hovered} />}
+            {handles.source && <ConnectionHandle position="right" visible={hovered} />}
           </motion.div>
         </>
       )}
@@ -386,4 +379,4 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
   );
 });
 
-ExecutorNode.displayName = "ExecutorNode";
+ExecutorNode.displayName = 'ExecutorNode';

@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
-import type { HTMLAttributes } from "react";
+import { cn } from '@/lib/utils';
+import type { HTMLAttributes } from 'react';
 
 type LoaderIconProps = {
   size?: number;
@@ -9,19 +9,14 @@ const LoaderIcon = ({ size = 16 }: LoaderIconProps) => (
   <svg
     height={size}
     strokeLinejoin="round"
-    style={{ color: "currentcolor" }}
+    style={{ color: 'currentcolor' }}
     viewBox="0 0 16 16"
     width={size}
   >
     <title>Loader</title>
     <g clipPath="url(#clip0_2393_1490)">
       <path d="M8 0V4" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M8 16V12"
-        opacity="0.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
+      <path d="M8 16V12" opacity="0.5" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M3.29773 1.52783L5.64887 4.7639"
         opacity="0.9"
@@ -86,9 +81,9 @@ export type LoaderProps = HTMLAttributes<HTMLDivElement> & {
 export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
   <div
     className={cn(
-      "inline-flex animate-spin items-center justify-center",
-      "transition-all duration-300 ease-out",
-      className
+      'inline-flex animate-spin items-center justify-center',
+      'transition-all duration-300 ease-out',
+      className,
     )}
     {...props}
   >
@@ -99,16 +94,19 @@ export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
 export const SkeletonLoader = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "animate-shimmer-enhanced bg-gradient-to-r from-transparent via-foreground/10 to-transparent",
-      "rounded-lg",
-      className
+      'animate-shimmer-enhanced bg-gradient-to-r from-transparent via-foreground/10 to-transparent',
+      'rounded-lg',
+      className,
     )}
     {...props}
   />
 );
 
 export const NodeSkeleton = () => (
-  <div data-testid="node-skeleton" className="w-[352px] h-[200px] rounded-xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-4">
+  <div
+    data-testid="node-skeleton"
+    className="w-[352px] h-[200px] rounded-xl bg-gradient-to-br from-card to-card/80 border border-border/50 p-4"
+  >
     <div className="flex items-center gap-3 mb-4">
       <SkeletonLoader className="w-3 h-3 rounded-full" />
       <SkeletonLoader className="h-6 w-32 rounded" />

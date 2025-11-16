@@ -1,8 +1,8 @@
-import * as yaml from "js-yaml";
-import type { Workflow } from "../workflow";
-import type { BaseExecutor } from "../types";
-import type { BaseEdge } from "../types";
-import type { EdgeGroup } from "../edges";
+import * as yaml from 'js-yaml';
+import type { Workflow } from '../workflow';
+import type { BaseExecutor } from '../types';
+import type { BaseEdge } from '../types';
+import type { EdgeGroup } from '../edges';
 
 /**
  * Serialized workflow format for export
@@ -58,9 +58,7 @@ export interface SerializedEdgeGroup {
  */
 export function serializeToJSON(workflow: Workflow, pretty: boolean = true): string {
   const serialized = workflowToSerialized(workflow);
-  return pretty
-    ? JSON.stringify(serialized, null, 2)
-    : JSON.stringify(serialized);
+  return pretty ? JSON.stringify(serialized, null, 2) : JSON.stringify(serialized);
 }
 
 /**
@@ -141,7 +139,7 @@ function executorToSerialized(executor: BaseExecutor): SerializedExecutor {
 
   // Copy all other properties
   Object.keys(executor).forEach((key) => {
-    if (!["id", "type", "label", "description"].includes(key)) {
+    if (!['id', 'type', 'label', 'description'].includes(key)) {
       serialized[key] = (executor as unknown as Record<string, unknown>)[key];
     }
   });
@@ -181,12 +179,12 @@ function edgeToSerialized(edge: BaseEdge): SerializedEdge {
   };
 
   if (edge.condition) {
-    if (edge.condition.type === "predicate") {
+    if (edge.condition.type === 'predicate') {
       serialized.condition = {
         type: edge.condition.type,
         expression: edge.condition.expression,
       };
-    } else if (edge.condition.type === "case") {
+    } else if (edge.condition.type === 'case') {
       serialized.condition = {
         type: edge.condition.type,
         caseValue: edge.condition.caseValue,
@@ -211,15 +209,18 @@ function serializedToEdge(serialized: SerializedEdge): BaseEdge {
     target: serialized.target,
   };
 
-  if (serialized.condition && (serialized.condition.type === "predicate" || serialized.condition.type === "case")) {
-    if (serialized.condition.type === "predicate") {
+  if (
+    serialized.condition &&
+    (serialized.condition.type === 'predicate' || serialized.condition.type === 'case')
+  ) {
+    if (serialized.condition.type === 'predicate') {
       edge.condition = {
-        type: "predicate" as const,
+        type: 'predicate' as const,
         expression: serialized.condition.expression,
       };
     } else {
       edge.condition = {
-        type: "case" as const,
+        type: 'case' as const,
         caseValue: serialized.condition.caseValue,
       };
     }
@@ -259,22 +260,19 @@ function serializedToEdgeGroup(serialized: SerializedEdgeGroup): EdgeGroup {
  */
 export function downloadWorkflow(
   workflow: Workflow,
-  format: "json" | "yaml",
-  filename?: string
+  format: 'json' | 'yaml',
+  filename?: string,
 ): void {
-  const content =
-    format === "json"
-      ? serializeToJSON(workflow, true)
-      : serializeToYAML(workflow);
+  const content = format === 'json' ? serializeToJSON(workflow, true) : serializeToYAML(workflow);
 
   const blob = new Blob([content], {
-    type: format === "json" ? "application/json" : "text/yaml",
+    type: format === 'json' ? 'application/json' : 'text/yaml',
   });
 
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.href = url;
-  link.download = filename || `${workflow.id || "workflow"}.${format}`;
+  link.download = filename || `${workflow.id || 'workflow'}.${format}`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

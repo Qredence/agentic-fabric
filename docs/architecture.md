@@ -40,11 +40,13 @@ The workflow engine is the heart of the system, providing the core abstractions 
 #### Key Files and Responsibilities
 
 - **`workflow.ts`** - Core workflow type definitions
+
   - `Workflow` interface: The main workflow structure
   - `WorkflowState`: Runtime state management
   - `WorkflowMetadata`: Workflow metadata and versioning
 
 - **`executors.ts`** - Executor implementations
+
   - `BaseExecutor`: Base interface for all executors
   - `FunctionExecutor`: Executes JavaScript functions
   - `AgentExecutor`: Runs AI agents
@@ -53,12 +55,14 @@ The workflow engine is the heart of the system, providing the core abstractions 
   - `MagenticOrchestratorExecutor`: Multi-agent orchestration
 
 - **`agent.ts`** - Agent protocol and base classes
+
   - `AgentProtocol`: Interface all agents must implement
   - `BaseAgent`: Common agent functionality
   - Agent lifecycle management
   - Streaming support
 
 - **`edges.ts`** - Edge definitions and routing logic
+
   - `BaseEdge`: Simple point-to-point connections
   - `EdgeGroup`: Advanced routing constructs
   - `FanInEdgeGroup`: Merge multiple inputs
@@ -66,11 +70,13 @@ The workflow engine is the heart of the system, providing the core abstractions 
   - `SwitchCaseEdgeGroup`: Conditional routing
 
 - **`tools.ts`** - Tool protocol and definitions
+
   - `ToolProtocol`: Interface for tools
   - `AIFunction`: Typed function wrappers for AI models
   - Tool parameter validation
 
 - **`conversion.ts`** - React Flow ↔ Workflow conversion
+
   - Converts UI representation to executable workflows
   - Converts workflows back to UI nodes
   - Maintains metadata during round-trip conversions
@@ -87,12 +93,14 @@ The UI layer provides the visual interface for building and managing workflows.
 #### Component Organization
 
 - **`ai-elements/`** - AI-specific reusable components
+
   - Generic node, edge, and canvas components
   - Text block cards and attribute nodes
   - Executor-specific node renderers
   - Panel and toolbar components
 
 - **`workflow-builder/`** - Workflow builder UI
+
   - `node-library.tsx`: Draggable node palette
   - `properties-panel.tsx`: Node configuration interface
   - `executor-editors/`: Specialized editors for each executor type
@@ -109,6 +117,7 @@ The UI layer provides the visual interface for building and managing workflows.
 Next.js 16 App Router structure:
 
 - **`page.tsx`** - Main workflow canvas page
+
   - React Flow provider setup
   - Canvas rendering and interaction
   - Node/edge state management
@@ -172,6 +181,7 @@ Start Node
 ### Canvas State
 
 Managed by React Flow's built-in state management:
+
 - Nodes array: All workflow nodes with position and data
 - Edges array: All connections between nodes
 - Viewport: Pan/zoom state
@@ -179,6 +189,7 @@ Managed by React Flow's built-in state management:
 ### History State
 
 Custom implementation for undo/redo:
+
 - Array of historical states (nodes + edges)
 - Current history index
 - Limited to last 50 states
@@ -187,6 +198,7 @@ Custom implementation for undo/redo:
 ### Selected Node State
 
 Local React state:
+
 - Currently selected node for properties panel
 - Synced with React Flow selection
 - Updates on node changes
@@ -194,6 +206,7 @@ Local React state:
 ### Workflow State
 
 Workflow-level state during execution:
+
 - `WorkflowState` interface in workflow.ts
 - Run ID, status, shared state
 - Events, checkpoints, errors
@@ -206,12 +219,8 @@ The project uses TypeScript with strict type checking. Key type patterns:
 ### Discriminated Unions
 
 ```typescript
-type ExecutorType = 
-  | "executor"
-  | "function-executor"
-  | "agent-executor"
-  | "workflow-executor"
-  // etc...
+type ExecutorType = 'executor' | 'function-executor' | 'agent-executor' | 'workflow-executor';
+// etc...
 ```
 
 ### Generic Interfaces
@@ -299,6 +308,7 @@ See [TYPE_SYSTEM.md](../lib/workflow/TYPE_SYSTEM.md) for detailed type documenta
 ### Unit Tests
 
 Located in `lib/workflow/__tests__/`:
+
 - `workflow.test.ts`: Core workflow logic
 - `executors.test.ts`: Executor behavior
 - `edges.test.ts`: Edge routing logic
@@ -352,21 +362,25 @@ npm start
 ### Planned Enhancements
 
 1. **Workflow Execution Runtime**
+
    - Background job execution
    - Streaming execution updates
    - Checkpoint and resume capability
 
 2. **Collaboration Features**
+
    - Real-time multi-user editing
    - Workflow versioning
    - Conflict resolution
 
 3. **Tool Ecosystem**
+
    - Plugin system for external tools
    - Tool marketplace
    - Custom tool builder
 
 4. **Advanced AI Integration**
+
    - Multiple AI provider support
    - Function calling improvements
    - Streaming enhancements

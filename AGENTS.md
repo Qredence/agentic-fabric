@@ -7,7 +7,7 @@ If you are building, wiring, or debugging agents (or Magentic workflows), start 
 ## Big Picture
 
 - Agents share a common protocol and type system so they can run, stream, and use tools in a consistent way.
-- Workflows embed agents via *executors*, which act as the bridge between the visual canvas and the runtime.
+- Workflows embed agents via _executors_, which act as the bridge between the visual canvas and the runtime.
 - Tools are first‑class: they are typed, labeled for the UI, and can be protocol‑based, AI‑function based, or hosted/MCP variants.
 
 Key implementation references:
@@ -39,7 +39,7 @@ There are two primary agent flavors:
 Rule of thumb:
 
 - Use **Chat agents** for direct user conversations with optional tools.
-- Use **Workflow agents** when you want an agent to *run a workflow* (Magentic, pipelines, or other orchestrations) behind the scenes.
+- Use **Workflow agents** when you want an agent to _run a workflow_ (Magentic, pipelines, or other orchestrations) behind the scenes.
 
 ## Configuring Agents
 
@@ -94,12 +94,12 @@ The `MAGENTIC_AGENT_PRESET_MAP` is used for lookup and wiring.
 
 Available presets:
 
-| Key    | Label           | Role    | Core Duties                                                  | Default Tools                                  |
-| ------ | --------------- | ------- | ------------------------------------------------------------ | ---------------------------------------------- |
-| planner | Planner Agent  | planner | Break work into steps; maintain fact/progress ledgers       | `magentic-task-ledger`, `magentic-progress-ledger` |
-| web     | Web Surfer Agent | web-surfer | Search and summarise authoritative sources                  | `web-browser`, `http-client`                   |
-| coder   | Coder Agent    | coder   | Generate and run code to fulfil subtasks                    | `hosted-code-interpreter`                      |
-| critic  | Critic Agent   | critic  | Review outputs for accuracy, completeness, and adherence    | `analysis-notes`                               |
+| Key     | Label            | Role       | Core Duties                                              | Default Tools                                      |
+| ------- | ---------------- | ---------- | -------------------------------------------------------- | -------------------------------------------------- |
+| planner | Planner Agent    | planner    | Break work into steps; maintain fact/progress ledgers    | `magentic-task-ledger`, `magentic-progress-ledger` |
+| web     | Web Surfer Agent | web-surfer | Search and summarise authoritative sources               | `web-browser`, `http-client`                       |
+| coder   | Coder Agent      | coder      | Generate and run code to fulfil subtasks                 | `hosted-code-interpreter`                          |
+| critic  | Critic Agent     | critic     | Review outputs for accuracy, completeness, and adherence | `analysis-notes`                                   |
 
 ## Editing Agents in the UI
 
@@ -160,20 +160,17 @@ These all share a consistent labeling and configuration surface so they feel uni
 ### Create a Magentic Orchestrator and Agent Programmatically
 
 ```ts
-import { createExecutorFromNodeType } from '@/lib/workflow/conversion'
+import { createExecutorFromNodeType } from '@/lib/workflow/conversion';
 
 const orchestrator = createExecutorFromNodeType(
   'magentic-orchestrator-executor',
   'orch-1',
   'Magentic Orchestrator',
-)
+);
 
-const coderAgent = createExecutorFromNodeType(
-  'magentic-agent-executor',
-  'agent-coder',
-  'Coder',
-  { presetKey: 'coder' },
-)
+const coderAgent = createExecutorFromNodeType('magentic-agent-executor', 'agent-coder', 'Coder', {
+  presetKey: 'coder',
+});
 ```
 
 ### Editing via UI

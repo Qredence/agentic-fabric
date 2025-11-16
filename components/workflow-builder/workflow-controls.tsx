@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Panel } from "@/components/ai-elements/panel";
-import { Button } from "@/components/ui/button";
-import { Action, Actions } from "@/components/ai-elements/actions";
-import { Download, CheckCircle2, AlertCircle, Upload } from "lucide-react";
-import type { Workflow } from "@/lib/workflow/workflow";
-import { validateWorkflowExtended } from "@/lib/workflow/export/validator";
+import React from 'react';
+import { Panel } from '@/components/ai-elements/panel';
+import { Button } from '@/components/ui/button';
+import { Action, Actions } from '@/components/ai-elements/actions';
+import { Download, CheckCircle2, AlertCircle, Upload } from 'lucide-react';
+import type { Workflow } from '@/lib/workflow/workflow';
+import { validateWorkflowExtended } from '@/lib/workflow/export/validator';
 
 interface WorkflowControlsProps {
   workflow: Workflow | null;
@@ -21,9 +21,7 @@ export function WorkflowControls({
   onImport,
   onValidate,
 }: WorkflowControlsProps) {
-  const validation = workflow
-    ? validateWorkflowExtended(workflow)
-    : null;
+  const validation = workflow ? validateWorkflowExtended(workflow) : null;
 
   const isValid = validation?.valid ?? false;
   const hasErrors = validation
@@ -38,15 +36,11 @@ export function WorkflowControls({
         <h2 className="text-sm font-semibold">Workflow Controls</h2>
       </div>
       <Actions>
-        <Action
-          tooltip="Import workflow from file"
-          label="Import"
-          onClick={onImport}
-        >
+        <Action tooltip="Import workflow from file" label="Import" onClick={onImport}>
           <Upload className="size-4" />
         </Action>
         <Action
-          tooltip={hasErrors ? "Fix errors before exporting" : "Export workflow"}
+          tooltip={hasErrors ? 'Fix errors before exporting' : 'Export workflow'}
           label="Export"
           onClick={onExport}
           disabled={!workflow || hasErrors}
@@ -57,10 +51,10 @@ export function WorkflowControls({
           <Action
             tooltip={
               hasErrors
-                ? "Workflow has errors"
+                ? 'Workflow has errors'
                 : hasWarnings
-                ? "Workflow has warnings"
-                : "Workflow is valid"
+                  ? 'Workflow has warnings'
+                  : 'Workflow is valid'
             }
             label="Validation"
             onClick={onValidate}

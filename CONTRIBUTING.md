@@ -144,7 +144,7 @@ When you are ready to open a pull request:
    - `pnpm lint`
    - `pnpm typecheck`
    - `pnpm test` (or `pnpm verify`)
-   all succeed.
+     all succeed.
 3. Open a PR and include:
    - A short summary of the change.
    - Any screenshots or recordings for UI changes.
@@ -165,4 +165,3 @@ If you are unsure about something or want feedback before investing significant 
 - Start with a small documentation or test change to validate your approach.
 
 We appreciate every contribution—whether it’s fixing a typo, improving docs, adding tests, or designing new workflows and agents. Thank you for helping improve this project!
-

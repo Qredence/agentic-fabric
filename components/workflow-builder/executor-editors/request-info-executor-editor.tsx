@@ -1,19 +1,16 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import type { RequestInfoExecutor } from "@/lib/workflow/executors";
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import type { RequestInfoExecutor } from '@/lib/workflow/executors';
 
 interface RequestInfoExecutorEditorProps {
   executor: RequestInfoExecutor;
   onChange: (updates: Partial<RequestInfoExecutor>) => void;
 }
 
-export function RequestInfoExecutorEditor({
-  executor,
-  onChange,
-}: RequestInfoExecutorEditorProps) {
+export function RequestInfoExecutorEditor({ executor, onChange }: RequestInfoExecutorEditorProps) {
   return (
     <div className="space-y-4 pt-2 border-t">
       <h4 className="text-sm font-medium">Request Info Configuration</h4>
@@ -22,7 +19,7 @@ export function RequestInfoExecutorEditor({
         <Label htmlFor="request-type">Request Type</Label>
         <Input
           id="request-type"
-          value={executor.requestType || ""}
+          value={executor.requestType || ''}
           onChange={(e) => onChange({ requestType: e.target.value })}
           placeholder="user-input"
         />
@@ -37,7 +34,7 @@ export function RequestInfoExecutorEditor({
           id="timeout"
           type="number"
           min="0"
-          value={executor.timeout ?? ""}
+          value={executor.timeout ?? ''}
           onChange={(e) =>
             onChange({
               timeout: e.target.value ? Number.parseInt(e.target.value, 10) : undefined,
@@ -78,14 +75,12 @@ export function RequestInfoExecutorEditor({
                 id="backoff-ms"
                 type="number"
                 min="0"
-                value={executor.retryPolicy.backoffMs ?? ""}
+                value={executor.retryPolicy.backoffMs ?? ''}
                 onChange={(e) =>
                   onChange({
                     retryPolicy: {
                       ...executor.retryPolicy!,
-                      backoffMs: e.target.value
-                        ? Number.parseInt(e.target.value, 10)
-                        : undefined,
+                      backoffMs: e.target.value ? Number.parseInt(e.target.value, 10) : undefined,
                     },
                   })
                 }
@@ -118,7 +113,7 @@ export function RequestInfoExecutorEditor({
         <Label htmlFor="response-handler">Response Handler</Label>
         <Input
           id="response-handler"
-          value={executor.responseHandler || ""}
+          value={executor.responseHandler || ''}
           onChange={(e) => onChange({ responseHandler: e.target.value || undefined })}
           placeholder="handleResponse"
         />

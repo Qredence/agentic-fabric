@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import React, { memo, useState } from "react";
-import { Handle, Position } from "@xyflow/react";
-import { motion, AnimatePresence } from "motion/react";
-import { Info, ChevronDown, ChevronUp, Settings, User, Zap, MessageSquare } from "lucide-react";
-import type { AgentExecutor, ToolReference, MagenticAgentExecutor } from "@/lib/workflow/executors";
-import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
+import React, { memo, useState } from 'react';
+import { Handle, Position } from '@xyflow/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Info, ChevronDown, ChevronUp, Settings, User, Zap, MessageSquare } from 'lucide-react';
+import type { AgentExecutor, ToolReference, MagenticAgentExecutor } from '@/lib/workflow/executors';
+import { ConnectionHandle } from '@/components/ai-elements/connection-handle';
 
 /**
  * Agent executor node data
  */
 export interface AgentExecutorNodeData {
-  variant: "agent-executor";
+  variant: 'agent-executor';
   handles: {
     target: boolean;
     source: boolean;
@@ -19,7 +19,7 @@ export interface AgentExecutorNodeData {
   executor: AgentExecutor | MagenticAgentExecutor;
   label?: string;
   description?: string;
-  status?: "idle" | "running" | "completed" | "error";
+  status?: 'idle' | 'running' | 'completed' | 'error';
 }
 
 /**
@@ -32,24 +32,24 @@ export interface AgentExecutorNodeProps {
 }
 
 const springTransition = {
-  type: "spring" as const,
+  type: 'spring' as const,
   stiffness: 300,
   damping: 30,
   mass: 0.8,
 };
 
 const statusColors = {
-  idle: "bg-gray-500",
-  running: "bg-blue-500 animate-pulse",
-  completed: "bg-green-500",
-  error: "bg-red-500",
+  idle: 'bg-gray-500',
+  running: 'bg-blue-500 animate-pulse',
+  completed: 'bg-green-500',
+  error: 'bg-red-500',
 };
 
 /**
  * Agent executor node component
  */
 export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNodeProps) => {
-  const { handles, executor, label, status = "idle" } = data;
+  const { handles, executor, label, status = 'idle' } = data;
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [internalHovered, setInternalHovered] = useState(false);
 
@@ -64,11 +64,12 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   const magenticMeta = (metadata.magentic as Record<string, any> | undefined) ?? {};
   const agentRole = typedExecutor.agentRole || magenticMeta.agentRole;
 
-  const displayLabel = label || executor.label || agentRole || (executor as AgentExecutor).agentId || executor.id;
-  const executorTypeName = "agent-executor";
-  
+  const displayLabel =
+    label || executor.label || agentRole || (executor as AgentExecutor).agentId || executor.id;
+  const executorTypeName = 'agent-executor';
+
   // Get model from executor or default
-  const model = (executor as AgentExecutor).model || metadata.model || "GPT-5";
+  const model = (executor as AgentExecutor).model || metadata.model || 'GPT-5';
 
   const hovered = internalHovered;
 
@@ -77,13 +78,13 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   };
 
   // Get current values for suggestions
-  const currentModel = (executor as AgentExecutor).model || metadata.model || "gpt-5";
-  const currentReasoningEffort = metadata.reasoningEffort || "low";
+  const currentModel = (executor as AgentExecutor).model || metadata.model || 'gpt-5';
+  const currentReasoningEffort = metadata.reasoningEffort || 'low';
   const toolsCount = Array.isArray(typedExecutor.tools) ? typedExecutor.tools.length : 0;
-  const currentTools = toolsCount > 0 ? `${toolsCount} tool(s)` : "No tools";
-  const currentOutputFormat = metadata.outputFormat || "text";
-  const currentVerbosity = metadata.verbosity || "medium";
-  const currentSummary = metadata.summary || "auto";
+  const currentTools = toolsCount > 0 ? `${toolsCount} tool(s)` : 'No tools';
+  const currentOutputFormat = metadata.outputFormat || 'text';
+  const currentVerbosity = metadata.verbosity || 'medium';
+  const currentSummary = metadata.summary || 'auto';
   const currentIncludeChatHistory = metadata.includeChatHistory !== false;
 
   // Suggestions for Agent Executor - matching main parameters exactly as shown in properties panel
@@ -114,7 +115,7 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
     },
     {
       icon: User,
-      label: `Include chat history ${currentIncludeChatHistory ? "Yes" : "No"}`,
+      label: `Include chat history ${currentIncludeChatHistory ? 'Yes' : 'No'}`,
     },
   ];
 
@@ -155,17 +156,19 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
             shadow-lg hover:shadow-xl
             ${
               selected
-                ? "border-primary/50 ring-2 ring-primary/20"
+                ? 'border-primary/50 ring-2 ring-primary/20'
                 : hovered
-                ? "border-primary/20"
-                : "border-border/50"
+                  ? 'border-primary/20'
+                  : 'border-border/50'
             }
             hover:border-primary/30 hover:-translate-y-0.5 active:scale-98
             flex items-center justify-between group
           `}
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-2 h-2 rounded-full ${statusColors[status]} transition-all duration-300`} />
+            <div
+              className={`w-2 h-2 rounded-full ${statusColors[status]} transition-all duration-300`}
+            />
             <motion.div
               layoutId={`node-title-${id}`}
               transition={springTransition}
@@ -223,13 +226,15 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className={`w-3 h-3 rounded-full ${statusColors[status]} transition-all duration-300 shadow-lg`} />
+                <div
+                  className={`w-3 h-3 rounded-full ${statusColors[status]} transition-all duration-300 shadow-lg`}
+                />
                 <div className="min-w-0">
                   <motion.div
                     layoutId={`node-title-${id}`}
                     transition={springTransition}
                     className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
-                      hovered ? "text-foreground" : "text-foreground/80"
+                      hovered ? 'text-foreground' : 'text-foreground/80'
                     }`}
                   >
                     {displayLabel}
@@ -312,10 +317,10 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
                 shadow-lg hover:shadow-xl
                 ${
                   selected
-                    ? "border-primary/50 ring-2 ring-primary/20"
+                    ? 'border-primary/50 ring-2 ring-primary/20'
                     : hovered
-                    ? "border-primary/20"
-                    : "border-border/50"
+                      ? 'border-primary/20'
+                      : 'border-border/50'
                 }
                 hover:border-primary/30 hover:-translate-y-0.5
               `}
@@ -410,19 +415,11 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
               </div>
             </motion.div>
             {/* ReactFlow Handles */}
-            {handles.target && (
-              <Handle position={Position.Left} type="target" />
-            )}
-            {handles.source && (
-              <Handle position={Position.Right} type="source" />
-            )}
+            {handles.target && <Handle position={Position.Left} type="target" />}
+            {handles.source && <Handle position={Position.Right} type="source" />}
             {/* Connection Handles */}
-            {handles.target && (
-              <ConnectionHandle position="left" visible={hovered} />
-            )}
-            {handles.source && (
-              <ConnectionHandle position="right" visible={hovered} />
-            )}
+            {handles.target && <ConnectionHandle position="left" visible={hovered} />}
+            {handles.source && <ConnectionHandle position="right" visible={hovered} />}
           </motion.div>
         </>
       )}
@@ -430,4 +427,4 @@ export const AgentExecutorNode = memo(({ id, data, selected }: AgentExecutorNode
   );
 });
 
-AgentExecutorNode.displayName = "AgentExecutorNode";
+AgentExecutorNode.displayName = 'AgentExecutorNode';

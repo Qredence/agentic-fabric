@@ -1,6 +1,6 @@
-import type { BaseExecutor, ExecutorId } from "./types";
-import type { WorkflowTool, ToolProtocol, AIFunction } from "./tools";
-import type { WorkflowDefinition } from "./executors";
+import type { BaseExecutor, ExecutorId } from './types';
+import type { WorkflowTool, ToolProtocol, AIFunction } from './tools';
+import type { WorkflowDefinition } from './executors';
 
 /**
  * Agent Protocol - protocol defining the interface all agents must implement
@@ -11,7 +11,7 @@ export interface AgentProtocol {
   run: (messages: unknown[], options?: AgentRunOptions) => Promise<AgentRunResponse>;
   stream?: (
     messages: unknown[],
-    options?: AgentRunOptions
+    options?: AgentRunOptions,
   ) => AsyncIterable<AgentRunResponseUpdate>;
 }
 
@@ -24,7 +24,7 @@ export interface AgentRunOptions {
   model?: string;
   temperature?: number;
   maxTokens?: number;
-  toolMode?: "auto" | "required" | "none";
+  toolMode?: 'auto' | 'required' | 'none';
   stream?: boolean;
   metadata?: Record<string, unknown>;
 }
@@ -60,7 +60,7 @@ export interface UsageDetails {
  * Base Agent - base class providing core agent functionality
  */
 export interface BaseAgent extends AgentProtocol {
-  type?: "base-agent";
+  type?: 'base-agent';
   contextProviders?: ContextProvider[];
   middleware?: AgentMiddleware[];
   thread?: AgentThread;
@@ -104,12 +104,10 @@ export interface AggregateContextProvider extends ContextProvider {
 export interface AgentMiddleware {
   id: string;
   name: string;
-  beforeRun?: (
-    context: AgentRunContext
-  ) => Promise<AgentRunContext> | AgentRunContext;
+  beforeRun?: (context: AgentRunContext) => Promise<AgentRunContext> | AgentRunContext;
   afterRun?: (
     context: AgentRunContext,
-    response: AgentRunResponse
+    response: AgentRunResponse,
   ) => Promise<AgentRunResponse> | AgentRunResponse;
 }
 
@@ -136,36 +134,30 @@ export interface AgentThread {
 /**
  * Chat Agent - primary agent implementation using chat clients for LLM interaction
  */
-export interface ChatAgent extends Omit<BaseAgent, "type"> {
-  type: "chat-agent";
+export interface ChatAgent extends Omit<BaseAgent, 'type'> {
+  type: 'chat-agent';
   chatClient: ChatClientProtocol;
   systemPrompt?: string;
   tools?: (ToolProtocol | AIFunction)[];
   model?: string;
   temperature?: number;
   maxTokens?: number;
-  toolMode?: "auto" | "required" | "none";
+  toolMode?: 'auto' | 'required' | 'none';
 }
 
 /**
  * Chat Client Protocol - protocol for chat clients that generate responses
  */
 export interface ChatClientProtocol {
-  chat: (
-    messages: ChatMessage[],
-    options?: ChatOptions
-  ) => Promise<ChatResponse>;
-  stream?: (
-    messages: ChatMessage[],
-    options?: ChatOptions
-  ) => AsyncIterable<ChatResponseUpdate>;
+  chat: (messages: ChatMessage[], options?: ChatOptions) => Promise<ChatResponse>;
+  stream?: (messages: ChatMessage[], options?: ChatOptions) => AsyncIterable<ChatResponseUpdate>;
 }
 
 /**
  * Chat Message
  */
 export interface ChatMessage {
-  role: "system" | "user" | "assistant" | "tool";
+  role: 'system' | 'user' | 'assistant' | 'tool';
   content: string | ChatContent[];
   name?: string;
   toolCallId?: string;
@@ -176,7 +168,7 @@ export interface ChatMessage {
  * Chat Content
  */
 export interface ChatContent {
-  type: "text" | "image" | "file";
+  type: 'text' | 'image' | 'file';
   value: string;
 }
 
@@ -194,7 +186,7 @@ export interface ToolCall {
  */
 export interface ChatResponse {
   message: ChatMessage;
-  finishReason?: "stop" | "length" | "tool_calls" | "content_filter";
+  finishReason?: 'stop' | 'length' | 'tool_calls' | 'content_filter';
   usage?: UsageDetails;
 }
 
@@ -216,7 +208,7 @@ export interface ChatOptions {
   model?: string;
   temperature?: number;
   maxTokens?: number;
-  toolMode?: "auto" | "required" | "none";
+  toolMode?: 'auto' | 'required' | 'none';
   stream?: boolean;
   metadata?: Record<string, unknown>;
 }
@@ -224,8 +216,8 @@ export interface ChatOptions {
 /**
  * Workflow Agent - wraps a workflow and exposes it as an agent
  */
-export interface WorkflowAgent extends Omit<BaseAgent, "type"> {
-  type: "workflow-agent";
+export interface WorkflowAgent extends Omit<BaseAgent, 'type'> {
+  type: 'workflow-agent';
   workflow: WorkflowDefinition;
   inputAdapter?: (messages: unknown[]) => unknown[];
   outputAdapter?: (output: unknown[]) => unknown[];
@@ -240,30 +232,25 @@ export type WorkflowAgentType = BaseAgent | ChatAgent | WorkflowAgent;
  * Type guard helpers
  */
 export function isChatAgent(agent: AgentProtocol): agent is ChatAgent {
-  return "type" in agent && agent.type === "chat-agent";
+  return 'type' in agent && agent.type === 'chat-agent';
 }
 
-export function isWorkflowAgent(
-  agent: AgentProtocol
-): agent is WorkflowAgent {
-  return "type" in agent && agent.type === "workflow-agent";
+export function isWorkflowAgent(agent: AgentProtocol): agent is WorkflowAgent {
+  return 'type' in agent && agent.type === 'workflow-agent';
 }
 
 export function isBaseAgent(agent: AgentProtocol): agent is BaseAgent {
-  return "type" in agent && agent.type === "base-agent";
+  return 'type' in agent && agent.type === 'base-agent';
 }
 
 /**
  * Create executor from agent
  */
-export function agentToExecutor(
-  agent: AgentProtocol,
-  executorId: string
-): BaseExecutor {
+export function agentToExecutor(agent: AgentProtocol, executorId: string): BaseExecutor {
   return {
     id: executorId,
-    type: "agent-executor",
-    label: "name" in agent ? agent.name : executorId,
-    description: `Agent executor: ${"name" in agent ? agent.name : executorId}`,
+    type: 'agent-executor',
+    label: 'name' in agent ? agent.name : executorId,
+    description: `Agent executor: ${'name' in agent ? agent.name : executorId}`,
   };
 }

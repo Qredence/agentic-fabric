@@ -1,12 +1,12 @@
-import type { Workflow } from "../workflow";
+import type { Workflow } from '../workflow';
 import type {
   WorkflowValidationResult,
   WorkflowValidationError,
   WorkflowValidationWarning,
-} from "../workflow";
-import { validateWorkflow as validateWorkflowStructure } from "../workflow";
-import type { BaseExecutor } from "../types";
-import type { ExecutorType } from "../executors";
+} from '../workflow';
+import { validateWorkflow as validateWorkflowStructure } from '../workflow';
+import type { BaseExecutor } from '../types';
+import type { ExecutorType } from '../executors';
 
 /**
  * Extended validation result with additional checks
@@ -41,9 +41,7 @@ export interface ConnectivityWarning {
 /**
  * Validate workflow with extended checks
  */
-export function validateWorkflowExtended(
-  workflow: Workflow
-): ExtendedValidationResult {
+export function validateWorkflowExtended(workflow: Workflow): ExtendedValidationResult {
   const baseValidation = validateWorkflowStructure(workflow);
   const typeErrors: TypeValidationError[] = [];
   const connectivityWarnings: ConnectivityWarning[] = [];
@@ -62,11 +60,7 @@ export function validateWorkflowExtended(
     const targetExecutor = workflow.executors.find((e) => e.id === edge.target);
 
     if (sourceExecutor && targetExecutor) {
-      const compatibilityError = validateEdgeCompatibility(
-        sourceExecutor,
-        targetExecutor,
-        edge
-      );
+      const compatibilityError = validateEdgeCompatibility(sourceExecutor, targetExecutor, edge);
       if (compatibilityError) {
         typeErrors.push(compatibilityError);
       }
@@ -78,20 +72,20 @@ export function validateWorkflowExtended(
     const connected = getConnectedExecutors(workflow, executor.id);
     if (connected.incoming.length === 0 && connected.outgoing.length === 0) {
       connectivityWarnings.push({
-        code: "isolated-executor",
+        code: 'isolated-executor',
         message: `Executor ${executor.id} is isolated (no connections)`,
         executorId: executor.id,
       });
     } else if (connected.incoming.length === 0) {
       connectivityWarnings.push({
-        code: "no-incoming-edges",
+        code: 'no-incoming-edges',
         message: `Executor ${executor.id} has no incoming edges`,
         executorId: executor.id,
         connectedExecutors: connected.outgoing,
       });
     } else if (connected.outgoing.length === 0) {
       connectivityWarnings.push({
-        code: "no-outgoing-edges",
+        code: 'no-outgoing-edges',
         message: `Executor ${executor.id} has no outgoing edges`,
         executorId: executor.id,
         connectedExecutors: connected.incoming,
@@ -109,25 +103,23 @@ export function validateWorkflowExtended(
 /**
  * Validate executor type
  */
-function validateExecutorType(
-  executor: BaseExecutor
-): TypeValidationError | null {
+function validateExecutorType(executor: BaseExecutor): TypeValidationError | null {
   const validTypes: ExecutorType[] = [
-    "executor",
-    "function-executor",
-    "workflow-executor",
-    "agent-executor",
-    "request-info-executor",
-    "magentic-agent-executor",
-    "magentic-orchestrator-executor",
+    'executor',
+    'function-executor',
+    'workflow-executor',
+    'agent-executor',
+    'request-info-executor',
+    'magentic-agent-executor',
+    'magentic-orchestrator-executor',
   ];
 
   if (!validTypes.includes(executor.type as ExecutorType)) {
     return {
-      code: "invalid-executor-type",
+      code: 'invalid-executor-type',
       message: `Invalid executor type: ${executor.type}`,
       executorId: executor.id,
-      expectedType: validTypes.join(" | "),
+      expectedType: validTypes.join(' | '),
       actualType: executor.type,
     };
   }
@@ -141,7 +133,7 @@ function validateExecutorType(
 function validateEdgeCompatibility(
   source: BaseExecutor,
   target: BaseExecutor,
-  edge: { id: string }
+  edge: { id: string },
 ): TypeValidationError | null {
   // Basic compatibility checks
   // In a full implementation, this would check message type compatibility
@@ -160,17 +152,13 @@ function validateEdgeCompatibility(
  */
 function getConnectedExecutors(
   workflow: Workflow,
-  executorId: string
+  executorId: string,
 ): {
   incoming: string[];
   outgoing: string[];
 } {
-  const incoming = workflow.edges
-    .filter((e) => e.target === executorId)
-    .map((e) => e.source);
-  const outgoing = workflow.edges
-    .filter((e) => e.source === executorId)
-    .map((e) => e.target);
+  const incoming = workflow.edges.filter((e) => e.target === executorId).map((e) => e.source);
+  const outgoing = workflow.edges.filter((e) => e.source === executorId).map((e) => e.target);
 
   return { incoming, outgoing };
 }
@@ -184,14 +172,14 @@ export function validateWorkflowSchema(workflow: unknown): {
 } {
   const errors: string[] = [];
 
-  if (!workflow || typeof workflow !== "object") {
-    errors.push("Workflow must be an object");
+  if (!workflow || typeof workflow !== 'object') {
+    errors.push('Workflow must be an object');
     return { valid: false, errors };
   }
 
   const wf = workflow as Record<string, unknown>;
 
-  if (!wf.id || typeof wf.id !== "string") {
+  if (!wf.id || typeof wf.id !== 'string') {
     errors.push("Workflow must have a string 'id' property");
   }
 
@@ -200,14 +188,14 @@ export function validateWorkflowSchema(workflow: unknown): {
       errors.push("Workflow 'executors' must be an array");
     } else {
       wf.executors.forEach((executor, idx) => {
-        if (!executor || typeof executor !== "object") {
+        if (!executor || typeof executor !== 'object') {
           errors.push(`Executor at index ${idx} must be an object`);
         } else {
           const exec = executor as Record<string, unknown>;
-          if (!exec.id || typeof exec.id !== "string") {
+          if (!exec.id || typeof exec.id !== 'string') {
             errors.push(`Executor at index ${idx} must have a string 'id' property`);
           }
-          if (!exec.type || typeof exec.type !== "string") {
+          if (!exec.type || typeof exec.type !== 'string') {
             errors.push(`Executor at index ${idx} must have a string 'type' property`);
           }
         }
@@ -220,17 +208,17 @@ export function validateWorkflowSchema(workflow: unknown): {
       errors.push("Workflow 'edges' must be an array");
     } else {
       wf.edges.forEach((edge, idx) => {
-        if (!edge || typeof edge !== "object") {
+        if (!edge || typeof edge !== 'object') {
           errors.push(`Edge at index ${idx} must be an object`);
         } else {
           const e = edge as Record<string, unknown>;
-          if (!e.id || typeof e.id !== "string") {
+          if (!e.id || typeof e.id !== 'string') {
             errors.push(`Edge at index ${idx} must have a string 'id' property`);
           }
-          if (!e.source || typeof e.source !== "string") {
+          if (!e.source || typeof e.source !== 'string') {
             errors.push(`Edge at index ${idx} must have a string 'source' property`);
           }
-          if (!e.target || typeof e.target !== "string") {
+          if (!e.target || typeof e.target !== 'string') {
             errors.push(`Edge at index ${idx} must have a string 'target' property`);
           }
         }

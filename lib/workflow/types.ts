@@ -1,4 +1,4 @@
-export type WorkflowNodeVariant = "workflow" | "textBlock" | "attribute";
+export type WorkflowNodeVariant = 'workflow' | 'textBlock' | 'attribute';
 
 // ============================================================================
 // Agent Framework Base Types
@@ -50,10 +50,10 @@ export interface BaseEdge {
  * Edge condition for conditional routing
  */
 export type EdgeCondition = {
-  type: "predicate" | "case" | "always";
+  type: 'predicate' | 'case' | 'always';
   expression?: string;
   caseValue?: string;
-  operator?: "equals" | "not-equals" | "contains" | "greater-than" | "less-than";
+  operator?: 'equals' | 'not-equals' | 'contains' | 'greater-than' | 'less-than';
   value?: unknown;
 };
 
@@ -72,7 +72,7 @@ export interface BaseMessage {
 /**
  * Message role in conversation
  */
-export type MessageRole = "system" | "user" | "assistant" | "tool";
+export type MessageRole = 'system' | 'user' | 'assistant' | 'tool';
 
 /**
  * Workflow context - provides execution context for executors
@@ -105,13 +105,9 @@ export interface BaseEdgeGroup {
 /**
  * Edge group types
  */
-export type EdgeGroupType =
-  | "single"
-  | "fan-in"
-  | "fan-out"
-  | "switch-case";
+export type EdgeGroupType = 'single' | 'fan-in' | 'fan-out' | 'switch-case';
 
-export type StatusFlag = "draft" | "active" | "disabled" | "deprecated";
+export type StatusFlag = 'draft' | 'active' | 'disabled' | 'deprecated';
 
 export interface Acl {
   owner: string;
@@ -123,17 +119,12 @@ export interface Acl {
 /**
  * Finish reason for chat responses
  */
-export type FinishReason =
-  | "stop"
-  | "length"
-  | "tool_calls"
-  | "content_filter"
-  | "function_call";
+export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call';
 
 /**
  * Tool mode for agent execution
  */
-export type ToolMode = "auto" | "required" | "none";
+export type ToolMode = 'auto' | 'required' | 'none';
 
 export type WorkflowHandles = {
   target: boolean;
@@ -141,7 +132,7 @@ export type WorkflowHandles = {
 };
 
 export type WorkflowStepNodeData = {
-  variant: "workflow";
+  variant: 'workflow';
   handles: WorkflowHandles;
   label: string;
   description: string;
@@ -150,7 +141,7 @@ export type WorkflowStepNodeData = {
 };
 
 export type TextBlockNodeData = {
-  variant: "textBlock";
+  variant: 'textBlock';
   handles: WorkflowHandles;
   title: string;
   model: string;
@@ -159,7 +150,7 @@ export type TextBlockNodeData = {
   collapsed: boolean;
 };
 
-export type AttributeType = "input" | "progress" | "checkbox" | "select" | "slider";
+export type AttributeType = 'input' | 'progress' | 'checkbox' | 'select' | 'slider';
 
 export type AttributeDefinition = {
   id: string;
@@ -173,7 +164,7 @@ export type AttributeDefinition = {
 };
 
 export type AttributeNodeData = {
-  variant: "attribute";
+  variant: 'attribute';
   handles: WorkflowHandles;
   title: string;
   model: string;
@@ -181,10 +172,7 @@ export type AttributeNodeData = {
   collapsed: boolean;
 };
 
-export type WorkflowNodeData =
-  | WorkflowStepNodeData
-  | TextBlockNodeData
-  | AttributeNodeData;
+export type WorkflowNodeData = WorkflowStepNodeData | TextBlockNodeData | AttributeNodeData;
 
 export const defaultHandles: WorkflowHandles = {
   target: true,
@@ -192,39 +180,35 @@ export const defaultHandles: WorkflowHandles = {
 };
 
 export const defaultWorkflowStepData = (
-  overrides: Partial<Omit<WorkflowStepNodeData, "variant">> = {}
+  overrides: Partial<Omit<WorkflowStepNodeData, 'variant'>> = {},
 ): WorkflowStepNodeData => ({
-  variant: "workflow",
+  variant: 'workflow',
   handles: overrides.handles ?? defaultHandles,
-  label: overrides.label ?? "New Step",
-  description: overrides.description ?? "Customize this workflow step",
-  content:
-    overrides.content ??
-    "Drag to reposition or connect to an existing node.",
-  footer: overrides.footer ?? "Status: Draft",
+  label: overrides.label ?? 'New Step',
+  description: overrides.description ?? 'Customize this workflow step',
+  content: overrides.content ?? 'Drag to reposition or connect to an existing node.',
+  footer: overrides.footer ?? 'Status: Draft',
 });
 
 export const defaultTextBlockData = (
-  overrides: Partial<Omit<TextBlockNodeData, "variant">> = {}
+  overrides: Partial<Omit<TextBlockNodeData, 'variant'>> = {},
 ): TextBlockNodeData => ({
-  variant: "textBlock",
+  variant: 'textBlock',
   handles: overrides.handles ?? defaultHandles,
-  title: overrides.title ?? "Text",
-  model: overrides.model ?? "GPT-5",
-  placeholder:
-    overrides.placeholder ??
-    'Try "A script excerpt of a romantic meeting in Paris"',
+  title: overrides.title ?? 'Text',
+  model: overrides.model ?? 'GPT-5',
+  placeholder: overrides.placeholder ?? 'Try "A script excerpt of a romantic meeting in Paris"',
   showSuggestions: overrides.showSuggestions ?? true,
   collapsed: overrides.collapsed ?? false,
 });
 
 export const defaultAttributeNodeData = (
-  overrides: Partial<Omit<AttributeNodeData, "variant">> = {}
+  overrides: Partial<Omit<AttributeNodeData, 'variant'>> = {},
 ): AttributeNodeData => ({
-  variant: "attribute",
+  variant: 'attribute',
   handles: overrides.handles ?? defaultHandles,
-  title: overrides.title ?? "Attributes",
-  model: overrides.model ?? "GPT-5",
+  title: overrides.title ?? 'Attributes',
+  model: overrides.model ?? 'GPT-5',
   attributes: overrides.attributes ?? [],
   collapsed: overrides.collapsed ?? false,
 });

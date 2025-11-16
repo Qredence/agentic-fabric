@@ -25,6 +25,7 @@ This guide covers development workflows, coding conventions, testing practices, 
 ### Initial Setup
 
 1. Clone and install:
+
 ```bash
 git clone https://github.com/Qredence/agentic-fabric.git
 cd agentic-fabric
@@ -32,6 +33,7 @@ npm install
 ```
 
 2. Run development server:
+
 ```bash
 npm run dev
 ```
@@ -39,6 +41,7 @@ npm run dev
 3. Open http://localhost:3000
 
 4. Run tests:
+
 ```bash
 npm test
 ```
@@ -57,6 +60,7 @@ npm test
 ### Making Changes
 
 1. **Create a branch**:
+
 ```bash
 git checkout -b feature/my-new-feature
 ```
@@ -64,18 +68,21 @@ git checkout -b feature/my-new-feature
 2. **Make changes**: Follow coding conventions below
 
 3. **Test changes**:
+
 ```bash
 npm test
 npm run lint
 ```
 
 4. **Commit changes**:
+
 ```bash
 git add .
 git commit -m "feat: add new feature"
 ```
 
 5. **Push and create PR**:
+
 ```bash
 git push origin feature/my-new-feature
 ```
@@ -93,6 +100,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -103,6 +111,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `perf`: Performance improvements
 
 **Examples:**
+
 ```
 feat(workflow): add fan-in edge group support
 fix(canvas): resolve node selection bug
@@ -117,6 +126,7 @@ refactor(executors): simplify agent executor logic
 #### Strict Type Checking
 
 Enable all strict checks:
+
 ```typescript
 // tsconfig.json
 {
@@ -131,6 +141,7 @@ Enable all strict checks:
 #### Type Definitions
 
 Prefer interfaces over types for objects:
+
 ```typescript
 // Good
 interface Workflow {
@@ -142,18 +153,20 @@ interface Workflow {
 type Workflow = {
   id: string;
   name?: string;
-}
+};
 ```
 
 Use types for unions and primitives:
+
 ```typescript
-type ExecutorType = "agent" | "function" | "workflow";
+type ExecutorType = 'agent' | 'function' | 'workflow';
 type ExecutorId = string;
 ```
 
 #### Avoid `any`
 
 Use `unknown` when type is truly unknown:
+
 ```typescript
 // Bad
 function process(data: any) { ... }
@@ -184,12 +197,12 @@ export const MyComponent = ({
 }: MyComponentProps) => {
   // Hooks first
   const [state, setState] = useState<string>("");
-  
+
   // Event handlers
   const handleClick = useCallback(() => {
     onAction?.();
   }, [onAction]);
-  
+
   // Render
   return (
     <div>
@@ -236,23 +249,18 @@ const [nodes, setNodes] = useNodesState(initialNodes);
 const [edges, setEdges] = useEdgesState(initialEdges);
 
 // Memoize expensive computations
-const workflow = useMemo(
-  () => reactFlowToWorkflow(nodes, edges, "id", "name"),
-  [nodes, edges]
-);
+const workflow = useMemo(() => reactFlowToWorkflow(nodes, edges, 'id', 'name'), [nodes, edges]);
 
 // Memoize callbacks
-const handleNodeClick = useCallback(
-  (event: React.MouseEvent, node: Node) => {
-    setSelectedNode(node);
-  },
-  []
-);
+const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  setSelectedNode(node);
+}, []);
 ```
 
 #### Component Optimization
 
 Use `React.memo` for expensive components:
+
 ```typescript
 export const ExpensiveComponent = memo(({ data }: Props) => {
   // Component logic
@@ -260,6 +268,7 @@ export const ExpensiveComponent = memo(({ data }: Props) => {
 ```
 
 Custom comparison function:
+
 ```typescript
 export const Node = memo(
   ({ id, data }: NodeProps) => {
@@ -267,7 +276,7 @@ export const Node = memo(
   },
   (prev, next) => {
     return prev.id === next.id && prev.data === next.data;
-  }
+  },
 );
 ```
 
@@ -276,11 +285,13 @@ export const Node = memo(
 #### Tailwind CSS Conventions
 
 1. Use utility classes directly:
+
 ```typescript
 <div className="flex items-center gap-2 p-4 rounded-lg bg-primary text-primary-foreground">
 ```
 
 2. Use `cn()` for conditional classes:
+
 ```typescript
 import { cn } from "@/lib/utils";
 
@@ -292,43 +303,43 @@ import { cn } from "@/lib/utils";
 ```
 
 3. Use CVA for component variants:
-```typescript
-import { cva } from "class-variance-authority";
 
-const buttonVariants = cva(
-  "rounded-md font-medium transition-colors",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        outline: "border border-input bg-background hover:bg-accent",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 px-3",
-        lg: "h-11 px-8",
-      },
+```typescript
+import { cva } from 'class-variance-authority';
+
+const buttonVariants = cva('rounded-md font-medium transition-colors', {
+  variants: {
+    variant: {
+      default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+      outline: 'border border-input bg-background hover:bg-accent',
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
+    size: {
+      default: 'h-10 px-4 py-2',
+      sm: 'h-9 px-3',
+      lg: 'h-11 px-8',
     },
-  }
-);
+  },
+  defaultVariants: {
+    variant: 'default',
+    size: 'default',
+  },
+});
 ```
 
 4. Semantic color tokens:
+
 ```typescript
 // Good - semantic
-"bg-primary text-muted-foreground border-border"
+'bg-primary text-muted-foreground border-border';
 
 // Avoid - hardcoded
-"bg-blue-500 text-gray-400 border-gray-300"
+'bg-blue-500 text-gray-400 border-gray-300';
 ```
 
 #### Component Styling Patterns
 
 Extract base classes to variables when repeating:
+
 ```typescript
 const inputClasses = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2";
 
@@ -336,6 +347,7 @@ const inputClasses = "flex h-10 w-full rounded-md border border-input bg-backgro
 ```
 
 Group-based styling:
+
 ```typescript
 <div className="group">
   <div className="group-hover:bg-accent" />
@@ -353,19 +365,19 @@ Group-based styling:
 5. Relative imports
 
 ```typescript
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback } from 'react';
 
-import { ReactFlowProvider } from "@xyflow/react";
-import { nanoid } from "nanoid";
+import { ReactFlowProvider } from '@xyflow/react';
+import { nanoid } from 'nanoid';
 
-import { Canvas } from "@/components/ai-elements/canvas";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Canvas } from '@/components/ai-elements/canvas';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-import type { Workflow } from "@/lib/workflow/workflow";
-import type { ExecutorType } from "@/lib/workflow/executors";
+import type { Workflow } from '@/lib/workflow/workflow';
+import type { ExecutorType } from '@/lib/workflow/executors';
 
-import { NodeLibrary } from "./node-library";
+import { NodeLibrary } from './node-library';
 ```
 
 #### File Naming
@@ -378,6 +390,7 @@ import { NodeLibrary } from "./node-library";
 #### Directory Structure
 
 Keep related files together:
+
 ```
 components/
   workflow-builder/
@@ -399,6 +412,7 @@ components/
 ### Test File Location
 
 Place tests in `__tests__` directories:
+
 ```
 lib/
   workflow/
@@ -423,16 +437,16 @@ describe("reactFlowToWorkflow", () => {
       { id: "1", type: "agent-executor", data: { executor: {...} } }
     ];
     const edges = [];
-    
+
     const workflow = reactFlowToWorkflow(nodes, edges, "test-id");
-    
+
     expect(workflow.executors).toHaveLength(1);
     expect(workflow.executors[0].id).toBe("1");
   });
-  
+
   it("handles empty workflow", () => {
     const workflow = reactFlowToWorkflow([], [], "test-id");
-    
+
     expect(workflow.executors).toHaveLength(0);
     expect(workflow.edges).toHaveLength(0);
   });
@@ -451,15 +465,15 @@ describe("Button", () => {
     render(<Button>Click me</Button>);
     expect(screen.getByText("Click me")).toBeInTheDocument();
   });
-  
+
   it("calls onClick when clicked", () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Click</Button>);
-    
+
     fireEvent.click(screen.getByText("Click"));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
-  
+
   it("applies variant classes", () => {
     const { container } = render(<Button variant="destructive">Delete</Button>);
     expect(container.firstChild).toHaveClass("bg-destructive");
@@ -470,23 +484,21 @@ describe("Button", () => {
 #### Integration Tests
 
 ```typescript
-describe("Workflow Integration", () => {
-  it("executes simple workflow", async () => {
+describe('Workflow Integration', () => {
+  it('executes simple workflow', async () => {
     const workflow: Workflow = {
-      id: "test",
+      id: 'test',
       executors: [
-        { id: "1", type: "function", function: { code: "..." } },
-        { id: "2", type: "agent", agentId: "test-agent" }
+        { id: '1', type: 'function', function: { code: '...' } },
+        { id: '2', type: 'agent', agentId: 'test-agent' },
       ],
-      edges: [
-        { id: "e1", source: "1", target: "2" }
-      ]
+      edges: [{ id: 'e1', source: '1', target: '2' }],
     };
-    
+
     // Execute workflow
-    const result = await executeWorkflow(workflow, { input: "test" });
-    
-    expect(result.status).toBe("completed");
+    const result = await executeWorkflow(workflow, { input: 'test' });
+
+    expect(result.status).toBe('completed');
     expect(result.output).toBeDefined();
   });
 });
@@ -517,6 +529,7 @@ npm test -- --coverage
 ### Test Coverage
 
 Aim for:
+
 - **80%+ overall coverage**
 - **90%+ for critical paths** (workflow conversion, execution)
 - **100% for utilities**
@@ -550,6 +563,7 @@ npm run format:check
 ### Profiling
 
 Use React DevTools Profiler:
+
 1. Open React DevTools
 2. Go to Profiler tab
 3. Click record
@@ -579,6 +593,7 @@ npm run build -- --analyze
 ### Debug Configuration (VS Code)
 
 `.vscode/launch.json`:
+
 ```json
 {
   "version": "0.2.0",
@@ -602,8 +617,9 @@ npm run build -- --analyze
 ### Debugging Tips
 
 1. **Console logging**:
+
 ```typescript
-console.log("State:", { nodes, edges });
+console.log('State:', { nodes, edges });
 ```
 
 2. **React DevTools**: Inspect component props and state
@@ -619,14 +635,16 @@ console.log("State:", { nodes, edges });
 ### Adding a New Executor Type
 
 1. Define type in `lib/workflow/executors.ts`:
+
 ```typescript
 export interface MyExecutor extends BaseExecutor {
-  type: "my-executor";
+  type: 'my-executor';
   myConfig: string;
 }
 ```
 
 2. Create node component in `components/ai-elements/executors/`:
+
 ```typescript
 // my-executor-node.tsx
 export const MyExecutorNode = ({ id, data }: NodeProps) => {
@@ -635,6 +653,7 @@ export const MyExecutorNode = ({ id, data }: NodeProps) => {
 ```
 
 3. Create editor in `components/workflow-builder/executor-editors/`:
+
 ```typescript
 // my-executor-editor.tsx
 export const MyExecutorEditor = ({ executor, onChange }: Props) => {
@@ -643,6 +662,7 @@ export const MyExecutorEditor = ({ executor, onChange }: Props) => {
 ```
 
 4. Update conversion logic in `lib/workflow/conversion.ts`:
+
 ```typescript
 case "my-executor":
   return {
@@ -652,10 +672,11 @@ case "my-executor":
 ```
 
 5. Register in `app/page.tsx`:
+
 ```typescript
 const nodeTypes = {
   // ...
-  "my-executor": MyExecutorNode,
+  'my-executor': MyExecutorNode,
 };
 ```
 
@@ -666,6 +687,7 @@ const nodeTypes = {
 ### Adding a New UI Component
 
 1. Create component file in `components/ui/`:
+
 ```typescript
 // my-component.tsx
 import { cn } from "@/lib/utils";
@@ -702,6 +724,7 @@ export const MyComponent = ({ className }: MyComponentProps) => {
 ### Common Issues
 
 **Issue**: TypeScript errors after dependency update
+
 ```bash
 # Solution: Clear cache and reinstall
 rm -rf node_modules package-lock.json
@@ -709,6 +732,7 @@ npm install
 ```
 
 **Issue**: Build fails with module not found
+
 ```bash
 # Solution: Check import paths use @ alias
 import { X } from "@/lib/utils";  # Good
@@ -716,6 +740,7 @@ import { X } from "../../../lib/utils";  # Avoid
 ```
 
 **Issue**: Tests fail after React update
+
 ```bash
 # Solution: Update testing library
 npm update @testing-library/react @testing-library/user-event
@@ -755,6 +780,7 @@ npm update @testing-library/react @testing-library/user-event
 ### Code Review Guidelines
 
 As a reviewer:
+
 - Check for test coverage
 - Verify documentation updates
 - Ensure code follows conventions
@@ -763,6 +789,7 @@ As a reviewer:
 - Be constructive and respectful
 
 As an author:
+
 - Respond to all comments
 - Make requested changes
 - Ask questions if unclear

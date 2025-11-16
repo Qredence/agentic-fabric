@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { motion } from "motion/react";
-import { Handle, Position } from "@xyflow/react";
-import { ConnectionHandle } from "./connection-handle";
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import { Handle, Position } from '@xyflow/react';
+import { ConnectionHandle } from './connection-handle';
 
 interface ExecutorNodeWrapperProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ interface ExecutorNodeWrapperProps {
 }
 
 const springTransition = {
-  type: "spring" as const,
+  type: 'spring' as const,
   stiffness: 300,
   damping: 30,
   mass: 0.8,
@@ -27,7 +27,7 @@ export const ExecutorNodeWrapper: React.FC<ExecutorNodeWrapperProps> = ({
   children,
   selected = false,
   dataId,
-  className = "",
+  className = '',
   handles = { target: true, source: true },
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -74,10 +74,10 @@ export const ExecutorNodeWrapper: React.FC<ExecutorNodeWrapperProps> = ({
             border transition-all duration-200
             ${
               selected
-                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                 : isHovered
-                ? "border-white/10"
-                : "border-white/5"
+                  ? 'border-white/10'
+                  : 'border-white/5'
             }
           `}
         >
@@ -89,10 +89,10 @@ export const ExecutorNodeWrapper: React.FC<ExecutorNodeWrapperProps> = ({
               position={Position.Left}
               className="!w-12 !h-12 !bg-transparent !border-none !rounded-none !cursor-grab !left-[-32px] !top-[176px]"
               style={{
-                width: "48px",
-                height: "48px",
-                transform: "translate(-50%, -50%)",
-                pointerEvents: "auto",
+                width: '48px',
+                height: '48px',
+                transform: 'translate(-50%, -50%)',
+                pointerEvents: 'auto',
               }}
             />
           )}
@@ -103,28 +103,18 @@ export const ExecutorNodeWrapper: React.FC<ExecutorNodeWrapperProps> = ({
               position={Position.Right}
               className="!w-12 !h-12 !bg-transparent !border-none !rounded-none !cursor-grab !right-[-32px] !top-[176px]"
               style={{
-                width: "48px",
-                height: "48px",
-                transform: "translate(50%, -50%)",
-                pointerEvents: "auto",
+                width: '48px',
+                height: '48px',
+                transform: 'translate(50%, -50%)',
+                pointerEvents: 'auto',
               }}
             />
           )}
           {children}
         </motion.div>
         {/* Custom Connection Handles (visual only - handles functional above) */}
-        {handles.target && (
-          <ConnectionHandle 
-            position="left" 
-            visible={isHovered} 
-          />
-        )}
-        {handles.source && (
-          <ConnectionHandle 
-            position="right" 
-            visible={isHovered} 
-          />
-        )}
+        {handles.target && <ConnectionHandle position="left" visible={isHovered} />}
+        {handles.source && <ConnectionHandle position="right" visible={isHovered} />}
       </motion.div>
     </motion.div>
   );

@@ -6,14 +6,10 @@ import type {
   WorkflowContext,
   BaseMessage,
   SharedState,
-} from "./types";
-import type {
-  WorkflowDefinition,
-  EdgeDefinition,
-  WorkflowExecutorType,
-} from "./executors";
-import type { EdgeGroup } from "./edges";
-import type { WorkflowEvent } from "./events";
+} from './types';
+import type { WorkflowDefinition, EdgeDefinition, WorkflowExecutorType } from './executors';
+import type { EdgeGroup } from './edges';
+import type { WorkflowEvent } from './events';
 
 /**
  * Workflow - graph-based execution engine that orchestrates connected executors
@@ -60,12 +56,7 @@ export interface WorkflowState {
 /**
  * Workflow status
  */
-export type WorkflowStatus =
-  | "pending"
-  | "running"
-  | "completed"
-  | "failed"
-  | "cancelled";
+export type WorkflowStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 /**
  * Workflow error
@@ -93,7 +84,7 @@ export interface WorkflowCheckpoint {
  */
 export interface ExecutorState {
   executorId: ExecutorId;
-  status: "pending" | "running" | "completed" | "failed";
+  status: 'pending' | 'running' | 'completed' | 'failed';
   messages?: BaseMessage[];
   error?: WorkflowError;
   startedAt?: string;
@@ -119,11 +110,7 @@ export interface WorkflowBuilder {
   /**
    * Add an edge between executors
    */
-  addEdge(
-    source: ExecutorId,
-    target: ExecutorId,
-    condition?: EdgeCondition
-  ): WorkflowBuilder;
+  addEdge(source: ExecutorId, target: ExecutorId, condition?: EdgeCondition): WorkflowBuilder;
 
   /**
    * Add multiple edges
@@ -150,7 +137,7 @@ export interface WorkflowBuilder {
  * Edge condition for builder
  */
 export interface EdgeCondition {
-  type: "predicate" | "case" | "always";
+  type: 'predicate' | 'case' | 'always';
   expression?: string;
   caseValue?: string;
 }
@@ -160,10 +147,7 @@ export interface EdgeCondition {
  */
 export interface WorkflowRunner {
   run(workflow: Workflow, input?: unknown[]): Promise<WorkflowRunResult>;
-  stream?(
-    workflow: Workflow,
-    input?: unknown[]
-  ): AsyncIterable<WorkflowRunResult>;
+  stream?(workflow: Workflow, input?: unknown[]): AsyncIterable<WorkflowRunResult>;
 }
 
 /**
@@ -299,9 +283,7 @@ export interface WorkflowValidationWarning {
 /**
  * Validate workflow
  */
-export function validateWorkflow(
-  workflow: Workflow
-): WorkflowValidationResult {
+export function validateWorkflow(workflow: Workflow): WorkflowValidationResult {
   const errors: WorkflowValidationError[] = [];
   const warnings: WorkflowValidationWarning[] = [];
 
@@ -310,7 +292,7 @@ export function validateWorkflow(
   for (const executor of workflow.executors) {
     if (executorIds.has(executor.id)) {
       errors.push({
-        code: "duplicate-executor-id",
+        code: 'duplicate-executor-id',
         message: `Duplicate executor ID: ${executor.id}`,
         executorId: executor.id,
       });
@@ -323,7 +305,7 @@ export function validateWorkflow(
   for (const edge of workflow.edges) {
     if (edgeIds.has(edge.id)) {
       errors.push({
-        code: "duplicate-edge-id",
+        code: 'duplicate-edge-id',
         message: `Duplicate edge ID: ${edge.id}`,
         edgeId: edge.id,
       });
@@ -333,7 +315,7 @@ export function validateWorkflow(
     // Check that source and target executors exist
     if (!executorIds.has(edge.source)) {
       errors.push({
-        code: "invalid-edge-source",
+        code: 'invalid-edge-source',
         message: `Edge source executor not found: ${edge.source}`,
         edgeId: edge.id,
         executorId: edge.source,
@@ -341,7 +323,7 @@ export function validateWorkflow(
     }
     if (!executorIds.has(edge.target)) {
       errors.push({
-        code: "invalid-edge-target",
+        code: 'invalid-edge-target',
         message: `Edge target executor not found: ${edge.target}`,
         edgeId: edge.id,
         executorId: edge.target,
@@ -355,7 +337,7 @@ export function validateWorkflow(
     const hasOutgoing = workflow.edges.some((e) => e.source === executor.id);
     if (!hasIncoming && !hasOutgoing) {
       warnings.push({
-        code: "orphaned-executor",
+        code: 'orphaned-executor',
         message: `Executor has no connections: ${executor.id}`,
         executorId: executor.id,
       });
@@ -372,9 +354,7 @@ export function validateWorkflow(
 /**
  * Convert workflow definition to workflow
  */
-export function workflowDefinitionToWorkflow(
-  definition: WorkflowDefinition
-): Workflow {
+export function workflowDefinitionToWorkflow(definition: WorkflowDefinition): Workflow {
   return {
     id: definition.id,
     name: definition.name,

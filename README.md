@@ -32,8 +32,7 @@
   </a>
 </p>
 
-> [!CAUTION]
-> **Alpha software.** Agentic Fabric is under active development. APIs, workflows, and UI behaviors may change without notice and are not yet stable for long‑term production use.
+> [!CAUTION] > **Alpha software.** Agentic Fabric is under active development. APIs, workflows, and UI behaviors may change without notice and are not yet stable for long‑term production use.
 
 Agentic Fabric lets you build, orchestrate, and test AI workflows with a visual Next.js + React Flow canvas and an extensible Agent Framework. The project bundles Magentic multi‑agent orchestration, a rich AI Elements component library, and a batteries‑included developer experience.
 
@@ -127,19 +126,19 @@ From the repo root:
 
 Common scripts from `package.json`:
 
-| Script | Description |
-| ------ | ----------- |
-| `pnpm dev` | Start the Next.js dev server. |
-| `pnpm build` | Compile a production build. |
-| `pnpm start:prod` | Run the compiled app on port `3000`. |
-| `pnpm verify` | Lint, typecheck, and run tests. |
-| `pnpm doctor` | “All‑in‑one” check (lint + typecheck + tests). |
-| `pnpm lint` / `pnpm lint:fix` | Static analysis (errors only) / autofix. |
-| `pnpm format` | Format the repository with Prettier. |
-| `pnpm typecheck` | Run TypeScript type‑checking (`--noEmit`). |
-| `pnpm deps:unused` | Report unused dependencies. |
-| `pnpm clean`, `pnpm clean:deps`, `pnpm clean:logs` | Clean artifacts, dependencies, and logs. |
-| `pnpm docs:generate` | Regenerate docs from source. |
+| Script                                             | Description                                    |
+| -------------------------------------------------- | ---------------------------------------------- |
+| `pnpm dev`                                         | Start the Next.js dev server.                  |
+| `pnpm build`                                       | Compile a production build.                    |
+| `pnpm start:prod`                                  | Run the compiled app on port `3000`.           |
+| `pnpm verify`                                      | Lint, typecheck, and run tests.                |
+| `pnpm doctor`                                      | “All‑in‑one” check (lint + typecheck + tests). |
+| `pnpm lint` / `pnpm lint:fix`                      | Static analysis (errors only) / autofix.       |
+| `pnpm format`                                      | Format the repository with Prettier.           |
+| `pnpm typecheck`                                   | Run TypeScript type‑checking (`--noEmit`).     |
+| `pnpm deps:unused`                                 | Report unused dependencies.                    |
+| `pnpm clean`, `pnpm clean:deps`, `pnpm clean:logs` | Clean artifacts, dependencies, and logs.       |
+| `pnpm docs:generate`                               | Regenerate docs from source.                   |
 
 ---
 
@@ -156,7 +155,7 @@ This project uses React Flow as the underlying canvas.
 - Import its stylesheet before other UI CSS:
 
   ```ts
-  import '@xyflow/react/dist/style.css'
+  import '@xyflow/react/dist/style.css';
   ```
 
 - Canvas behaviors and interactions:
@@ -175,7 +174,7 @@ Key workflow‑builder files:
 
 For deeper React Flow documentation, see the official guides:
 
-- https://reactflow.dev/learn  
+- https://reactflow.dev/learn
 - https://reactflow.dev/ui
 
 ## Testing & Quality

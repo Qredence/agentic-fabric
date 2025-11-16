@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
+import { useRef } from 'react';
 import {
   PromptInput,
   PromptInputBody,
@@ -16,7 +16,7 @@ import {
   PromptInputSpeechButton,
   PromptInputAttachments,
   PromptInputAttachment,
-} from "@/components/ai-elements/prompt-input";
+} from '@/components/ai-elements/prompt-input';
 
 type PromptPayload = {
   text?: string;

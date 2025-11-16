@@ -1,22 +1,19 @@
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useMemo } from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import type { MagenticAgentExecutor, ToolReference } from "@/lib/workflow/executors";
-import {
-  MAGENTIC_AGENT_PRESETS,
-  MAGENTIC_AGENT_PRESET_MAP,
-} from "@/lib/workflow/magentic-presets";
-import type { MagenticAgentPresetKey } from "@/lib/workflow/magentic-presets";
+} from '@/components/ui/select';
+import type { MagenticAgentExecutor, ToolReference } from '@/lib/workflow/executors';
+import { MAGENTIC_AGENT_PRESETS, MAGENTIC_AGENT_PRESET_MAP } from '@/lib/workflow/magentic-presets';
+import type { MagenticAgentPresetKey } from '@/lib/workflow/magentic-presets';
 
 type MagenticAgentExecutorEditorProps = {
   executor: MagenticAgentExecutor;
@@ -33,16 +30,21 @@ type MagenticMetadata = {
 type ExecutorMetadata = Record<string, unknown> & { magentic?: MagenticMetadata };
 
 const toCommaSeparated = (values?: string[]) =>
-  values && values.length > 0 ? values.join(", ") : "";
+  values && values.length > 0 ? values.join(', ') : '';
 
 const fromCommaSeparated = (value: string) =>
   value
-    .split(",")
+    .split(',')
     .map((part) => part.trim())
     .filter(Boolean);
 
 const toToolIds = (tools?: ToolReference[]) =>
-  tools && tools.length > 0 ? tools.map((tool) => tool.toolId).filter(Boolean).join(", ") : "";
+  tools && tools.length > 0
+    ? tools
+        .map((tool) => tool.toolId)
+        .filter(Boolean)
+        .join(', ')
+    : '';
 
 const fromToolIds = (value: string): ToolReference[] | undefined => {
   const ids = fromCommaSeparated(value);
@@ -52,13 +54,13 @@ const fromToolIds = (value: string): ToolReference[] | undefined => {
 
 const mergeMetadata = (
   executor: MagenticAgentExecutor,
-  magenticPatch: Partial<MagenticMetadata>
+  magenticPatch: Partial<MagenticMetadata>,
 ): ExecutorMetadata => {
   const current = (executor.metadata as ExecutorMetadata | undefined) ?? {};
   const currentMagentic = current.magentic ?? {};
   return {
     ...current,
-    source: "agent-framework",
+    source: 'agent-framework',
     magentic: {
       ...currentMagentic,
       ...magenticPatch,
@@ -66,7 +68,10 @@ const mergeMetadata = (
   };
 };
 
-export function MagenticAgentExecutorEditor({ executor, onChange }: MagenticAgentExecutorEditorProps) {
+export function MagenticAgentExecutorEditor({
+  executor,
+  onChange,
+}: MagenticAgentExecutorEditorProps) {
   const metadata = (executor.metadata as ExecutorMetadata | undefined) ?? {};
   const magenticMeta = metadata.magentic ?? {};
 
@@ -75,11 +80,11 @@ export function MagenticAgentExecutorEditor({ executor, onChange }: MagenticAgen
       return magenticMeta.presetKey;
     }
     const match = MAGENTIC_AGENT_PRESETS.find((preset) => preset.agentRole === executor.agentRole);
-    return match?.key ?? "custom";
+    return match?.key ?? 'custom';
   }, [magenticMeta.presetKey, executor.agentRole]);
 
   const handlePresetChange = (value: string) => {
-    if (value === "custom") {
+    if (value === 'custom') {
       onChange({
         metadata: mergeMetadata(executor, { presetKey: null }),
       });
@@ -166,7 +171,7 @@ export function MagenticAgentExecutorEditor({ executor, onChange }: MagenticAgen
         <Label htmlFor="magentic-agent-role">Agent Role</Label>
         <Input
           id="magentic-agent-role"
-          value={executor.agentRole || ""}
+          value={executor.agentRole || ''}
           onChange={(event) => handleAgentRoleChange(event.target.value)}
           placeholder="planner, coder, reviewer..."
         />
@@ -191,7 +196,8 @@ export function MagenticAgentExecutorEditor({ executor, onChange }: MagenticAgen
           placeholder="comma separated tool ids"
         />
         <p className="text-xs text-muted-foreground">
-          Tools are referenced by id (e.g. web-browser, hosted-code-interpreter). Leave blank to disable tools.
+          Tools are referenced by id (e.g. web-browser, hosted-code-interpreter). Leave blank to
+          disable tools.
         </p>
       </div>
 
@@ -199,7 +205,7 @@ export function MagenticAgentExecutorEditor({ executor, onChange }: MagenticAgen
         <Label htmlFor="magentic-agent-system-prompt">System Prompt</Label>
         <Textarea
           id="magentic-agent-system-prompt"
-          value={executor.systemPrompt || ""}
+          value={executor.systemPrompt || ''}
           onChange={(event) =>
             onChange({
               systemPrompt: event.target.value || undefined,

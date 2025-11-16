@@ -1,17 +1,25 @@
-"use client";
+'use client';
 
-import React, { memo, useState } from "react";
-import { Handle, Position } from "@xyflow/react";
-import { motion, AnimatePresence } from "motion/react";
-import { Info, ChevronDown, ChevronUp, ArrowLeftRight, Code, Settings, FileCode } from "lucide-react";
-import type { FunctionExecutor } from "@/lib/workflow/executors";
-import { ConnectionHandle } from "@/components/ai-elements/connection-handle";
+import React, { memo, useState } from 'react';
+import { Handle, Position } from '@xyflow/react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Info,
+  ChevronDown,
+  ChevronUp,
+  ArrowLeftRight,
+  Code,
+  Settings,
+  FileCode,
+} from 'lucide-react';
+import type { FunctionExecutor } from '@/lib/workflow/executors';
+import { ConnectionHandle } from '@/components/ai-elements/connection-handle';
 
 /**
  * Function executor node data
  */
 export interface FunctionExecutorNodeData {
-  variant: "function-executor";
+  variant: 'function-executor';
   handles: {
     target: boolean;
     source: boolean;
@@ -19,7 +27,7 @@ export interface FunctionExecutorNodeData {
   executor: FunctionExecutor;
   label?: string;
   description?: string;
-  status?: "idle" | "running" | "completed" | "error";
+  status?: 'idle' | 'running' | 'completed' | 'error';
 }
 
 /**
@@ -28,7 +36,7 @@ export interface FunctionExecutorNodeData {
 export type FunctionExecutorNodeProps = any;
 
 const springTransition = {
-  type: "spring" as const,
+  type: 'spring' as const,
   stiffness: 300,
   damping: 30,
   mass: 0.8,
@@ -43,11 +51,11 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
   const [internalHovered, setInternalHovered] = useState(false);
 
   const displayLabel = label || executor.label || executor.functionName || executor.id;
-  const executorTypeName = "function-executor";
-  
+  const executorTypeName = 'function-executor';
+
   // Get model from metadata or default
   const metadata = (executor.metadata as Record<string, any> | undefined) ?? {};
-  const model = metadata.model || "GPT-5";
+  const model = metadata.model || 'GPT-5';
 
   const hovered = internalHovered;
 
@@ -56,13 +64,13 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
   };
 
   // Get current values for suggestions
-  const currentFunctionName = executor.functionName || "—";
+  const currentFunctionName = executor.functionName || '—';
   const parametersCount = executor.parameters ? Object.keys(executor.parameters).length : 0;
-  const currentParameters = parametersCount > 0 ? `${parametersCount} parameter(s)` : "None";
+  const currentParameters = parametersCount > 0 ? `${parametersCount} parameter(s)` : 'None';
   const hasCode = !!executor.functionCode;
-  const currentCode = hasCode ? "Configured" : "None";
+  const currentCode = hasCode ? 'Configured' : 'None';
   const hasFunctionId = !!executor.functionId;
-  const currentFunctionId = hasFunctionId ? executor.functionId || "—" : "None";
+  const currentFunctionId = hasFunctionId ? executor.functionId || '—' : 'None';
 
   // Suggestions for Function Executor - matching main parameters exactly as shown in properties panel
   const suggestions = [
@@ -120,10 +128,10 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
             border transition-all duration-200
             ${
               selected
-                ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                 : hovered
-                ? "border-white/10"
-                : "border-white/5"
+                  ? 'border-white/10'
+                  : 'border-white/5'
             }
             hover:border-white/15 active:scale-98
             flex items-center justify-between
@@ -190,7 +198,7 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
                   layoutId={`node-title-${id}`}
                   transition={springTransition}
                   className={`text-[24px] leading-[30px] truncate transition-colors duration-200 ${
-                    hovered ? "text-gray-300" : "text-gray-400"
+                    hovered ? 'text-gray-300' : 'text-gray-400'
                   }`}
                 >
                   {displayLabel}
@@ -271,10 +279,10 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
                 border transition-all duration-200
                 ${
                   selected
-                    ? "border-blue-500/50 ring-2 ring-blue-500/20"
+                    ? 'border-blue-500/50 ring-2 ring-blue-500/20'
                     : hovered
-                    ? "border-white/10"
-                    : "border-white/5"
+                      ? 'border-white/10'
+                      : 'border-white/5'
                 }
               `}
             >
@@ -368,19 +376,11 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
               </div>
             </motion.div>
             {/* ReactFlow Handles */}
-            {handles.target && (
-              <Handle position={Position.Left} type="target" />
-            )}
-            {handles.source && (
-              <Handle position={Position.Right} type="source" />
-            )}
+            {handles.target && <Handle position={Position.Left} type="target" />}
+            {handles.source && <Handle position={Position.Right} type="source" />}
             {/* Connection Handles */}
-            {handles.target && (
-              <ConnectionHandle position="left" visible={hovered} />
-            )}
-            {handles.source && (
-              <ConnectionHandle position="right" visible={hovered} />
-            )}
+            {handles.target && <ConnectionHandle position="left" visible={hovered} />}
+            {handles.source && <ConnectionHandle position="right" visible={hovered} />}
           </motion.div>
         </>
       )}
@@ -388,4 +388,4 @@ export const FunctionExecutorNode = memo(({ id, data, selected }: FunctionExecut
   );
 });
 
-FunctionExecutorNode.displayName = "FunctionExecutorNode";
+FunctionExecutorNode.displayName = 'FunctionExecutorNode';

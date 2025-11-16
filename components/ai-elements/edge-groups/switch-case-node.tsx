@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { memo } from "react";
-import { Handle, Position, type NodeProps as ReactFlowNodeProps } from "@xyflow/react";
+import React, { memo } from 'react';
+import { Handle, Position, type NodeProps as ReactFlowNodeProps } from '@xyflow/react';
 import {
   Node,
   NodeContent,
@@ -9,18 +9,18 @@ import {
   NodeFooter,
   NodeHeader,
   NodeTitle,
-} from "@/components/ai-elements/node";
-import { Toolbar } from "@/components/ai-elements/toolbar";
-import { Actions, Action } from "@/components/ai-elements/actions";
-import { GitBranch, Pencil, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { SwitchCaseEdgeGroup } from "@/lib/workflow/edges";
+} from '@/components/ai-elements/node';
+import { Toolbar } from '@/components/ai-elements/toolbar';
+import { Actions, Action } from '@/components/ai-elements/actions';
+import { GitBranch, Pencil, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { SwitchCaseEdgeGroup } from '@/lib/workflow/edges';
 
 /**
  * Switch-case node data
  */
 export interface SwitchCaseNodeData {
-  variant: "switch-case";
+  variant: 'switch-case';
   handles: {
     target: boolean;
     source: boolean;
@@ -30,7 +30,7 @@ export interface SwitchCaseNodeData {
   group: SwitchCaseEdgeGroup;
   label?: string;
   description?: string;
-  status?: "idle" | "routing" | "completed" | "error";
+  status?: 'idle' | 'routing' | 'completed' | 'error';
   error?: string;
 }
 
@@ -49,21 +49,19 @@ export const SwitchCaseNode = memo(({ id, data, selected }: SwitchCaseNodeProps)
   const displayDescription = description || `Routes based on: ${group.switchExpression}`;
 
   return (
-    <Node handles={handles} className={cn(selected && "ring-2 ring-primary")}>
+    <Node handles={handles} className={cn(selected && 'ring-2 ring-primary')}>
       <NodeHeader>
         <div className="flex items-center gap-2">
           <GitBranch className="size-4 text-primary" />
           <div className="flex-1 min-w-0">
             <NodeTitle className="text-sm truncate">{displayLabel}</NodeTitle>
-            <NodeDescription className="text-xs truncate">
-              {displayDescription}
-            </NodeDescription>
+            <NodeDescription className="text-xs truncate">{displayDescription}</NodeDescription>
           </div>
           <div className="text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground">
-            {status === "routing" && "Routing"}
-            {status === "completed" && "Completed"}
-            {status === "idle" && "Idle"}
-            {status === "error" && "Error"}
+            {status === 'routing' && 'Routing'}
+            {status === 'completed' && 'Completed'}
+            {status === 'idle' && 'Idle'}
+            {status === 'error' && 'Error'}
           </div>
         </div>
       </NodeHeader>
@@ -75,9 +73,7 @@ export const SwitchCaseNode = memo(({ id, data, selected }: SwitchCaseNodeProps)
           <div className="text-xs text-muted-foreground">
             Source: <span className="font-mono">{group.source}</span>
           </div>
-          <div className="text-xs text-muted-foreground">
-            Cases: {group.cases.length}
-          </div>
+          <div className="text-xs text-muted-foreground">Cases: {group.cases.length}</div>
           {group.default && (
             <div className="text-xs text-muted-foreground">
               Default case: <span className="font-mono">{group.default.target}</span>
@@ -118,4 +114,4 @@ export const SwitchCaseNode = memo(({ id, data, selected }: SwitchCaseNodeProps)
   );
 });
 
-SwitchCaseNode.displayName = "SwitchCaseNode";
+SwitchCaseNode.displayName = 'SwitchCaseNode';

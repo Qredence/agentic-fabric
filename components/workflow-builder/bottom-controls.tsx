@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ExpandableTabs } from "@/components/ui/expandable-tabs";
-import { Undo2, Redo2, Frame, Lock, Unlock, Sun, Moon, Play, CheckCircle2 } from "lucide-react";
-import { useTheme } from "next-themes";
-import { cn } from "@/lib/utils";
+import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ExpandableTabs } from '@/components/ui/expandable-tabs';
+import { Undo2, Redo2, Frame, Lock, Unlock, Sun, Moon, Play, CheckCircle2 } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
 
-type ToolType = "pointer" | "pan";
+type ToolType = 'pointer' | 'pan';
 
 interface BottomControlsProps {
   onUndo?: () => void;
@@ -41,33 +41,33 @@ export function BottomControls({
   }, []);
 
   // Use a default theme during SSR to prevent hydration mismatch
-  const isDark = mounted ? resolvedTheme === "dark" : false;
+  const isDark = mounted ? resolvedTheme === 'dark' : false;
   return (
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
       <ExpandableTabs
         tabs={[
-          { title: "Undo", icon: Undo2, disabled: !canUndo },
-          { title: "Redo", icon: Redo2, disabled: !canRedo },
-          { type: "separator" },
-          { title: "Evaluate", icon: Play, ariaLabel: "Evaluate workflow" },
-          { title: "Validation", icon: CheckCircle2, ariaLabel: "Validate workflow" },
-          { type: "separator" },
-          { title: "Auto-fit view", icon: Frame },
+          { title: 'Undo', icon: Undo2, disabled: !canUndo },
+          { title: 'Redo', icon: Redo2, disabled: !canRedo },
+          { type: 'separator' },
+          { title: 'Evaluate', icon: Play, ariaLabel: 'Evaluate workflow' },
+          { title: 'Validation', icon: CheckCircle2, ariaLabel: 'Validate workflow' },
+          { type: 'separator' },
+          { title: 'Auto-fit view', icon: Frame },
           {
-            title: locked ? "Unlock node edits" : "Lock node edits",
+            title: locked ? 'Unlock node edits' : 'Lock node edits',
             icon: locked ? Unlock : Lock,
             active: locked,
-            ariaLabel: locked ? "Unlock node edits" : "Lock node edits",
+            ariaLabel: locked ? 'Unlock node edits' : 'Lock node edits',
           },
-          { type: "separator" },
+          { type: 'separator' },
           {
-            title: "Toggle theme",
+            title: 'Toggle theme',
             icon: isDark ? Moon : Sun,
             active: isDark,
-            ariaLabel: isDark ? "Activate light mode" : "Activate dark mode",
+            ariaLabel: isDark ? 'Activate light mode' : 'Activate dark mode',
           },
         ]}
-        className={cn("rounded-full border bg-background/95 backdrop-blur-sm shadow-lg p-1.5")}
+        className={cn('rounded-full border bg-background/95 backdrop-blur-sm shadow-lg p-1.5')}
         showLabelsOnSelect={false}
         onClickBehavior="momentary"
         onChange={(index) => {
@@ -97,7 +97,7 @@ export function BottomControls({
             return;
           }
           if (index === 9) {
-            setTheme(isDark ? "light" : "dark");
+            setTheme(isDark ? 'light' : 'dark');
             return;
           }
         }}

@@ -1,19 +1,16 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import type { WorkflowExecutor } from "@/lib/workflow/executors";
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import type { WorkflowExecutor } from '@/lib/workflow/executors';
 
 interface WorkflowExecutorEditorProps {
   executor: WorkflowExecutor;
   onChange: (updates: Partial<WorkflowExecutor>) => void;
 }
 
-export function WorkflowExecutorEditor({
-  executor,
-  onChange,
-}: WorkflowExecutorEditorProps) {
+export function WorkflowExecutorEditor({ executor, onChange }: WorkflowExecutorEditorProps) {
   return (
     <div className="space-y-4 pt-2 border-t">
       <h4 className="text-sm font-medium">Nested Workflow Configuration</h4>
@@ -22,13 +19,11 @@ export function WorkflowExecutorEditor({
         <Label htmlFor="workflow-id">Workflow ID</Label>
         <Input
           id="workflow-id"
-          value={executor.workflowId || ""}
+          value={executor.workflowId || ''}
           onChange={(e) => onChange({ workflowId: e.target.value })}
           placeholder="nested-workflow-1"
         />
-        <p className="text-xs text-muted-foreground">
-          Reference to the nested workflow to execute
-        </p>
+        <p className="text-xs text-muted-foreground">Reference to the nested workflow to execute</p>
       </div>
 
       {executor.workflowDefinition && (

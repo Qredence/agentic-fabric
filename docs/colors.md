@@ -1,6 +1,7 @@
 # Light Mode Color Palette (WCAG 2.1 AA)
 
 ## Core Colors
+
 - Primary text: `#0F172A` (RGB 15,23,42) — role: `text-foreground`
 - Background: `#F9FAFB` (RGB 249,250,251) — role: `bg-background`
 - Accent (interactive):
@@ -14,6 +15,7 @@
   - Strong: `#94A3B8` (RGB 148,163,184) — role: `border-border-strong`
 
 ## OKLCH Tokens (Light Mode)
+
 - `--background: oklch(0.98 0.02 247)`
 - `--foreground: oklch(0.145 0.01 250)`
 - `--primary: oklch(0.17 0.14 258)`
@@ -26,6 +28,7 @@
 - `--ring: oklch(0.25 0.12 257)`
 
 ## Usage Guidelines
+
 - Use `text-foreground` for body copy, titles; reserve `text-muted-foreground` for meta and helper text.
 - Use `bg-primary text-primary-foreground` for primary buttons; use `text-primary` for links.
 - Use `hover:bg-accent`/`hover:text-accent-foreground` for subtle hover states; avoid pure white hovers.
@@ -33,6 +36,7 @@
 - Ensure focus visibility with `outline-ring ring-[3px]` on interactive components.
 
 ## Contrast Targets
+
 - Normal text vs background ≥ 4.5:1
 - Large text vs background ≥ 3:1
 - Non-text indicators (focus rings, UI outlines) ≥ 3:1
