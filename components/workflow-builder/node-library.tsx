@@ -245,7 +245,7 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
     <Panel
       position="center-left"
       className={cn(
-        'm-0 ml-6 mt-8 w-[224px] space-y-4 p-3',
+        'm-0 ml-6 mt-8 w-[224px] space-y-4 px-3',
         'bottom-6 overflow-y-auto',
         'bg-gray-262626 backdrop-blur-sm rounded-br-2xl py-4',
       )}
