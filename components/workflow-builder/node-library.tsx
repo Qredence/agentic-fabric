@@ -28,6 +28,7 @@ interface NodeLibraryProps {
   onDragStart: (event: React.DragEvent<HTMLElement>, nodeType: string) => void;
   onAddNode: (nodeType: string) => void;
   onAddMagenticScaffold: () => void;
+  className?: string;
 }
 
 interface NodeLibraryItem {
@@ -167,7 +168,12 @@ const categoryConfig: Record<
   },
 };
 
-export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: NodeLibraryProps) {
+export function NodeLibrary({
+  onDragStart,
+  onAddNode,
+  onAddMagenticScaffold,
+  className,
+}: NodeLibraryProps) {
   const handleDragStart = useCallback(
     (event: React.DragEvent<HTMLElement>, nodeType: string) => {
       onDragStart(event, nodeType);
@@ -248,6 +254,7 @@ export function NodeLibrary({ onDragStart, onAddNode, onAddMagenticScaffold }: N
         'm-0 ml-6 mt-8 w-[224px] space-y-4 px-3',
         'bottom-6 overflow-y-auto',
         'bg-gray-262626 backdrop-blur-sm rounded-br-2xl py-4',
+        className,
       )}
       style={{ height: 'calc(100vh - 8.5rem)' }}
     >
