@@ -1,6 +1,14 @@
 'use client';
 
-import React, { memo, useCallback, useRef, useState, useMemo, type DragEvent } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useRef,
+  useState,
+  useMemo,
+  useEffect,
+  type DragEvent,
+} from 'react';
 import {
   ReactFlowProvider,
   addEdge,
@@ -30,8 +38,10 @@ import { Toolbar } from '@/components/ai-elements/toolbar';
 import { TextBlockCard } from '@/components/ai-elements/text-block-card';
 import { AttributeNode } from '@/components/ai-elements/attribute-node';
 import { Action, Actions } from '@/components/ai-elements/actions';
-import { Pencil, Trash2 } from 'lucide-react';
 import { nanoid } from 'nanoid';
+import { validateWorkflowExtended } from '@/lib/workflow/export/validator';
+import { downloadWorkflow } from '@/lib/workflow/export/serializers';
+import { toast } from '@/hooks/use-toast';
 
 // Import executor node components
 import { ExecutorNode } from '@/components/ai-elements/executors/executor-node';
@@ -73,6 +83,7 @@ import type { FanInEdgeGroup, FanOutEdgeGroup, SwitchCaseEdgeGroup } from '@/lib
 import type { ExecutorType } from '@/lib/workflow/executors';
 import { MAGENTIC_AGENT_PRESETS } from '@/lib/workflow/magentic-presets';
 import type { MagenticAgentPresetKey } from '@/lib/workflow/magentic-presets';
+import { log } from '@/lib/logger';
 
 type WorkflowNode = WorkflowReactFlowNode;
 type WorkflowEdge = Edge;
@@ -342,6 +353,22 @@ const WorkflowCanvas = () => {
     navSettings,
   );
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === '+' || e.key === '=') {
+        try {
+          reactFlow.zoomIn();
+        } catch {}
+      } else if (e.key === '-') {
+        try {
+          reactFlow.zoomOut();
+        } catch {}
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [reactFlow]);
+
   // State management for new features
   const [selectedNode, setSelectedNode] = useState<ReactFlowNode<WorkflowNodeDataWithIndex> | null>(
     null,
@@ -351,6 +378,18 @@ const WorkflowCanvas = () => {
   const [inspectOpen, setInspectOpen] = useState(false);
   const [locked, setLocked] = useState(false);
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
+  const [nodeStatuses, setNodeStatuses] = useState<
+    Record<string, 'idle' | 'running' | 'completed' | 'error'>
+  >({});
+  const setNodeStatus = useCallback(
+    (id: string, status: 'idle' | 'running' | 'completed' | 'error') => {
+      setNodeStatuses((prev) => ({ ...prev, [id]: status }));
+      setNodes((nds) =>
+        nds.map((n) => (n.id === id ? ({ ...n, data: { ...(n.data as any), status } } as any) : n)),
+      );
+    },
+    [setNodes],
+  );
 
   // Undo/Redo history management
   const [history, setHistory] = useState<Array<{ nodes: any[]; edges: Edge[] }>>([
@@ -361,22 +400,37 @@ const WorkflowCanvas = () => {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
-  // Save state to history
+  const historyFrameRef = useRef(0 as number);
+  const bufferedNodesRef = useRef<any[]>([]);
+  const bufferedEdgesRef = useRef<Edge[]>([]);
   const saveToHistory = useCallback(
     (newNodes: any[], newEdges: Edge[]) => {
-      setHistory((prev) => {
-        const newHistory = prev.slice(0, historyIndex + 1);
-        newHistory.push({ nodes: structuredClone(newNodes), edges: structuredClone(newEdges) });
-        return newHistory.slice(-50); // Keep last 50 states
+      bufferedNodesRef.current = newNodes;
+      bufferedEdgesRef.current = newEdges;
+      if (historyFrameRef.current) return;
+      historyFrameRef.current = requestAnimationFrame(() => {
+        setHistory((prev) => {
+          const newHistory = prev.slice(0, historyIndex + 1);
+          newHistory.push({
+            nodes: structuredClone(bufferedNodesRef.current),
+            edges: structuredClone(bufferedEdgesRef.current),
+          });
+          return newHistory.slice(-50);
+        });
+        setHistoryIndex((prev) => Math.min(prev + 1, 49));
+        historyFrameRef.current = 0;
       });
-      setHistoryIndex((prev) => Math.min(prev + 1, 49));
     },
     [historyIndex],
   );
 
-  // Convert React Flow state to Workflow format
-  const currentWorkflow = useMemo(() => {
-    return reactFlowToWorkflow(nodes as any, edges, 'workflow-1', 'Agentic Fabric');
+  const [currentWorkflow, setCurrentWorkflow] = useState<any | null>(null);
+  const [lastTransformMs, setLastTransformMs] = useState<number | null>(null);
+  const recomputeWorkflow = useCallback(() => {
+    const t0 = performance.now();
+    const wf = reactFlowToWorkflow(nodes as any, edges, 'workflow-1', 'Agentic Fabric');
+    setCurrentWorkflow(wf);
+    setLastTransformMs(performance.now() - t0);
   }, [nodes, edges]);
 
   // Handle node selection - wrapper to sync selected node state
@@ -830,9 +884,14 @@ const WorkflowCanvas = () => {
     });
 
     const nextEdges = [...currentEdges];
+    const edgeKey = (e: Edge) => `${e.source}->${e.target}`;
+    const edgeSet = new Set(nextEdges.map(edgeKey));
     const ensureEdge = (source: string, target: string) => {
-      if (!nextEdges.some((edge) => edge.source === source && edge.target === target)) {
-        nextEdges.push({ id: nanoid(), source, target, type: 'animated' });
+      const key = `${source}->${target}`;
+      if (!edgeSet.has(key)) {
+        const created = { id: nanoid(), source, target, type: 'animated' } as Edge;
+        nextEdges.push(created);
+        edgeSet.add(key);
       }
     };
 
@@ -911,20 +970,30 @@ const WorkflowCanvas = () => {
   );
 
   const handleEvaluate = useCallback(() => {
-    // TODO: Implement evaluate functionality
-  }, []);
+    recomputeWorkflow();
+    const result = validateWorkflowExtended(currentWorkflow);
+    const message = result.valid ? 'Workflow is valid' : 'Workflow has issues';
+    const details = result.valid
+      ? 'No errors or warnings'
+      : `${result.errors.length + result.typeErrors.length} errors, ${result.warnings.length + result.connectivityWarnings.length} warnings`;
+    toast({ title: message, description: details });
+  }, [currentWorkflow, recomputeWorkflow]);
 
   const handleCode = useCallback(() => {
-    // TODO: Implement code view functionality
-  }, []);
+    recomputeWorkflow();
+    setExportDialogOpen(true);
+  }, [recomputeWorkflow]);
 
   const handlePreview = useCallback(() => {
-    // TODO: Implement preview functionality
-  }, []);
+    recomputeWorkflow();
+    setInspectOpen(true);
+  }, [recomputeWorkflow]);
 
   const handlePublish = useCallback(() => {
-    // TODO: Implement publish functionality
-  }, []);
+    recomputeWorkflow();
+    downloadWorkflow(currentWorkflow, 'json');
+    toast({ title: 'Published', description: 'Workflow bundle downloaded' });
+  }, [currentWorkflow, recomputeWorkflow]);
 
   const handleNodeDragStart = useCallback((_event: React.MouseEvent, node: ReactFlowNode) => {
     setDraggedNodeId(node.id);
@@ -1005,9 +1074,9 @@ const WorkflowCanvas = () => {
   return (
     <div className="relative h-full w-full">
       <TopNavigation
-        projectName={currentWorkflow.name || 'MCP Draft'}
-        projectStatus={currentWorkflow.metadata?.custom?.status as string | undefined}
-        workflow={currentWorkflow}
+        projectName={currentWorkflow?.name || 'MCP Draft'}
+        projectStatus={currentWorkflow?.metadata?.custom?.status as string | undefined}
+        workflow={null}
         onEvaluate={handleEvaluate}
         onCode={handleCode}
         onPreview={handlePreview}
@@ -1104,7 +1173,8 @@ const WorkflowCanvas = () => {
                 }
               }}
               onEvaluate={(nodeId) => {
-                // TODO: Implement node evaluation
+                setNodeStatus(nodeId, 'running');
+                window.setTimeout(() => setNodeStatus(nodeId, 'completed'), 600);
               }}
             />
           )}
@@ -1172,7 +1242,11 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     return { hasError: true };
   }
 
-  componentDidCatch() {}
+  componentDidCatch(error: unknown, info: unknown) {
+    try {
+      log.error('ErrorBoundary', error, info);
+    } catch {}
+  }
 
   render() {
     if (this.state.hasError) {

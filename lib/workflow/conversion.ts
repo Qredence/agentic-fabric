@@ -1,4 +1,5 @@
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from '@xyflow/react';
+import { getExecutorFactory } from './executor-registry';
 import type { BaseExecutor, BaseEdge, ExecutorId, EdgeId, EdgeCondition } from './types';
 import type { Workflow } from './workflow';
 import type {
@@ -497,6 +498,8 @@ export function createExecutorFromNodeType(
   label?: string,
   options?: CreateExecutorOptions,
 ): BaseExecutor {
+  const factory = getExecutorFactory(nodeType);
+  if (factory) return factory(id, label, options);
   switch (nodeType) {
     case 'function-executor':
       return {

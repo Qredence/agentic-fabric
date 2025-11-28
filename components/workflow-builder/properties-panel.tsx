@@ -39,12 +39,8 @@ import type {
   MagenticAgentExecutor,
   MagenticOrchestratorExecutor,
 } from '@/lib/workflow/executors';
-import { FunctionExecutorEditor } from './executor-editors/function-executor-editor';
-import { AgentExecutorEditor } from './executor-editors/agent-executor-editor';
-import { WorkflowExecutorEditor } from './executor-editors/workflow-executor-editor';
-import { RequestInfoExecutorEditor } from './executor-editors/request-info-executor-editor';
-import { MagenticAgentExecutorEditor } from './executor-editors/magentic-agent-executor-editor';
-import { MagenticOrchestratorExecutorEditor } from './executor-editors/magentic-orchestrator-executor-editor';
+import { useEffect } from 'react';
+import { getEditorEntry } from '@/lib/workflow/editor-registry';
 
 interface PropertiesPanelProps {
   selectedNode: {
@@ -78,6 +74,30 @@ export function PropertiesPanel({
   const [continueOnError, setContinueOnError] = useState(false);
   const [writeToConversationHistory, setWriteToConversationHistory] = useState(true);
   const instructionsDebounceRef = useRef<number | null>(null);
+  const [editorComp, setEditorComp] = useState<React.ComponentType<any> | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const [editorLoading, setEditorLoading] = useState(false);
+
+  useEffect(() => {
+    const executor = selectedNode?.data.executor as BaseExecutor | undefined;
+    const executorType = (selectedNode?.data.executorType as string | undefined) || executor?.type;
+    if (!executor || !executorType) {
+      setEditorComp(null);
+      return;
+    }
+    const entry = getEditorEntry(executorType);
+    if (!entry) {
+      setEditorComp(null);
+      return;
+    }
+    setEditorLoading(true);
+    setEditorError(null);
+    entry
+      .editor()
+      .then((m) => setEditorComp(() => m.default))
+      .catch(() => setEditorError('Failed to load editor'))
+      .finally(() => setEditorLoading(false));
+  }, [selectedNode]);
 
   if (!selectedNode || !selectedNode.data.executor) {
     return (
@@ -343,6 +363,17 @@ export function PropertiesPanel({
             </Select>
           </div>
         </div>
+
+        {editorLoading && <div className="text-xs text-muted-foreground">Loading editor…</div>}
+        {editorError && <div className="text-xs text-destructive">{editorError}</div>}
+        {editorComp && (
+          <div className="mt-2">
+            {(() => {
+              const Comp = editorComp as React.ComponentType<any>;
+              return <Comp executor={executor} onUpdate={handleExecutorChange} />;
+            })()}
+          </div>
+        )}
 
         {/* Guardrails Section */}
         {showGuardrails && (
@@ -674,49 +705,15 @@ export function PropertiesPanel({
                 className="font-mono text-xs bg-muted"
               />
             </div>
-            {/* Type-specific editors */}
-            {executorType === 'function-executor' && (
-              <FunctionExecutorEditor
-                executor={executor as FunctionExecutor}
-                onChange={handleExecutorChange}
-              />
-            )}
-
-            {executorType === 'agent-executor' && (
-              <AgentExecutorEditor
-                executor={executor as AgentExecutor}
-                onChange={handleExecutorChange}
-              />
-            )}
-
-            {executorType === 'magentic-agent-executor' && (
-              <MagenticAgentExecutorEditor
-                executor={executor as MagenticAgentExecutor}
-                onChange={handleExecutorChange as (updates: Partial<MagenticAgentExecutor>) => void}
-              />
-            )}
-
-            {executorType === 'workflow-executor' && (
-              <WorkflowExecutorEditor
-                executor={executor as WorkflowExecutor}
-                onChange={handleExecutorChange}
-              />
-            )}
-
-            {executorType === 'request-info-executor' && (
-              <RequestInfoExecutorEditor
-                executor={executor as RequestInfoExecutor}
-                onChange={handleExecutorChange}
-              />
-            )}
-
-            {executorType === 'magentic-orchestrator-executor' && (
-              <MagenticOrchestratorExecutorEditor
-                executor={executor as MagenticOrchestratorExecutor}
-                onChange={
-                  handleExecutorChange as (updates: Partial<MagenticOrchestratorExecutor>) => void
-                }
-              />
+            {editorLoading && <div className="text-xs text-muted-foreground">Loading editor…</div>}
+            {editorError && <div className="text-xs text-destructive">{editorError}</div>}
+            {editorComp && (
+              <div className="mt-2">
+                {(() => {
+                  const Comp = editorComp as React.ComponentType<any>;
+                  return <Comp executor={executor} onUpdate={handleExecutorChange} />;
+                })()}
+              </div>
             )}
           </CollapsibleContent>
         </Collapsible>

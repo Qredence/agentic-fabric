@@ -41,7 +41,7 @@ const springTransition = {
  * Base executor node component - displays an executor in the workflow canvas
  */
 export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => {
-  const { handles, executor, executorType, label } = data;
+  const { handles, executor, executorType, label, status } = data;
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [internalHovered, setInternalHovered] = useState(false);
 
@@ -280,6 +280,22 @@ export const ExecutorNode = memo(({ id, data, selected }: ExecutorNodeProps) => 
               <div className="flex flex-col h-full rounded-2xl overflow-hidden">
                 {/* Content Area */}
                 <div className="relative flex-1 flex flex-col overflow-hidden">
+                  {status && (
+                    <div
+                      aria-live="polite"
+                      className={`absolute right-2 top-2 rounded-md px-2 py-0.5 text-[10px] font-medium ${
+                        status === 'running'
+                          ? 'bg-blue-500/20 text-blue-300'
+                          : status === 'completed'
+                            ? 'bg-green-500/20 text-green-300'
+                            : status === 'error'
+                              ? 'bg-red-500/20 text-red-300'
+                              : 'bg-gray-500/20 text-gray-300'
+                      }`}
+                    >
+                      {status}
+                    </div>
+                  )}
                   {/* Empty State with Suggestions */}
                   <AnimatePresence mode="wait">
                     <motion.div

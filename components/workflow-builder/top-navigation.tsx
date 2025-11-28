@@ -36,11 +36,6 @@ export function TopNavigation({
   const validation = workflow ? validateWorkflowExtended(workflow) : null;
 
   const isValid = validation?.valid ?? false;
-  const hasErrors = validation
-    ? validation.valid === false || validation.typeErrors.length > 0
-    : false;
-  const hasWarnings =
-    validation && (validation.warnings.length > 0 || validation.connectivityWarnings.length > 0);
 
   return (
     <div
@@ -57,7 +52,34 @@ export function TopNavigation({
         <img src={logoLightmode.src} alt="Logo" className="size-8 dark:hidden" />{' '}
         <h1 className="text-lg font-semibold text-gray-200">{displayName}</h1>
       </div>
-      {/* Right side: Action buttons */}
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <Button variant="outline" onClick={onEvaluate} aria-label="Evaluate">
+          <Play className="size-4 mr-2" />
+          Evaluate
+        </Button>
+        <Button variant="outline" onClick={onCode} aria-label="Code">
+          <Code className="size-4 mr-2" />
+          Code
+        </Button>
+        <Button variant="outline" onClick={onPreview} aria-label="Preview">
+          <Eye className="size-4 mr-2" />
+          Preview
+        </Button>
+        <Button onClick={onPublish} aria-label="Publish">
+          <Upload className="size-4 mr-2" />
+          Publish
+        </Button>
+        {validation && (
+          <div className="ml-2 flex items-center">
+            {isValid ? (
+              <CheckCircle2 className="size-5 text-green-400" aria-label="Valid" />
+            ) : (
+              <AlertCircle className="size-5 text-yellow-400" aria-label="Issues" />
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

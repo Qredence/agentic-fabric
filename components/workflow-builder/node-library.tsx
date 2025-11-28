@@ -237,12 +237,16 @@ export function NodeLibrary({
         >
           {config.label}
         </h4>
-        <div
+        <ul
           className="rounded-2xl overflow-hidden border bg-background/20 p-0 shadow-sm divide-y divide-border/20"
           role="list"
         >
-          {config.items.map(renderNodeItem)}
-        </div>
+          {config.items.map((item) => (
+            <li key={item.id} role="listitem">
+              {renderNodeItem(item)}
+            </li>
+          ))}
+        </ul>
       </div>
     );
   };

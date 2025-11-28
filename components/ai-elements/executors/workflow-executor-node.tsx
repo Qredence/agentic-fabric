@@ -39,7 +39,7 @@ const springTransition = {
  * Workflow executor node component - represents a nested workflow
  */
 export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecutorNodeProps) => {
-  const { handles, executor, label, childCount } = data;
+  const { handles, executor, label, childCount, status } = data;
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [internalHovered, setInternalHovered] = useState(false);
 
@@ -283,6 +283,22 @@ export const WorkflowExecutorNode = memo(({ id, data, selected }: WorkflowExecut
                 {/* Content Area */}
                 <div className="relative flex-1 flex flex-col overflow-hidden">
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/5" />
+                  {status && (
+                    <div
+                      aria-live="polite"
+                      className={`absolute right-2 top-2 rounded-md px-2 py-0.5 text-[10px] font-medium ${
+                        status === 'running'
+                          ? 'bg-blue-500/20 text-blue-300'
+                          : status === 'completed'
+                            ? 'bg-green-500/20 text-green-300'
+                            : status === 'error'
+                              ? 'bg-red-500/20 text-red-300'
+                              : 'bg-gray-500/20 text-gray-300'
+                      }`}
+                    >
+                      {status}
+                    </div>
+                  )}
                   {/* Empty State with Suggestions */}
                   <AnimatePresence mode="wait">
                     <motion.div
