@@ -2,6 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+// Zoom limits for viewport clamping
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 4;
+
+// Maximum allowed pan distance in clampViewport
+const MAX_PAN_DISTANCE = 10000;
+
 type Settings = {
   panSensitivity: number;
   zoomSensitivity: number;
@@ -23,8 +30,8 @@ export function useTrackpadNavigation(
   settings: Settings,
 ) {
   const [navigating, setNavigating] = useState(false);
-  const vx = useRef(0);
-  const vy = useRef(0);
+  const velocityX = useRef(0);
+  const velocityY = useRef(0);
   const raf = useRef<number | null>(null);
   const endTimer = useRef<number | null>(null);
   const pinchActive = useRef(false);
@@ -52,19 +59,19 @@ export function useTrackpadNavigation(
         setNavigating(false);
         return;
       }
-      if (Math.abs(vx.current) < 0.001 && Math.abs(vy.current) < 0.001) {
+      if (Math.abs(velocityX.current) < 0.001 && Math.abs(velocityY.current) < 0.001) {
         setNavigating(false);
         return;
       }
       if (!raf.current) {
         const step = () => {
-          const vpx = api.getViewport();
-          const nx = vpx.x - vx.current;
-          const ny = vpx.y - vy.current;
-          api.setViewport({ x: nx, y: ny, zoom: vpx.zoom });
-          vx.current *= settings.inertiaFriction;
-          vy.current *= settings.inertiaFriction;
-          if (Math.abs(vx.current) < 0.001 && Math.abs(vy.current) < 0.001) {
+          const currentViewport = api.getViewport();
+          const nx = currentViewport.x - velocityX.current;
+          const ny = currentViewport.y - velocityY.current;
+          api.setViewport({ x: nx, y: ny, zoom: currentViewport.zoom });
+          velocityX.current *= settings.inertiaFriction;
+          velocityY.current *= settings.inertiaFriction;
+          if (Math.abs(velocityX.current) < 0.001 && Math.abs(velocityY.current) < 0.001) {
             setNavigating(false);
             raf.current = null;
             return;
@@ -77,8 +84,8 @@ export function useTrackpadNavigation(
   };
 
   const clampViewport = (x: number, y: number, zoom: number) => {
-    const z = Math.max(0.1, Math.min(4, zoom));
-    const limit = 10000;
+    const z = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+    const limit = MAX_PAN_DISTANCE;
     return {
       x: Math.max(-limit, Math.min(limit, x)),
       y: Math.max(-limit, Math.min(limit, y)),
@@ -98,7 +105,7 @@ export function useTrackpadNavigation(
     const projector =
       api.project ?? api.screenToFlowPosition ?? ((p: { x: number; y: number }) => p);
     const pt = projector({ x: cx, y: cy });
-    const clampedTarget = Math.max(0.1, Math.min(4, targetZoom));
+    const clampedTarget = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, targetZoom));
     targetZoomRef.current = clampedTarget;
     zoomCenterRef.current = pt;
     if (zoomRaf.current) {
@@ -157,13 +164,13 @@ export function useTrackpadNavigation(
         const dy = ((e.deltaY || 0) * settings.panSensitivity) / vp.zoom;
         const next = clampViewport(vp.x - dx, vp.y - dy, vp.zoom);
         api.setViewport(next);
-        vx.current = Math.max(
+        velocityX.current = Math.max(
           -settings.maxMomentumSpeed,
-          Math.min(settings.maxMomentumSpeed, vx.current + dx),
+          Math.min(settings.maxMomentumSpeed, velocityX.current + dx),
         );
-        vy.current = Math.max(
+        velocityY.current = Math.max(
           -settings.maxMomentumSpeed,
-          Math.min(settings.maxMomentumSpeed, vy.current + dy),
+          Math.min(settings.maxMomentumSpeed, velocityY.current + dy),
         );
         scheduleEnd();
       } else {
@@ -188,7 +195,7 @@ export function useTrackpadNavigation(
       const ge = e as any;
       if (typeof ge.scale !== 'number') return;
       const vp = api.getViewport();
-      const targetZoom = Math.max(0.1, Math.min(4, vp.zoom * ge.scale));
+      const targetZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, vp.zoom * ge.scale));
       const rect = node.getBoundingClientRect();
       const center = { x: rect.width / 2, y: rect.height / 2 };
       animateZoomTo(node, targetZoom, center);
