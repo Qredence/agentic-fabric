@@ -11,7 +11,10 @@ import type {
 import { MAGENTIC_AGENT_PRESET_MAP } from './magentic-presets';
 import type { MagenticAgentPresetKey } from './magentic-presets';
 
-type Factory = (id: string, label?: string, options?: { presetKey?: string }) => BaseExecutor;
+interface ExecutorFactoryOptions {
+  presetKey?: string;
+}
+type Factory = (id: string, label?: string, options?: ExecutorFactoryOptions) => BaseExecutor;
 
 const factories: Record<string, Factory> = {
   'function-executor': (id, label) =>
@@ -77,7 +80,7 @@ const factories: Record<string, Factory> = {
       agentRole: preset?.agentRole || 'generalist',
       capabilities: preset?.capabilities,
       systemPrompt: preset?.systemPrompt,
-      tools: preset?.toolIds?.map((toolId: string) => ({ toolId, enabled: true }) as ToolReference),
+      tools: preset?.toolIds?.map(toolId => ({ toolId, enabled: true }) as ToolReference),
       metadata: {
         source: 'agent-framework',
         magentic: {
@@ -89,12 +92,13 @@ const factories: Record<string, Factory> = {
       },
     } as MagenticAgentExecutor;
   },
-  executor: (id, label) => ({
-    id,
-    type: 'executor',
-    label: label || 'Executor',
-    description: 'Base executor for processing messages',
-  }),
+  executor: (id, label) =>
+    ({
+      id,
+      type: 'executor',
+      label: label || 'Executor',
+      description: 'Base executor for processing messages',
+    }) as BaseExecutor,
 };
 
 export const getExecutorFactory = (type: string): Factory | undefined => factories[type];
