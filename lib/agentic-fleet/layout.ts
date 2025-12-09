@@ -17,12 +17,12 @@ const NODE_WIDTHS = {
 
 const TIER_Y_OFFSETS = {
   config: 0,
-  dspy_module: 250, // Increased vertical spacing for taller cards
-  phase: 600,
-  strategy: 950,
-  agent: 1300,
-  tool: 1700,
-  task: 1700,
+  dspy_module: 300,
+  phase: 700,
+  strategy: 1100,
+  agent: 1500,
+  tool: 1950,
+  task: 1950,
 };
 
 const PHASE_ORDER = ['Analysis', 'Routing', 'Execution', 'Progress', 'Quality'];
@@ -70,18 +70,15 @@ export const getLayoutedElements = (
 
     const tierY = TIER_Y_OFFSETS[type as keyof typeof TIER_Y_OFFSETS] || 0;
     const nodeWidth = NODE_WIDTHS[type as keyof typeof NODE_WIDTHS] || DEFAULT_WIDTH;
-    const spacingX = 40; // Gap between nodes
+    const spacingX = 80; // Increased gap between nodes
 
     const totalWidth = tierNodes.length * nodeWidth + (tierNodes.length - 1) * spacingX;
     const startX = -totalWidth / 2;
 
     tierNodes.forEach((node, index) => {
       // Calculate position (centering the node)
-      const x = startX + index * (nodeWidth + spacingX) + nodeWidth / 2 - nodeWidth / 2;
-      // Simplified: startX + index * stride.
-      // But React Flow anchors top-left.
-      // So x should be the left coordinate.
-      // startX is the left coordinate of the first node.
+      // startX + index * stride.
+      // React Flow anchors top-left.
       const leftX = startX + index * (nodeWidth + spacingX);
 
       const y = tierY;

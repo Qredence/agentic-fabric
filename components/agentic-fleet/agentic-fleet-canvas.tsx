@@ -241,7 +241,7 @@ export const AgenticFleetCanvas = () => {
         minZoom={0.1}
         maxZoom={1.5}
         defaultEdgeOptions={{
-          type: 'smoothstep',
+          type: 'straight',
           markerEnd: { type: MarkerType.ArrowClosed },
           style: { strokeWidth: 2, stroke: '#64748b' },
         }}
