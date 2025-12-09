@@ -21,14 +21,14 @@ describe('Referential Integrity Check Bug', () => {
           }
         },
         {
-            id: 'group-2',
-            type: 'single',
-            edge: {
-              id: 'edge-2',
-              source: 'MISSING_SOURCE', // This should be flagged
-              target: 'node-2'
-            }
+          id: 'group-2',
+          type: 'single',
+          edge: {
+            id: 'edge-2',
+            source: 'MISSING_SOURCE', // This should be flagged
+            target: 'node-2'
           }
+        }
       ]
     };
 
