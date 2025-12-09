@@ -1,4 +1,5 @@
 #!/bin/sh
 # Temporarily disabled - using npm instead of pnpm
+# TODO: Re-enable lint-staged once npm scripts are properly configured
 # npm run lint-staged
 exit 0

@@ -1,4 +1,5 @@
 #!/bin/sh
 # Temporarily disabled - using npm instead of pnpm
+# TODO: Re-enable verification once npm scripts are properly configured
 # npm run verify
 exit 0

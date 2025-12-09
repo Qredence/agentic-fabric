@@ -74,7 +74,7 @@ export const getLayoutedElements = (
     const startX = -totalWidth / 2;
 
     tierNodes.forEach((node, index) => {
-      // Calculate position (React Flow anchors top-left)
+      // Calculate horizontal position: center the tier, then place each node with spacing
       const leftX = startX + index * (nodeWidth + spacingX);
       const y = tierY;
 
