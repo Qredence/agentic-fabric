@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 import { BookOpen, Trash2, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 
 interface BaseNodeProps {
   title: string;

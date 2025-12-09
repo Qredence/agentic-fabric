@@ -1,7 +1,5 @@
 import { AgenticFleetNode, AgenticFleetEdge, PhaseNode } from './types';
 
-const TIER_HEIGHT = 200;
-// All nodes default to w-[320px] via BaseNode, except Task which is w-64 (256px)
 const DEFAULT_WIDTH = 320;
 const TASK_WIDTH = 256;
 
@@ -76,14 +74,8 @@ export const getLayoutedElements = (
     const startX = -totalWidth / 2;
 
     tierNodes.forEach((node, index) => {
-      // Calculate position (centering the node)
-      const x = startX + index * (nodeWidth + spacingX) + nodeWidth / 2 - nodeWidth / 2;
-      // Simplified: startX + index * stride.
-      // But React Flow anchors top-left.
-      // So x should be the left coordinate.
-      // startX is the left coordinate of the first node.
+      // Calculate position (React Flow anchors top-left)
       const leftX = startX + index * (nodeWidth + spacingX);
-
       const y = tierY;
 
       layoutedNodes.push({

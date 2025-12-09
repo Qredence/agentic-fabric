@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   useNodesState,
   useEdgesState,
-  ReactFlowProvider,
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -224,8 +223,7 @@ export const AgenticFleetCanvas = () => {
       initialNodesData,
       initialEdgesData
     );
-    // Cast to any to avoid strict type check issues with ReactFlow's generic constraints
-    setNodes(layoutedNodes as any);
+    setNodes(layoutedNodes);
     setEdges(layoutedEdges);
   }, [setNodes, setEdges]);
 

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { Activity, Clock, Timer, Zap, Server } from 'lucide-react';
+import { Activity, Clock, Server } from 'lucide-react';
 import { PhaseNode as PhaseNodeType } from '@/lib/agentic-fleet/types';
-import { BaseNode, NodeSection, NodePill, NodeProperty } from './base-node';
+import { BaseNode, NodeProperty } from './base-node';
 import { cn } from '@/lib/utils';
 
 const statusColors = {
