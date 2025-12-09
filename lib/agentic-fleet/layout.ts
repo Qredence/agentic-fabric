@@ -1,24 +1,28 @@
 import { AgenticFleetNode, AgenticFleetEdge, PhaseNode } from './types';
 
 const TIER_HEIGHT = 200;
+// All nodes default to w-[320px] via BaseNode, except Task which is w-64 (256px)
+const DEFAULT_WIDTH = 320;
+const TASK_WIDTH = 256;
+
 const NODE_WIDTHS = {
-  config: 320,
-  dspy_module: 280,
-  phase: 220,
-  strategy: 250,
-  agent: 280,
-  tool: 230,
-  task: 220,
+  config: DEFAULT_WIDTH,
+  dspy_module: DEFAULT_WIDTH,
+  phase: DEFAULT_WIDTH,
+  strategy: DEFAULT_WIDTH,
+  agent: DEFAULT_WIDTH,
+  tool: DEFAULT_WIDTH,
+  task: TASK_WIDTH,
 };
 
 const TIER_Y_OFFSETS = {
   config: 0,
-  dspy_module: 200,
-  phase: 450,
-  strategy: 700,
-  agent: 950,
-  tool: 1250,
-  task: 1250, // Tasks might float or be at bottom
+  dspy_module: 250, // Increased vertical spacing for taller cards
+  phase: 600,
+  strategy: 950,
+  agent: 1300,
+  tool: 1700,
+  task: 1700,
 };
 
 const PHASE_ORDER = ['Analysis', 'Routing', 'Execution', 'Progress', 'Quality'];
@@ -65,20 +69,26 @@ export const getLayoutedElements = (
     if (!tierNodes || tierNodes.length === 0) return;
 
     const tierY = TIER_Y_OFFSETS[type as keyof typeof TIER_Y_OFFSETS] || 0;
-    const nodeWidth = NODE_WIDTHS[type as keyof typeof NODE_WIDTHS] || 250;
-    const spacingX = 50;
+    const nodeWidth = NODE_WIDTHS[type as keyof typeof NODE_WIDTHS] || DEFAULT_WIDTH;
+    const spacingX = 40; // Gap between nodes
 
     const totalWidth = tierNodes.length * nodeWidth + (tierNodes.length - 1) * spacingX;
     const startX = -totalWidth / 2;
 
     tierNodes.forEach((node, index) => {
-      // Calculate position
-      const x = startX + index * (nodeWidth + spacingX);
+      // Calculate position (centering the node)
+      const x = startX + index * (nodeWidth + spacingX) + nodeWidth / 2 - nodeWidth / 2;
+      // Simplified: startX + index * stride.
+      // But React Flow anchors top-left.
+      // So x should be the left coordinate.
+      // startX is the left coordinate of the first node.
+      const leftX = startX + index * (nodeWidth + spacingX);
+
       const y = tierY;
 
       layoutedNodes.push({
         ...node,
-        position: { x, y },
+        position: { x: leftX, y },
         draggable: false, // Enforce layout
       });
     });

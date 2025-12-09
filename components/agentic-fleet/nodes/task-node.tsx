@@ -1,51 +1,50 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, CircleDashed, AlertCircle, PlayCircle } from 'lucide-react';
+import { ClipboardList, Flag, User } from 'lucide-react';
 import { TaskNode as TaskNodeType } from '@/lib/agentic-fleet/types';
+import { BaseNode, NodeProperty, NodePill } from './base-node';
 import { cn } from '@/lib/utils';
 
-const priorityColors = {
-  low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-};
-
-const statusIcons = {
-  queued: CircleDashed,
-  processing: PlayCircle,
-  completed: CheckCircle2,
-  failed: AlertCircle,
-};
-
-export const TaskNode = ({ data }: NodeProps<TaskNodeType>) => {
-  const StatusIcon = statusIcons[data.status];
-
+export const TaskNode = ({ data, selected }: NodeProps<TaskNodeType>) => {
   return (
-    <Card className="w-48 bg-yellow-50 dark:bg-zinc-900 border-l-4 border-l-yellow-400 dark:border-l-yellow-600 shadow-md">
+    <>
       <Handle type="target" position={Position.Top} className="w-2 h-2" />
 
-      <CardHeader className="p-2 pb-1 flex flex-row justify-between items-start space-y-0">
-         <Badge className={cn("text-[10px] px-1.5 h-4", priorityColors[data.priority])}>
-           {data.priority}
-         </Badge>
-         <StatusIcon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-
-      <CardContent className="p-2 text-xs">
-        <div className="font-medium line-clamp-3 mb-2">
+      <BaseNode
+        title="Task"
+        icon={ClipboardList}
+        selected={selected}
+        className="w-64"
+      >
+        <div className="bg-[#2A2A2A] p-3 rounded-xl text-sm text-gray-200 italic border-l-2 border-yellow-500">
           {data.content}
         </div>
-        <div className="flex flex-col gap-1 text-[10px] text-muted-foreground">
-           {data.assignedAgent && (
-             <div>Agent: <span className="font-semibold">{data.assignedAgent}</span></div>
-           )}
-           <div>Phase: <span className="font-semibold">{data.phase}</span></div>
+
+        <div className="flex gap-2">
+          <NodePill className={cn("capitalize flex items-center gap-2",
+            data.priority === 'high' ? "text-red-300 bg-red-900/20" :
+            data.priority === 'medium' ? "text-yellow-300 bg-yellow-900/20" : "text-blue-300 bg-blue-900/20"
+          )}>
+            <Flag className="w-3 h-3" />
+            {data.priority}
+          </NodePill>
+
+          <NodePill className="capitalize flex items-center gap-2">
+             <div className={cn("w-2 h-2 rounded-full",
+               data.status === 'completed' ? "bg-green-500" :
+               data.status === 'processing' ? "bg-blue-500 animate-pulse" :
+               data.status === 'failed' ? "bg-red-500" : "bg-gray-500"
+             )} />
+             {data.status}
+          </NodePill>
         </div>
-      </CardContent>
+
+        {data.assignedAgent && (
+          <NodeProperty value={data.assignedAgent} icon={User} label="Assigned To" />
+        )}
+      </BaseNode>
 
       <Handle type="source" position={Position.Bottom} className="w-2 h-2" />
-    </Card>
+    </>
   );
 };

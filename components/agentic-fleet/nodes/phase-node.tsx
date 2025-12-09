@@ -1,57 +1,52 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Activity, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Activity, Clock, Timer, Zap, Server } from 'lucide-react';
 import { PhaseNode as PhaseNodeType } from '@/lib/agentic-fleet/types';
+import { BaseNode, NodeSection, NodePill, NodeProperty } from './base-node';
 import { cn } from '@/lib/utils';
 
 const statusColors = {
-  pending: 'border-slate-300 bg-slate-50 dark:bg-slate-900',
-  running: 'border-blue-500 bg-blue-50 dark:bg-blue-950/20',
-  completed: 'border-green-500 bg-green-50 dark:bg-green-950/20',
-  failed: 'border-red-500 bg-red-50 dark:bg-red-950/20',
+  pending: 'text-gray-400',
+  running: 'text-blue-400',
+  completed: 'text-green-400',
+  failed: 'text-red-400',
 };
 
-const statusIcons = {
-  pending: Clock,
-  running: Activity,
-  completed: CheckCircle,
-  failed: AlertTriangle,
-};
-
-export const PhaseNode = ({ data }: NodeProps<PhaseNodeType>) => {
-  const StatusIcon = statusIcons[data.status];
-
+export const PhaseNode = ({ data, selected }: NodeProps<PhaseNodeType>) => {
   return (
-    <Card className={cn("w-48 shadow-sm transition-colors", statusColors[data.status])}>
+    <>
       <Handle type="target" position={Position.Top} id="top" className="w-2 h-2" />
       <Handle type="target" position={Position.Left} id="prev" className="w-2 h-2" />
 
-      <CardHeader className="py-2 px-3">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider">{data.name}</CardTitle>
-          <StatusIcon className="h-4 w-4 opacity-70" />
-        </div>
-      </CardHeader>
-      <CardContent className="pb-2 px-3 text-xs">
-        <div className="font-mono text-[10px] text-muted-foreground mb-1">{data.executor}</div>
-        {data.metrics && (
-          <div className="grid grid-cols-2 gap-1 mt-2 text-[10px]">
-            <div className="flex flex-col">
-              <span className="text-muted-foreground">Duration</span>
-              <span className="font-medium">{data.metrics.duration_ms}ms</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-muted-foreground">Tokens</span>
-              <span className="font-medium">{data.metrics.tokens_used}</span>
-            </div>
+      <BaseNode
+        title={data.name}
+        icon={Activity}
+        selected={selected}
+        className={cn(data.status === 'running' && "ring-1 ring-blue-500/50")}
+      >
+        <NodeProperty
+          value={data.executor}
+          icon={Server}
+        />
+
+        <div className="flex justify-between items-center bg-[#2A2A2A] rounded-xl p-3">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-gray-400" />
+            <span className={cn("text-sm font-medium capitalize", statusColors[data.status])}>
+              {data.status}
+            </span>
           </div>
-        )}
-      </CardContent>
+          {data.metrics && (
+            <div className="flex flex-col items-end">
+              <span className="text-xs text-gray-400">{data.metrics.duration_ms}ms</span>
+              <span className="text-[10px] text-gray-500">{data.metrics.tokens_used} toks</span>
+            </div>
+          )}
+        </div>
+      </BaseNode>
 
       <Handle type="source" position={Position.Right} id="next" className="w-2 h-2" />
       <Handle type="source" position={Position.Bottom} id="strategy" className="w-2 h-2" />
-    </Card>
+    </>
   );
 };
