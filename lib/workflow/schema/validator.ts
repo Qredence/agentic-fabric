@@ -50,14 +50,7 @@ export function checkReferentialIntegrity(def: any): { valid: boolean; errors?: 
   }
   if (Array.isArray(def.edgeGroups)) {
     for (const g of def.edgeGroups) {
-      if (g.type === 'single') {
-        if (!g.edge) {
-          errs.push('Single edge group missing edge property');
-          continue;
-        }
-        if (!ids.has(g.edge.source)) errs.push(`Unknown source: ${g.edge.source}`);
-        if (!ids.has(g.edge.target)) errs.push(`Unknown target: ${g.edge.target}`);
-      } else if (g.type === 'fan-in') {
+      if (g.type === 'fan-in') {
         if (!ids.has(g.target)) errs.push(`Unknown fan-in target: ${g.target}`);
         for (const s of g.sources) if (!ids.has(s)) errs.push(`Unknown fan-in source: ${s}`);
       } else if (g.type === 'fan-out') {

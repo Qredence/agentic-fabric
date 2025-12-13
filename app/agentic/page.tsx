@@ -4,7 +4,7 @@ import React from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { AgenticFleetCanvas } from '@/components/agentic-fleet/agentic-fleet-canvas';
 
-export default function Page() {
+export default function AgenticFleetPage() {
   return (
     <div className="h-screen w-screen">
       <ReactFlowProvider>
